@@ -13,7 +13,9 @@
 
 
 Backlog:
-- Improve the loging of the process. Add details, and modify the format.
-- After entering the URL on the Dashboard reload page and display a popup message about success/failure. Change the format of the popup message. 
-- In the first “Cluster Image Upload” stage add details about img size. It can indicate why this step takes so long in some cases. 
-- In the first “Cluster Image Upload” stage add details about the cluster on which the img is uploading (beg-cluster, so the user can check the progress.
+- Integrate opening a Jira ticket for the process and log all the steps there.
+- Check possibilities for tracking who triggered the Scan Process. Notify the user and eng_sam_admins via email about the Jira case. Maybe add a field to enter a user's email address or integrate login with the AD account... 
+- Improve the loging of the process. Add details and modify the format.
+- After entering the URL on the Dashboard, reload the page and display a popup message about success/failure. Change the format of the popup message. 
+- In the first “Cluster Image Upload” stage, add details about img size. It can indicate why this step takes so long in some cases. 
+- In the first “Cluster Image Upload” stage, add details about the cluster on which the img is uploading (beg-cluster, so the user can check the progress.
