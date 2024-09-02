@@ -13,8 +13,8 @@
 
 
 **FIX:**
- - Centos 7/8 became a deprecated system. A potential solution is to Include a repo setup step, so it can install necessary packages. Use rpm packages for repo config. (yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm) 
-
+ - Centos 7/8 became a deprecated system. A potential solution is to Include a repo setup step so that it can install the necessary packages. Use rpm packages for repo config. (yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm)...
+ - Exclude VM renaming in case of failed_commands and commands retrying.
 
 
 **BACKLOG:**
