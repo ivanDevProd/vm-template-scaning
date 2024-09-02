@@ -1,5 +1,6 @@
 # vm-template-scaning
 
+**WORKFLOW**
 1. Download the image from Endor or other path
 2. Analyze extension and perform different extractions if necessary, depending on the image type
 3. Upload the Image to the cluster
@@ -10,8 +11,11 @@
 8. Terminate the machine from the cluster
 9. Upload the Image from Endor to Artifactory
 
+**FIX**
+ - Centos 7/8 became a deprecated system. A potential solution is to Include a repo setup step, so it can install necessary packages. Use rpm packages for repo config. (yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm) 
 
-Backlog:
+
+**BACKLOG**
 - Integrate opening a Jira ticket for the process and log all the steps there.
 - Check possibilities for tracking who triggered the Scan Process. Notify the user and eng_sam_admins via email about the Jira case. Maybe add a field to enter a user's email address or integrate login with the AD account...
 - We need to migrate to a new server with a bigger HDD capacity if we want to use it as a mounting point for extracting tar.gz files before uploading images to the cluster.
