@@ -25,6 +25,7 @@
 - HA, DR
 
 - Improve the loging of the process. Add details and modify the format.
-- After entering the URL on the Dashboard, reload the page and display a popup message about success/failure. Change the format of the popup message. 
+- After entering the URL on the Dashboard, reload the page and display a popup message about success/failure. Change the format of the popup message.
+- Add info about network configuration for Win VMs to logs. (PS command: Get-NetIPConfiguration)
 - In the first “Cluster Image Upload” stage, add details about img size. It can indicate why this step takes so long in some cases. 
 - In the first “Cluster Image Upload” stage, add details about the cluster on which the img is uploading (beg-cluster, so the user can check the progress.
