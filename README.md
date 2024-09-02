@@ -28,9 +28,7 @@
 - After entering the URL on the Dashboard, reload the page and display a popup message about success/failure. Change the format of the popup message.
 
 - Add info about network configuration for Win VMs to logs. (PS command: _Get-NetIPConfiguration_)
-- Consider introducing a command to set up DHCP for address and DNS. 
-_Set-NetIPInterface -InterfaceAlias "Ethernet" -Dhcp Enabled_
-_Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ResetServerAddresses_
+- Consider introducing a command to set up DHCP for address and DNS. Address PS command: _Set-NetIPInterface -InterfaceAlias "Ethernet" -Dhcp Enabled_ DHCP POS command: _Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ResetServerAddresses_
 
 - In the first “Cluster Image Upload” stage, add details about img size. It can indicate why this step takes so long in some cases. 
 - In the first “Cluster Image Upload” stage, add details about the cluster on which the img is uploading (beg-cluster, so the user can check the progress.
