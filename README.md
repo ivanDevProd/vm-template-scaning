@@ -22,7 +22,7 @@
 - Check possibilities for tracking who triggered the Scan Process. Notify the user and eng_sam_admins via email about the Jira case. Maybe add a field to enter a user's email address or integrate login with the AD account...
 - Migrate to a new server with a bigger HDD capacity if we want to use it as a mounting point for extracting tar.gz files before uploading images to the cluster.
 - Create a new UI for the end-user self-service process, with appropriate necessary fields in case of a self-service process.
-- HA, DR
+- HA, DR, Backup
 
 - Improve the loging of the process. Add details and modify the format.
 - After entering the URL on the Dashboard, reload the page and display a popup message about success/failure. Change the format of the popup message.
