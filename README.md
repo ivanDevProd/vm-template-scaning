@@ -3,12 +3,12 @@
 **Workflow:**
 1. Receive Image URL from Endor or Other Filer
 
- Input: A URL to a system image stored on Endor or another file storage system.
- Process: Retrieve the system image URL from the requester or automated trigger.
- Action: Store the image URL for further operations.
- Analyze Image Extension and Perform Necessary Extractions
+ - Input: A URL to a system image stored on Endor or another file storage system.
+ - Process: Retrieve the system image URL from the requester or automated trigger.
+ - Action: Store the image URL for further operations.
 
-2. Process: Identify the type of system image (e.g., .iso, .img, .qcow2).
+2. Analyze Image Extension and Perform Necessary Extractions
+Process: Identify the type of system image (e.g., .iso, .img, .qcow2).
 Action:
 If it's a compressed format (e.g., .zip, .tar), extract it.
 Depending on the image type, validate its integrity (e.g., using md5sum or sha256sum checks).
