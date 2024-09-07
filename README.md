@@ -1,7 +1,7 @@
 # vm-template-scaning
 
 **WORKFLOW:**
-1. Download the image from Endor or other path
+1. Receive image URL from Endor or some other filer
 2. Analyze extension and perform different extractions if necessary, depending on the image type
 3. Upload the Image to the cluster
 4. Spin up VM with image
