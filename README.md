@@ -8,7 +8,7 @@
  - Action: Store the image URL for further operations.
 
 2. Analyze Image Extension and Perform Necessary Extractions
-- Process: Identify the type of system image (e.g., .iso, .img, .qcow2).
+- Process: Identify the system image type (e.g., .iso, .img, .qcow2).
 - Action:
   a. If it's a compressed format (e.g., .zip, .tar), extract it.
   b. Depending on the image type, validate its integrity (e.g., using md5sum or sha256sum checks).
