@@ -1,4 +1,4 @@
-# vm-template-scaning
+# vm-template-scaning (scan_It!)
 
 **WORKFLOW:**
 1. Receive Image URL from Endor or Other Filer
