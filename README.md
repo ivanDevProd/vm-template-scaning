@@ -9,58 +9,57 @@
 
 2. Analyze Image Extension and Perform Necessary Extractions
 - Process: Identify the system image type (e.g., .iso, .img, .qcow2).
+- Action
+	- If it's a compressed format (e.g., .zip, .tar), extract it
+	- Depending on the image type, validate its integrity (e.g., using md5sum or sha256sum checks).
+	- Prepare the image for deployment if required (e.g., converting to a format suitable for your infrastructure).
+
+3. Upload the Image to the Cluster
+- Process: Transfer the image to the cluster where VMs can be spun up.
 - Action:
-  a. If it's a compressed format (e.g., .zip, .tar), extract it
-  b. Depending on the image type, validate its integrity (e.g., using md5sum or sha256sum checks).
-  c. Prepare the image for deployment if required (e.g., converting to a format suitable for your infrastructure).
-  d. Upload the Image to the Cluster
+	- Upload the image to the target cluster using SCP, SFTP, or an API, depending on your infrastructure.
+	- Store the image in the cluster’s designated image repository.
+   
+4. Spin Up VM with Image
+- Process: Create a virtual machine using the uploaded image.
+- Action:
+		- Use cloud infrastructure (e.g., OpenStack, AWS, VMware) or an on-premise system to provision a new VM.
+		- Select the system image for VM creation.
+		- Apply necessary configuration, such as networking and storage.
+5. Install Flexera Agent on the VM
+- Process: Deploy the Flexera agent to the VM for tracking and compliance.
+- Action:
+		- Download and install the Flexera agent on the spun-up VM.
+		- Configure the agent with the necessary credentials and settings for Flexera.
 
-3. Process: Transfer the image to the cluster where VMs can be spun up.
-Action:
-Upload the image to the target cluster using SCP, SFTP, or an API, depending on your infrastructure.
-Store the image in the cluster’s designated image repository.
-Spin Up VM with Image
+6. Check Flexera Logs
+- Process: Verify that the Flexera agent is working correctly.
+- Action:
+		- Check the logs on the VM or in the Flexera dashboard to confirm that the agent is running and successfully communicating with Flexera.
 
-4. Process: Create a virtual machine using the uploaded image.
+8. Check Flexera Report for VM
+- Process: Validate that the VM has been included in the Flexera inventory and is being reported.
+- Action:
+		- Review the Flexera dashboard or reports to ensure the VM is listed and tracked.
+		- Confirm that the correct license usage and compliance data is being collected.
+9. Terminate the Machine from the Cluster
+- Process: Once the system has been validated, shut down and remove the VM.
 Action:
-Use cloud infrastructure (e.g., OpenStack, AWS, VMware) or an on-premise system to provision a new VM.
-Select the system image for VM creation.
-Apply necessary configuration, such as networking and storage.
-Install Flexera Agent on the VM
+		- Decommission the VM using cloud or on-premise management tools.
+		- Ensure the resources are released and the VM is no longer listed in the cluster.
 
-5. Process: Deploy the Flexera agent to the VM for tracking and compliance.
-Action:
-Download and install the Flexera agent on the spun-up VM.
-Configure the agent with the necessary credentials and settings for Flexera.
-Check Flexera Logs
+10. Upload the System Image to Artifactory
+- Process: Store the validated system image in Artifactory for future use or distribution.
+- Action:
+		- Upload the image to Artifactory using the Artifactory API or interface.
+		- Tag the image with metadata, including version, description, and deployment details.
+		- Ensure the image is accessible for future use or retrieval by authorized personnel.
 
-6. Process: Verify that the Flexera agent is working correctly.
-Action:
-Check the logs on the VM or in the Flexera dashboard to confirm that the agent is running and successfully communicating with Flexera.
-Check Flexera Report for VM
-
-7. Process: Validate that the VM has been included in the Flexera inventory and is being reported.
-Action:
-Review the Flexera dashboard or reports to ensure the VM is listed and tracked.
-Confirm that the correct license usage and compliance data is being collected.
-Terminate the Machine from the Cluster
-
-8. Process: Once the system has been validated, shut down and remove the VM.
-Action:
-Decommission the VM using cloud or on-premise management tools.
-Ensure the resources are released and the VM is no longer listed in the cluster.
-Upload the System Image to Artifactory
-
-9. Process: Store the validated system image in Artifactory for future use or distribution.
-Action:
-Upload the image to Artifactory using the Artifactory API or interface.
-Tag the image with metadata, including version, description, and deployment details.
-Ensure the image is accessible for future use or retrieval by authorized personnel.
-Summary of Key Steps:
-Receive and analyze the system image.
-Perform necessary extractions and upload it to the cluster.
-Spin up a VM, install Flexera, and validate reports.
-Terminate the VM, then upload the image to Artifactory.
+**Summary of Key Steps:**
+- Receive and analyze the system image.
+- Perform necessary extractions and upload it to the cluster.
+- Spin up a VM, install Flexera, and validate reports.
+- Terminate the VM, then upload the image to Artifactory.
 
 
 **FIX:**
