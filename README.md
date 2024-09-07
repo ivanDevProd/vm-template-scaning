@@ -8,12 +8,12 @@
  - Action: Store the image URL for further operations.
 
 2. Analyze Image Extension and Perform Necessary Extractions
-Process: Identify the type of system image (e.g., .iso, .img, .qcow2).
-Action:
-If it's a compressed format (e.g., .zip, .tar), extract it.
-Depending on the image type, validate its integrity (e.g., using md5sum or sha256sum checks).
-Prepare the image for deployment if required (e.g., converting to a format suitable for your infrastructure).
-Upload the Image to the Cluster
+- Process: Identify the type of system image (e.g., .iso, .img, .qcow2).
+- Action:
+  --If it's a compressed format (e.g., .zip, .tar), extract it.
+  -- Depending on the image type, validate its integrity (e.g., using md5sum or sha256sum checks).
+  -- Prepare the image for deployment if required (e.g., converting to a format suitable for your infrastructure).
+  -- Upload the Image to the Cluster
 
 3. Process: Transfer the image to the cluster where VMs can be spun up.
 Action:
