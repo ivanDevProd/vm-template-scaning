@@ -11,11 +11,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+MYSQL_HOST = os.getenv("MYSQL_HOST")
 
 mysql_config = {
     'user': 'root',
     'password': MYSQL_PASSWORD,
-    'host': '127.0.0.1',
+    'host': MYSQL_HOST,
     'database': 'vm_template_scan',
     'port': '3306'
 }

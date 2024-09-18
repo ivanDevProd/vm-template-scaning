@@ -19,6 +19,7 @@ load_dotenv()
 
 # DB parameters
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+MYSQL_HOST = os.getenv("MYSQL_HOST")
 JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
 CLUSTER_IP = os.getenv("CLUSTER_IP")
 CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
@@ -28,7 +29,7 @@ CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
 mysql_config = {
     'user': 'root',
     'password': MYSQL_PASSWORD,
-    'host': '127.0.0.1',
+    'host': MYSQL_HOST,
     'database': 'vm_template_scan',
     'port': '3306'
 }
