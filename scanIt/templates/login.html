@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>scan_It! - Login</title>
+    <style>
+        /* Body styling */
+        body {
+            background: url('http://10.67.22.100/static/scanIt/nutanix_background.jpg');
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white; /* Text color white */
+        }
+
+        /* Container for form and other elements */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+        }
+
+        /* Styling for links */
+        a {
+            color: white; /* White color for links */
+        }
+
+        /* Styling for buttons */
+        button {
+            padding: 10px 20px;
+            background-color: #7855FA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #7855FA;
+        }
+
+        /* Logo placement in bottom-left corner */
+        .logo {
+            position: absolute;
+            bottom: 10px;
+            left: 20px; /* Place logo in bottom-left */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>DPRO Admin Login</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Login</button>
+        </form>
+        <br>
+        <a href="{% url 'scanIt' %}">Back to home</a>
+    </div>
+    <!-- Logo in bottom-left corner -->
+    <div class="logo">
+        <img src="{% static 'scanIt/logo.png' %}" alt="Logo" style="width: 150px; height: auto;">
+    </div>
+</body>
+</html>

@@ -1,0 +1,649 @@
+Processing payload with ID: d7f2fc35-a70d-43ad-9ecb-928f69e086f8
+Filename: /home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    39     37.5 MiB     37.5 MiB           1   @profile
+    40                                         def download_and_extract_image(source_url, download_dir, extracted_dir, process_id):
+    41     37.5 MiB      0.0 MiB           1       file_size_bytes = 0
+    42     37.5 MiB      0.0 MiB           1       try:
+    43                                                 # Retrieve file size using HEAD request
+    44     37.8 MiB      0.2 MiB           1           response = requests.head(source_url)
+    45     37.8 MiB      0.0 MiB           1           file_size_bytes = int(response.headers.get('Content-Length', 0))
+    46     37.8 MiB      0.0 MiB           1           file_size_gb = file_size_bytes / (1024 ** 3)  # Convert bytes to gigabytes
+    47     37.8 MiB      0.0 MiB           1           logging.info(f"File size: {file_size_gb:.2f} GB")
+    48     39.5 MiB      1.8 MiB           1           log_to_database(process_id, f"Starting download of {source_url}. File size: {file_size_gb:.2f} GB", "INITIATED", source_url, "Download and Extraction")
+    49                                             except Exception as e:
+    50                                                 logging.error(f"Error retrieving file size: {e}")
+    51                                                 log_to_database(process_id, f"Error retrieving file size: {e}", "FAILED", source_url, "Download and Extraction")
+    52                                                 return None
+    53                                         
+    54     39.5 MiB      0.0 MiB           1       file_name = os.path.basename(source_url)
+    55     39.5 MiB      0.0 MiB           1       download_path = os.path.join(download_dir, file_name)
+    56                                         
+    57     39.5 MiB      0.0 MiB           1       try:
+    58                                                 # Download the file
+    59     39.5 MiB      0.0 MiB           1           logging.info(f"Downloading file to {download_path}")
+    60     39.5 MiB      0.0 MiB           1           urllib.request.urlretrieve(source_url, download_path)
+    61     39.5 MiB      0.0 MiB           1           logging.info(f"Downloaded file to {download_path}")
+    62     40.2 MiB      0.8 MiB           1           log_to_database(process_id, f"Downloaded file to {download_path}", "SUCCEEDED", source_url, "Download and Extraction")
+    63                                             except Exception as e:
+    64                                                 logging.error(f"Error during download: {e}")
+    65                                                 log_to_database(process_id, f"Error during download: {e}", "FAILED", source_url, "Download and Extraction")
+    66                                                 return None
+    67                                         
+    68     40.2 MiB      0.0 MiB           1       try:
+    69                                                 # Extract the .tar.gz file
+    70     40.2 MiB      0.0 MiB           1           logging.info(f"Extracting image from {download_path} to {extracted_dir}")
+    71     40.2 MiB      0.0 MiB           1           log_to_database(process_id, f"Extracting image from {download_path} to {extracted_dir}", "INITIATED", source_url, "Download and Extraction")
+    72                                         
+    73                                                 # with tarfile.open(download_path, "r:gz") as tar:
+    74                                                 #     tar.extractall(path=extracted_dir)
+    75                                                 #     logging.info(f"Extracted files to {extracted_dir}")
+    76                                         
+    77                                                 # try:
+    78                                                 #     with tarfile.open(download_path, "r:gz") as tar:
+    79                                                 #         for member in tar.getmembers():
+    80                                                 #             # Extract each member one by one
+    81                                                 #             logging.info(f"Extracting {member.name}...")
+    82                                                 #             tar.extract(member, path=extracted_dir)
+    83                                                 #     logging.info(f"Extraction completed to {extracted_dir}")
+    84                                                 # except Exception as e:
+    85                                                 #     logging.error(f"Error during extraction in chunks: {e}")
+    86                                         
+    87     40.2 MiB      0.0 MiB           1           try:
+    88     72.5 MiB      0.2 MiB           2               with tarfile.open(download_path, "r:gz") as tar:
+    89     72.5 MiB      0.1 MiB           2                   for member in tar.getmembers():
+    90     40.6 MiB      0.0 MiB           1                       if member.isfile():
+    91     40.6 MiB      0.0 MiB           1                           logging.info(f"Extracting {member.name}...")
+    92                                                                 
+    93                                                                 # Extract the file object
+    94     40.6 MiB      0.0 MiB           1                           extracted_file = tar.extractfile(member)
+    95     40.6 MiB      0.0 MiB           1                           if extracted_file:
+    96     40.6 MiB      0.0 MiB           1                               extracted_file_path = os.path.join(extracted_dir, member.name)
+    97                                                                     
+    98                                                                     # Open the file to write the data in chunks
+    99     72.5 MiB      0.0 MiB           2                               with open(extracted_file_path, "wb") as output_file:
+   100    584.6 MiB     -0.6 MiB          17                                   while True:
+   101    584.6 MiB     31.3 MiB          17                                       chunk = extracted_file.read(BUFFER_SIZE)
+   102    584.6 MiB   -512.7 MiB          17                                       if not chunk:
+   103     72.5 MiB   -512.1 MiB           1                                           break
+   104    584.6 MiB     -0.6 MiB          16                                       output_file.write(chunk)
+   105                                                                 
+   106     72.5 MiB      0.0 MiB           1                           logging.info(f"Extracted {member.name} to {extracted_file_path}")
+   107                                                                 
+   108     72.5 MiB      0.0 MiB           1               logging.info(f"Extraction completed to {extracted_dir}")
+   109                                         
+   110                                                 except Exception as e:
+   111                                                     logging.error(f"Error during extraction in chunks: {e}")
+   112                                         
+   113     72.5 MiB      0.0 MiB           1           extracted_files = os.listdir(extracted_dir)
+   114     72.5 MiB      0.0 MiB           1           if len(extracted_files) == 1:
+   115     72.5 MiB      0.0 MiB           1               extracted_file_name = extracted_files[0]
+   116     72.5 MiB      0.0 MiB           1               file_path = os.path.join(extracted_dir, extracted_file_name)
+   117     72.5 MiB      0.0 MiB           1               extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{extracted_file_name}"
+   118     72.5 MiB      0.0 MiB           1               logging.info(f"Extracted image URL: {extracted_image_url}")
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+   119     72.5 MiB      0.0 MiB           1               log_to_database(process_id, f"Extracted image URL: {extracted_image_url}", "SUCCEEDED", source_url, "Download and Extraction")
+   120                                         
+   121     72.5 MiB      0.0 MiB           1               return extracted_image_url
+   122                                                 else:
+   123                                                     error_message = "Multiple files extracted. Process aborted."
+   124                                                     logging.error(error_message)
+   125                                                     log_to_database(process_id, error_message, "FAILED", source_url, "Download and Extraction")
+   126                                         
+   127                                                     # Clean up extracted directory
+   128                                                     for file_name in extracted_files:
+   129                                                         file_path = os.path.join(extracted_dir, file_name)
+   130                                                         if os.path.isfile(file_path):
+   131                                                             os.remove(file_path)
+   132                                         
+   133                                                     return None
+   134                                             except Exception as e:
+   135                                                 logging.error(f"Error during extraction: {e}")
+   136                                                 log_to_database(process_id, f"Error during extraction: {e}", "FAILED", source_url, "Download and Extraction")
+   137                                                 return None
+
+
+Upload Response Code: 202
+Upload Response Content: {"status": {"state": "PENDING", "execution_context": {"task_uuid": "80653438-2ed4-4bc2-816d-8fdfccef8b34"}}, "spec": {"name": "DPRO-AUTOMATION-kvm-Rocky8_510-1.0.tar.gz", "resources": {"image_type": "DISK_IMAGE", "source_uri": "http://10.67.22.100/static/scanIt/extracted_images/rocky8.img"}, "description": "http://endor.dyn.nutanix.com/agave/goldimages/kvm/Rocky8_510-1.0.tar.gz"}, "api_version": "3.1", "metadata": {"owner_reference": {"kind": "user", "uuid": "70e48f7a-1248-577a-9fd8-e2a1f767c889", "name": "itts"}, "use_categories_mapping": false, "kind": "image", "spec_version": 0, "uuid": "a6b02cbc-c918-4336-9fa4-298defc9bc87"}}
+Image upload initiated successfully
+Task UUID: 80653438-2ed4-4bc2-816d-8fdfccef8b34
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: SUCCEEDED, Percentage completed: 100%
+Image upload completed successfully
+Image UUID on cluster: a6b02cbc-c918-4336-9fa4-298defc9bc87
+Filename: /home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   179     37.5 MiB     37.5 MiB           1   @profile
+   180                                         def upload_image_to_nutanix():
+   181                                             # process_id = int(time.time() * 1000)  # Unique process ID using milliseconds
+   182     37.5 MiB      0.0 MiB           1       process_id = generate_unique_id()
+   183     37.5 MiB      0.0 MiB           1       json_data_str = sys.argv[1]
+   184     37.5 MiB      0.0 MiB           1       try:
+   185     37.5 MiB      0.0 MiB           1           payload = json.loads(json_data_str)
+   186     37.5 MiB      0.0 MiB           1           print(f"Processing payload with ID: {process_id}")
+   187                                             except json.JSONDecodeError as e:
+   188                                                 print(f"Error decoding JSON: {e}")
+   189                                                 return
+   190                                         
+   191                                             # Extract image name and source URL
+   192     37.5 MiB      0.0 MiB           1       image_name = payload['spec']['name']
+   193     37.5 MiB      0.0 MiB           1       source_url = payload['spec']['resources']['source_uri']
+   194                                             
+   195                                             # Define directories
+   196     37.5 MiB      0.0 MiB           1       download_dir = '/home/noc_admin/image_scanner_project/downloads/'
+   197     37.5 MiB      0.0 MiB           1       extracted_dir = '/home/noc_admin/image_scanner_project/static/scanIt/extracted_images/'
+   198                                         
+   199     37.5 MiB      0.0 MiB           1       if source_url.endswith('.tar.gz'):
+   200     72.5 MiB     35.0 MiB           1           new_source_url = download_and_extract_image(source_url, download_dir, extracted_dir, process_id)
+   201                                         
+   202     72.5 MiB      0.0 MiB           1           if new_source_url:
+   203     72.5 MiB      0.0 MiB           1               payload['spec']['resources']['source_uri'] = new_source_url
+   204                                                 else:
+   205                                                     print("Failed to download and extract image.")
+   206                                                     return
+   207                                         
+   208                                             # URL for image upload
+   209     72.5 MiB      0.0 MiB           1       upload_url = f"https://{cluster_ip}:9440/api/nutanix/v3/images"
+   210                                             
+   211     72.5 MiB      0.0 MiB           1       try:
+   212     72.7 MiB      0.1 MiB           2           upload_response = requests.post(
+   213     72.5 MiB      0.0 MiB           1               upload_url,
+   214     72.5 MiB      0.0 MiB           1               auth=HTTPBasicAuth(username, password),
+   215     72.5 MiB      0.0 MiB           1               json=payload,
+   216     72.5 MiB      0.0 MiB           1               verify=False
+   217                                                 )
+   218     72.7 MiB      0.0 MiB           1           print(f"Upload Response Code: {upload_response.status_code}")
+   219     72.7 MiB      0.0 MiB           1           print(f"Upload Response Content: {upload_response.text}")
+   220                                             except requests.RequestException as e:
+   221                                                 print(f"Failed to initiate image upload: {e}")
+   222                                                 return
+   223                                         
+   224     72.7 MiB      0.0 MiB           1       if upload_response.status_code == 202:
+   225     72.7 MiB      0.0 MiB           1           print("Image upload initiated successfully")
+   226     72.7 MiB      0.0 MiB           1           task_uuid = upload_response.json().get('status', {}).get('execution_context', {}).get('task_uuid', '')
+   227     72.7 MiB      0.0 MiB           1           print(f"Task UUID: {task_uuid}")
+   228                                         
+   229     72.7 MiB      0.0 MiB           1           task_url = f"https://{cluster_ip}:9440/api/nutanix/v3/tasks/{task_uuid}"
+   230                                         
+   231     72.7 MiB      0.0 MiB           1           try:
+   232     72.7 MiB      0.0 MiB           1               conn = mysql.connector.connect(**mysql_config)
+   233     72.7 MiB      0.0 MiB           1               cursor = conn.cursor()
+   234     72.7 MiB      0.0 MiB           2               cursor.execute(
+   235     72.7 MiB      0.0 MiB           1                   'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   236                                                         'VALUES (%s, %s, %s, %s, %s)',
+   237     72.7 MiB      0.0 MiB           1                   (process_id, f"Image upload initiated successfully. Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
+   238                                                     )
+   239     72.7 MiB      0.0 MiB           1               conn.commit()
+   240                                                 finally:
+   241     72.7 MiB      0.0 MiB           1               cursor.close()
+   242     72.7 MiB      0.0 MiB           1               conn.close()
+   243                                         
+   244     72.8 MiB      0.0 MiB          11           while True:
+   245     72.8 MiB      0.0 MiB          11               try:
+   246     72.8 MiB      0.1 MiB          11                   task_response = requests.get(task_url, auth=HTTPBasicAuth(username, password), verify=False)
+   247     72.8 MiB      0.0 MiB          11                   task_status = task_response.json()
+   248                                         
+   249     72.8 MiB      0.0 MiB          11                   state = task_status.get('status', 'UNKNOWN')
+   250     72.8 MiB      0.0 MiB          11                   percentage_complete = task_status.get('percentage_complete', 'N/A')
+   251     72.8 MiB      0.0 MiB          11                   print(f"State: {state}, Percentage completed: {percentage_complete}%")
+   252                                         
+   253     72.8 MiB      0.0 MiB          11                   if state == 'SUCCEEDED':
+   254     72.8 MiB      0.0 MiB           1                       print("Image upload completed successfully")
+   255     72.8 MiB      0.0 MiB           1                       uuid = task_status['entity_reference_list'][0]['uuid']
+   256     72.8 MiB      0.0 MiB           1                       print(f"Image UUID on cluster: {uuid}")
+   257                                         
+   258     72.8 MiB      0.0 MiB           1                       try:
+   259     72.8 MiB      0.0 MiB           1                           conn = mysql.connector.connect(**mysql_config)
+   260     72.8 MiB      0.0 MiB           1                           cursor = conn.cursor()
+   261     72.8 MiB      0.0 MiB           2                           cursor.execute(
+   262     72.8 MiB      0.0 MiB           1                               'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   263                                                                     'VALUES (%s, %s, %s, %s, %s)',
+   264     72.8 MiB      0.0 MiB           1                               (process_id, f"Image named <{image_name}> upload completed successfully. Image UUID: {uuid}", "SUCCEEDED", source_url, "Cluster Image Upload")
+   265                                                                 )
+   266     72.8 MiB      0.0 MiB           1                           conn.commit()
+   267                                                             finally:
+   268     72.8 MiB      0.0 MiB           1                           cursor.close()
+   269     72.8 MiB      0.0 MiB           1                           conn.close()
+   270                                         
+   271     72.8 MiB      0.0 MiB           1                       script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
+   272     72.8 MiB      0.0 MiB           1                       command = f"python3 {script_path} {process_id} {uuid} {image_name} {source_url}"
+   273     72.8 MiB      0.0 MiB           1                       subprocess.Popen(command, shell=True)
+   274                                         
+   275                                                             # Clean up the extracted file only if upload was successful
+   276     72.8 MiB      0.0 MiB           1                       cleanup_extracted_file(new_source_url, extracted_dir, process_id)
+   277     72.8 MiB      0.0 MiB           1                       break
+   278                                         
+   279     72.8 MiB      0.0 MiB          10                   elif state == 'FAILED':
+   280                                                             print("Image upload failed")
+   281                                                             try:
+   282                                                                 conn = mysql.connector.connect(**mysql_config)
+   283                                                                 cursor = conn.cursor()
+   284                                                                 cursor.execute(
+   285                                                                     'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   286                                                                     'VALUES (%s, %s, %s, %s, %s)',
+   287                                                                     (process_id, "Image upload failed", "FAILED", source_url, "Cluster Image Upload")
+   288                                                                 )
+   289                                                                 conn.commit()
+   290                                                             finally:
+   291                                                                 cursor.close()
+   292                                                                 conn.close()
+   293                                                             break
+   294                                         
+   295                                                     except requests.RequestException as e:
+   296                                                         print(f"Error retrieving task status: {e}")
+   297                                         
+   298     72.8 MiB      0.0 MiB          10               time.sleep(15)
+   299                                         
+   300                                             else:
+   301                                                 print("Failed to initiate image upload")
+   302                                                 print(f"Response Code: {upload_response.status_code}")
+   303                                                 print(f"Response Content: {upload_response.text}")
+
+
+Process 8135 dead!
+Process 8135 detected
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+d7f2fc35-a70d-43ad-9ecb-928f69e086f8 a6b02cbc-c918-4336-9fa4-298defc9bc87 DPRO-AUTOMATION-kvm-Rocky8_510-1.0.tar.gz http://endor.dyn.nutanix.com/agave/goldimages/kvm/Rocky8_510-1.0.tar.gz
+VM creation initiated successfully
+Task UUID: 535bf814-5c6c-44fd-958b-b5d2af70a421
+Current state: RUNNING
+State not found in response
+Current state: SUCCEEDED
+VM creation completed successfully
+{'status': 'SUCCEEDED', 'last_update_time': '2024-09-10T22:35:27Z', 'logical_timestamp': 2, 'entity_reference_list': [{'kind': 'vm', 'uuid': '293f9d11-5e0a-43f7-a28e-f707a491dfea'}], 'start_time': '2024-09-10T22:35:21Z', 'creation_time': '2024-09-10T22:35:21Z', 'start_time_usecs': 1726007721926372, 'cluster_reference': {'kind': 'cluster', 'uuid': '0005cc04-f8bc-a8bc-154c-ac1f6b3fdbfe'}, 'subtask_reference_list': [], 'completion_time': '2024-09-10T22:35:27Z', 'creation_time_usecs': 1726007721852692, 'progress_message': 'create_vm', 'operation_type': 'create_vm_intentful', 'completion_time_usecs': 1726007727222204, 'percentage_complete': 100, 'api_version': '3.1', 'uuid': '535bf814-5c6c-44fd-958b-b5d2af70a421'}
+VM IP Address: 10.67.22.220
+SSH connection to 10.67.22.220 established successfully with user nutanix
+Check Result: SSH
+VM avialable via ssh/winRM
+SSH connection to 10.67.22.220 established successfully with username: nutanix
+Executing command 'uname -s' as user 'nutanix'
+Detected OS type: Linux
+Checking linux distro
+Executing command 'cat /etc/os-release' as user 'nutanix'
+Detected distribution: Rocky Linux 8.5 (Green Obsidian) 
+Version: 8.5
+Executing command 'hostnamectl set-hostname DPRO_AUTOMATION_1726007773' as user 'nutanix'
+Command 'hostnamectl set-hostname DPRO_AUTOMATION_1726007773' executed successfully
+Output of 'hostnamectl set-hostname DPRO_AUTOMATION_1726007773': nutanix/4u
+nutanix/4u
+Executing command 'yum install -y curl' as user 'nutanix'
+Command 'yum install -y curl' executed successfully
+Output of 'yum install -y curl': nutanix/4u
+Rocky Linux 8 - AppS     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS  0% [                    ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS  0% [                    ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppStream                       3.6 kB/s | 4.8 kB     00:01    
+Rocky Linux 8 - AppS     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS 17% [===-                ] 7.1 MB/s | 2.1 MB     00:01 ETARocky Linux 8 - AppS 41% [========            ] 7.2 MB/s | 4.9 MB     00:00 ETARocky Linux 8 - AppS 68% [=============-      ] 7.5 MB/s | 8.3 MB     00:00 ETARocky Linux 8 - AppS 91% [==================  ] 7.5 MB/s |  11 MB     00:00 ETARocky Linux 8 - AppStream                       5.0 MB/s |  12 MB     00:02    
+Rocky Linux 8 - Base     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - BaseOS                          3.9 kB/s | 4.3 kB     00:01    
+Rocky Linux 8 - Base     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base  2% [                    ] 211 kB/s |  63 kB     00:13 ETARocky Linux 8 - Base 74% [==============-     ] 1.1 MB/s | 4.5 MB     00:01 ETARocky Linux 8 - BaseOS                          3.6 MB/s | 6.1 MB     00:01    
+Rocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extras                          3.5 kB/s | 3.1 kB     00:00    
+Rocky Linux 8 - Extr     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extras                          2.4 kB/s |  14 kB     00:05    
+Rocky Linux 8 - Powe     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe  0% [                    ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe 18% [===-                ] 2.6 kB/s | 1.0 kB     00:01 ETARocky Linux 8 - PowerTools                      4.1 kB/s | 4.8 kB     00:01    
+Rocky Linux 8 - Powe     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe 39% [=======-            ] 3.9 MB/s | 1.3 MB     00:00 ETARocky Linux 8 - PowerTools                      1.6 MB/s | 3.2 MB     00:02    
+Extra Packages for E     [               ===  ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for E 18% [===-                ]  22 kB/s | 8.0 kB     00:01 ETAExtra Packages for Enterprise Linux 8 - x86_64   54 kB/s |  42 kB     00:00    
+Extra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [   ===              ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [      ===           ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [         ===        ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [            ===     ] ---  B/s |   0  B     --:-- ETAExtra Packages for E  9% [=-                  ] 4.5 MB/s | 1.3 MB     00:02 ETAExtra Packages for E 34% [======-             ] 4.9 MB/s | 4.8 MB     00:01 ETAExtra Packages for E 44% [========-           ] 4.8 MB/s | 6.1 MB     00:01 ETAExtra Packages for E 56% [===========         ] 4.9 MB/s | 7.7 MB     00:01 ETAExtra Packages for E 73% [==============-     ] 5.0 MB/s |  10 MB     00:00 ETAExtra Packages for E 94% [==================- ] 5.3 MB/s |  13 MB     00:00 ETAExtra Packages for Enterprise Linux 8 - x86_64  4.1 MB/s |  14 MB     00:03    
+Extra Packages for E     [               ===  ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for Enterprise Linux Modular 8 - 8.8 kB/s | 5.3 kB     00:00    
+Extra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [   ===              ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [      ===           ] ---  B/s |   0  B     --:-- ETAExtra Packages for E 18% [===-                ] 450 kB/s | 135 kB     00:01 ETAExtra Packages for E 98% [===================-] 540 kB/s | 724 kB     00:00 ETAExtra Packages for Enterprise Linux Modular 8 - 541 kB/s | 733 kB     00:01    
+Package curl-7.61.1-22.el8.x86_64 is already installed.
+Dependencies resolved.
+================================================================================
+ Package             Architecture Version                    Repository    Size
+================================================================================
+Upgrading:
+ [1mcurl               [m x86_64       7.61.1-34.el8_10.2         baseos       353 k
+ [1mlibcurl            [m x86_64       7.61.1-34.el8_10.2         baseos       303 k
+ [1mlibssh             [m x86_64       0.9.6-14.el8               baseos       219 k
+ [1mlibssh-config      [m noarch       0.9.6-14.el8               baseos        20 k
+
+Transaction Summary
+================================================================================
+Upgrade  4 Packages
+
+Total download size: 894 k
+Downloading Packages:
+Rocky Linux 8 - Base  0% [                    ] 540 kB/s |   0  B     00:01 ETARocky Linux 8 - Base  0% [                    ] 540 kB/s |   0  B     00:01 ETA(1/4): curl-7.61.1-3  0% [                    ] ---  B/s |   0  B     --:-- ETA(1-3/4): libssh-0.9.  0% [                    ] ---  B/s |   0  B     --:-- ETA(1/4): curl-7.61.1-34.el8_10.2.x86_64.rpm       511 kB/s | 353 kB     00:00    
+(2-3/4): libssh-0.9. 71% [==============      ] 2.7 MB/s | 642 kB     00:00 ETA(2/4): libcurl-7.61.1-34.el8_10.2.x86_64.rpm    435 kB/s | 303 kB     00:00    
+(3-4/4): libssh-conf 83% [================-   ] 2.7 MB/s | 749 kB     00:00 ETA(3/4): libssh-config-0.9.6-14.el8.noarch.rpm    608 kB/s |  20 kB     00:00    
+(4/4): libssh-0.9.6- 95% [=================== ] 2.7 MB/s | 855 kB     00:00 ETA(4/4): libssh-0.9.6-14.el8.x86_64.rpm           294 kB/s | 219 kB     00:00    
+--------------------------------------------------------------------------------
+Total                                           675 kB/s | 894 kB     00:01     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :  [======                                             ] 1/1  Preparing        :  [============                                       ] 1/1  Preparing        :  [==================                                 ] 1/1  Preparing        :  [=========================                          ] 1/1  Preparing        :  [===============================                    ] 1/1  Preparing        :  [======================================             ] 1/1  Preparing        :  [============================================       ] 1/1  Preparing        :                                                        1/1 
+  Upgrading        : libssh-config-0.9.6-14.el [                          ] 1/8  Upgrading        : libssh-config-0.9.6-14.el [===                       ] 1/8  Upgrading        : libssh-config-0.9.6-14.el [========                  ] 1/8  Upgrading        : libssh-config-0.9.6-14.el [==================        ] 1/8  Upgrading        : libssh-config-0.9.6-14.el8.noarch                      1/8 
+  Upgrading        : libssh-0.9.6-14.el8.x86_6 [                          ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=                         ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [===                       ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [====                      ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [======                    ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [========                  ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=========                 ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [===========               ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=============             ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [==============            ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [================          ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=================         ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [===================       ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=====================     ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [======================    ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=======================   ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [========================  ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [========================= ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_64                             2/8 
+  Upgrading        : libcurl-7.61.1-34.el8_10. [                          ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=                         ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [==                        ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [====                      ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=====                     ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=======                   ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [========                  ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=========                 ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [===========               ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [============              ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [==============            ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [===============           ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [================          ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [==================        ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [===================       ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=====================     ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [======================    ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [========================  ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [========================= ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10.2.x86_64                      3/8 
+  Upgrading        : curl-7.61.1-34.el8_10.2.x [                          ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=                         ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==                        ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===                       ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [====                      ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=====                     ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=======                   ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [========                  ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=========                 ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==========                ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===========               ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [============              ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==============            ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===============           ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [================          ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=================         ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==================        ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===================       ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [====================      ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=====================     ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [======================    ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=======================   ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [========================  ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [========================= ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x86_64                         4/8 
+  Cleanup          : curl-7.61.1-22.el8.x86_64 [                          ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=                         ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [==                        ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [====                      ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=====                     ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=======                   ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=========                 ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [==========                ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [============              ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=============             ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [===============           ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [================          ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [==================        ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [===================       ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=====================     ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [======================    ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [========================  ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64                              5/8 
+  Cleanup          : libcurl-7.61.1-22.el8.x86 [                          ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [===                       ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [=======                   ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [==========                ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [==============            ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [==================        ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [======================    ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86_64                           6/8 
+  Cleanup          : libssh-0.9.4-3.el8.x86_64 [                          ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=                         ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [===                       ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=====                     ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=======                   ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=========                 ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [==========                ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=============             ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [==============            ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [================          ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [==================        ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [====================      ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [======================    ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=======================   ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64                              7/8 
+  Cleanup          : libssh-config-0.9.4-3.el8 [                          ] 8/8  Cleanup          : libssh-config-0.9.4-3.el8 [========                  ] 8/8  Cleanup          : libssh-config-0.9.4-3.el8 [=================         ] 8/8  Cleanup          : libssh-config-0.9.4-3.el8.noarch                       8/8 
+  Running scriptlet: libssh-config-0.9.4-3.el8.noarch                       8/8 
+  Verifying        : curl-7.61.1-34.el8_10.2.x86_64                         1/8 
+  Verifying        : curl-7.61.1-22.el8.x86_64                              2/8 
+  Verifying        : libcurl-7.61.1-34.el8_10.2.x86_64                      3/8 
+  Verifying        : libcurl-7.61.1-22.el8.x86_64                           4/8 
+  Verifying        : libssh-0.9.6-14.el8.x86_64                             5/8 
+  Verifying        : libssh-0.9.4-3.el8.x86_64                              6/8 
+  Verifying        : libssh-config-0.9.6-14.el8.noarch                      7/8 
+  Verifying        : libssh-config-0.9.4-3.el8.noarch                       8/8 
+
+Upgraded:
+  curl-7.61.1-34.el8_10.2.x86_64        libcurl-7.61.1-34.el8_10.2.x86_64       
+  libssh-0.9.6-14.el8.x86_64            libssh-config-0.9.6-14.el8.noarch       
+
+Complete!
+nutanix/4u
+Rocky Linux 8 - AppS     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS  0% [                    ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS  0% [                    ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppStream                       3.6 kB/s | 4.8 kB     00:01    
+Rocky Linux 8 - AppS     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - AppS 17% [===-                ] 7.1 MB/s | 2.1 MB     00:01 ETARocky Linux 8 - AppS 41% [========            ] 7.2 MB/s | 4.9 MB     00:00 ETARocky Linux 8 - AppS 68% [=============-      ] 7.5 MB/s | 8.3 MB     00:00 ETARocky Linux 8 - AppS 91% [==================  ] 7.5 MB/s |  11 MB     00:00 ETARocky Linux 8 - AppStream                       5.0 MB/s |  12 MB     00:02    
+Rocky Linux 8 - Base     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - BaseOS                          3.9 kB/s | 4.3 kB     00:01    
+Rocky Linux 8 - Base     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Base  2% [                    ] 211 kB/s |  63 kB     00:13 ETARocky Linux 8 - Base 74% [==============-     ] 1.1 MB/s | 4.5 MB     00:01 ETARocky Linux 8 - BaseOS                          3.6 MB/s | 6.1 MB     00:01    
+Rocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extras                          3.5 kB/s | 3.1 kB     00:00    
+Rocky Linux 8 - Extr     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extr     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Extras                          2.4 kB/s |  14 kB     00:05    
+Rocky Linux 8 - Powe     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [               ===  ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe  0% [                    ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe 18% [===-                ] 2.6 kB/s | 1.0 kB     00:01 ETARocky Linux 8 - PowerTools                      4.1 kB/s | 4.8 kB     00:01    
+Rocky Linux 8 - Powe     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [===                 ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [   ===              ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [      ===           ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [         ===        ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe     [            ===     ] ---  B/s |   0  B     --:-- ETARocky Linux 8 - Powe 39% [=======-            ] 3.9 MB/s | 1.3 MB     00:00 ETARocky Linux 8 - PowerTools                      1.6 MB/s | 3.2 MB     00:02    
+Extra Packages for E     [               ===  ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for E 18% [===-                ]  22 kB/s | 8.0 kB     00:01 ETAExtra Packages for Enterprise Linux 8 - x86_64   54 kB/s |  42 kB     00:00    
+Extra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [   ===              ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [      ===           ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [         ===        ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [            ===     ] ---  B/s |   0  B     --:-- ETAExtra Packages for E  9% [=-                  ] 4.5 MB/s | 1.3 MB     00:02 ETAExtra Packages for E 34% [======-             ] 4.9 MB/s | 4.8 MB     00:01 ETAExtra Packages for E 44% [========-           ] 4.8 MB/s | 6.1 MB     00:01 ETAExtra Packages for E 56% [===========         ] 4.9 MB/s | 7.7 MB     00:01 ETAExtra Packages for E 73% [==============-     ] 5.0 MB/s |  10 MB     00:00 ETAExtra Packages for E 94% [==================- ] 5.3 MB/s |  13 MB     00:00 ETAExtra Packages for Enterprise Linux 8 - x86_64  4.1 MB/s |  14 MB     00:03    
+Extra Packages for E     [               ===  ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for Enterprise Linux Modular 8 - 8.8 kB/s | 5.3 kB     00:00    
+Extra Packages for E     [===                 ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [   ===              ] ---  B/s |   0  B     --:-- ETAExtra Packages for E     [      ===           ] ---  B/s |   0  B     --:-- ETAExtra Packages for E 18% [===-                ] 450 kB/s | 135 kB     00:01 ETAExtra Packages for E 98% [===================-] 540 kB/s | 724 kB     00:00 ETAExtra Packages for Enterprise Linux Modular 8 - 541 kB/s | 733 kB     00:01    
+Package curl-7.61.1-22.el8.x86_64 is already installed.
+Dependencies resolved.
+================================================================================
+ Package             Architecture Version                    Repository    Size
+================================================================================
+Upgrading:
+ [1mcurl               [m x86_64       7.61.1-34.el8_10.2         baseos       353 k
+ [1mlibcurl            [m x86_64       7.61.1-34.el8_10.2         baseos       303 k
+ [1mlibssh             [m x86_64       0.9.6-14.el8               baseos       219 k
+ [1mlibssh-config      [m noarch       0.9.6-14.el8               baseos        20 k
+
+Transaction Summary
+================================================================================
+Upgrade  4 Packages
+
+Total download size: 894 k
+Downloading Packages:
+Rocky Linux 8 - Base  0% [                    ] 540 kB/s |   0  B     00:01 ETARocky Linux 8 - Base  0% [                    ] 540 kB/s |   0  B     00:01 ETA(1/4): curl-7.61.1-3  0% [                    ] ---  B/s |   0  B     --:-- ETA(1-3/4): libssh-0.9.  0% [                    ] ---  B/s |   0  B     --:-- ETA(1/4): curl-7.61.1-34.el8_10.2.x86_64.rpm       511 kB/s | 353 kB     00:00    
+(2-3/4): libssh-0.9. 71% [==============      ] 2.7 MB/s | 642 kB     00:00 ETA(2/4): libcurl-7.61.1-34.el8_10.2.x86_64.rpm    435 kB/s | 303 kB     00:00    
+(3-4/4): libssh-conf 83% [================-   ] 2.7 MB/s | 749 kB     00:00 ETA(3/4): libssh-config-0.9.6-14.el8.noarch.rpm    608 kB/s |  20 kB     00:00    
+(4/4): libssh-0.9.6- 95% [=================== ] 2.7 MB/s | 855 kB     00:00 ETA(4/4): libssh-0.9.6-14.el8.x86_64.rpm           294 kB/s | 219 kB     00:00    
+--------------------------------------------------------------------------------
+Total                                           675 kB/s | 894 kB     00:01     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :  [======                                             ] 1/1  Preparing        :  [============                                       ] 1/1  Preparing        :  [==================                                 ] 1/1  Preparing        :  [=========================                          ] 1/1  Preparing        :  [===============================                    ] 1/1  Preparing        :  [======================================             ] 1/1  Preparing        :  [============================================       ] 1/1  Preparing        :                                                        1/1 
+  Upgrading        : libssh-config-0.9.6-14.el [                          ] 1/8  Upgrading        : libssh-config-0.9.6-14.el [===                       ] 1/8  Upgrading        : libssh-config-0.9.6-14.el [========                  ] 1/8  Upgrading        : libssh-config-0.9.6-14.el [==================        ] 1/8  Upgrading        : libssh-config-0.9.6-14.el8.noarch                      1/8 
+  Upgrading        : libssh-0.9.6-14.el8.x86_6 [                          ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=                         ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [===                       ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [====                      ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [======                    ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [========                  ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=========                 ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [===========               ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=============             ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [==============            ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [================          ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=================         ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [===================       ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=====================     ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [======================    ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [=======================   ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [========================  ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_6 [========================= ] 2/8  Upgrading        : libssh-0.9.6-14.el8.x86_64                             2/8 
+  Upgrading        : libcurl-7.61.1-34.el8_10. [                          ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=                         ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [==                        ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [====                      ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=====                     ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=======                   ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [========                  ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=========                 ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [===========               ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [============              ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [==============            ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [===============           ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [================          ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [==================        ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [===================       ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [=====================     ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [======================    ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [========================  ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10. [========================= ] 3/8  Upgrading        : libcurl-7.61.1-34.el8_10.2.x86_64                      3/8 
+  Upgrading        : curl-7.61.1-34.el8_10.2.x [                          ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=                         ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==                        ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===                       ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [====                      ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=====                     ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=======                   ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [========                  ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=========                 ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==========                ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===========               ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [============              ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==============            ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===============           ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [================          ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=================         ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [==================        ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [===================       ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [====================      ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=====================     ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [======================    ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [=======================   ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [========================  ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x [========================= ] 4/8  Upgrading        : curl-7.61.1-34.el8_10.2.x86_64                         4/8 
+  Cleanup          : curl-7.61.1-22.el8.x86_64 [                          ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=                         ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [==                        ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [====                      ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=====                     ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=======                   ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=========                 ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [==========                ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [============              ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=============             ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [===============           ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [================          ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [==================        ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [===================       ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [=====================     ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [======================    ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64 [========================  ] 5/8  Cleanup          : curl-7.61.1-22.el8.x86_64                              5/8 
+  Cleanup          : libcurl-7.61.1-22.el8.x86 [                          ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [===                       ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [=======                   ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [==========                ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [==============            ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [==================        ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86 [======================    ] 6/8  Cleanup          : libcurl-7.61.1-22.el8.x86_64                           6/8 
+  Cleanup          : libssh-0.9.4-3.el8.x86_64 [                          ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=                         ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [===                       ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=====                     ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=======                   ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=========                 ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [==========                ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=============             ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [==============            ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [================          ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [==================        ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [====================      ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [======================    ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64 [=======================   ] 7/8  Cleanup          : libssh-0.9.4-3.el8.x86_64                              7/8 
+  Cleanup          : libssh-config-0.9.4-3.el8 [                          ] 8/8  Cleanup          : libssh-config-0.9.4-3.el8 [========                  ] 8/8  Cleanup          : libssh-config-0.9.4-3.el8 [=================         ] 8/8  Cleanup          : libssh-config-0.9.4-3.el8.noarch                       8/8 
+  Running scriptlet: libssh-config-0.9.4-3.el8.noarch                       8/8 
+  Verifying        : curl-7.61.1-34.el8_10.2.x86_64                         1/8 
+  Verifying        : curl-7.61.1-22.el8.x86_64                              2/8 
+  Verifying        : libcurl-7.61.1-34.el8_10.2.x86_64                      3/8 
+  Verifying        : libcurl-7.61.1-22.el8.x86_64                           4/8 
+  Verifying        : libssh-0.9.6-14.el8.x86_64                             5/8 
+  Verifying        : libssh-0.9.4-3.el8.x86_64                              6/8 
+  Verifying        : libssh-config-0.9.6-14.el8.noarch                      7/8 
+  Verifying        : libssh-config-0.9.4-3.el8.noarch                       8/8 
+
+Upgraded:
+  curl-7.61.1-34.el8_10.2.x86_64        libcurl-7.61.1-34.el8_10.2.x86_64       
+  libssh-0.9.6-14.el8.x86_64            libssh-config-0.9.6-14.el8.noarch       
+
+Complete!
+Executing command 'curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?' as user 'nutanix'
+Command 'curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?' executed successfully
+Output of 'curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?': nutanix/4u
+0
+nutanix/4u
+0
+Executing command 'curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?' as user 'nutanix'
+Command 'curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?' executed successfully
+Output of 'curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?': nutanix/4u
+0
+nutanix/4u
+0
+Executing command 'mkdir -p /etc/yum.repos.d/' as user 'nutanix'
+Command 'mkdir -p /etc/yum.repos.d/' executed successfully
+Output of 'mkdir -p /etc/yum.repos.d/': nutanix/4u
+nutanix/4u
+Executing command 'sudo chmod -R o+rw /etc/yum.repos.d' as user 'nutanix'
+Command 'sudo chmod -R o+rw /etc/yum.repos.d' executed successfully
+Output of 'sudo chmod -R o+rw /etc/yum.repos.d': nutanix/4u
+nutanix/4u
+Executing command 'curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo' as user 'nutanix'
+Command 'curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo' executed successfully
+Output of 'curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo': nutanix/4u
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   282  100   282    0     0    424      0 --:--:-- --:--:-- --:--:--   423
+nutanix/4u
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   282  100   282    0     0    424      0 --:--:-- --:--:-- --:--:--   423
+Executing command 'yum -y install managesoft-autoconf' as user 'nutanix'
+Command 'yum -y install managesoft-autoconf' executed successfully
+Output of 'yum -y install managesoft-autoconf': nutanix/4u
+flexera                  [===                 ] ---  B/s |   0  B     --:-- ETAflexera                  [===                 ] ---  B/s |   0  B     --:-- ETAflexera                  [   ===              ] ---  B/s |   0  B     --:-- ETAflexera                  [      ===           ] ---  B/s |   0  B     --:-- ETAflexera                                         2.4 kB/s | 2.4 kB     00:01    
+Dependencies resolved.
+================================================================================
+ Package                    Architecture  Version          Repository      Size
+================================================================================
+Installing:
+ [1mmanagesoft-autoconf       [m noarch        230927-2         flexera         16 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 16 k
+Installed size: 14 k
+Downloading Packages:
+managesoft-autoconf-  0% [                    ] ---  B/s |   0  B     --:-- ETAmanagesoft-autoconf-  0% [                    ] ---  B/s |   0  B     --:-- ETAmanagesoft-autoconf- 72% [==============      ]  36 kB/s |  12 kB     00:00 ETAmanagesoft-autoconf-230927-2.noarch.rpm          24 kB/s |  16 kB     00:00    
+--------------------------------------------------------------------------------
+Total                                            24 kB/s |  16 kB     00:00     
+flexera                  [         ===        ] ---  B/s |   0  B     --:-- ETAflexera                  [            ===     ] ---  B/s |   0  B     --:-- ETAflexera                                         4.7 kB/s | 2.4 kB     00:00    
+Importing GPG key 0xAA44E7D0:
+ Userid     : "Corp Packages (Nutanix IT-SE) <itse@nutanix.com>"
+ Fingerprint: 3FE0 D14F 120C 4597 2C71 DEF6 96C3 C19A AA44 E7D0
+ From       : https://rpm-mirror.corp.nutanix.com/corp/RPM-GPG-KEY-NTNX-Corp-RSA3072
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Installing       : managesoft-autoconf-23092 [                          ] 1/1  Installing       : managesoft-autoconf-23092 [=======                   ] 1/1  Installing       : managesoft-autoconf-23092 [========================= ] 1/1  Installing       : managesoft-autoconf-230927-2.noarch                    1/1 
+  Running scriptlet: managesoft-autoconf-230927-2.noarch                    1/1 
+  Verifying        : managesoft-autoconf-230927-2.noarch                    1/1 
+
+Installed:
+  managesoft-autoconf-230927-2.noarch                                           
+
+Complete!
+nutanix/4u
+flexera                  [===                 ] ---  B/s |   0  B     --:-- ETAflexera                  [===                 ] ---  B/s |   0  B     --:-- ETAflexera                  [   ===              ] ---  B/s |   0  B     --:-- ETAflexera                  [      ===           ] ---  B/s |   0  B     --:-- ETAflexera                                         2.4 kB/s | 2.4 kB     00:01    
+Dependencies resolved.
+================================================================================
+ Package                    Architecture  Version          Repository      Size
+================================================================================
+Installing:
+ [1mmanagesoft-autoconf       [m noarch        230927-2         flexera         16 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 16 k
+Installed size: 14 k
+Downloading Packages:
+managesoft-autoconf-  0% [                    ] ---  B/s |   0  B     --:-- ETAmanagesoft-autoconf-  0% [                    ] ---  B/s |   0  B     --:-- ETAmanagesoft-autoconf- 72% [==============      ]  36 kB/s |  12 kB     00:00 ETAmanagesoft-autoconf-230927-2.noarch.rpm          24 kB/s |  16 kB     00:00    
+--------------------------------------------------------------------------------
+Total                                            24 kB/s |  16 kB     00:00     
+flexera                  [         ===        ] ---  B/s |   0  B     --:-- ETAflexera                  [            ===     ] ---  B/s |   0  B     --:-- ETAflexera                                         4.7 kB/s | 2.4 kB     00:00    
+Importing GPG key 0xAA44E7D0:
+ Userid     : "Corp Packages (Nutanix IT-SE) <itse@nutanix.com>"
+ Fingerprint: 3FE0 D14F 120C 4597 2C71 DEF6 96C3 C19A AA44 E7D0
+ From       : https://rpm-mirror.corp.nutanix.com/corp/RPM-GPG-KEY-NTNX-Corp-RSA3072
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Installing       : managesoft-autoconf-23092 [                          ] 1/1  Installing       : managesoft-autoconf-23092 [=======                   ] 1/1  Installing       : managesoft-autoconf-23092 [========================= ] 1/1  Installing       : managesoft-autoconf-230927-2.noarch                    1/1 
+  Running scriptlet: managesoft-autoconf-230927-2.noarch                    1/1 
+  Verifying        : managesoft-autoconf-230927-2.noarch                    1/1 
+
+Installed:
+  managesoft-autoconf-230927-2.noarch                                           
+
+Complete!
+Executing command 'cat /var/opt/managesoft/log/uploader.log' as user 'nutanix'
+Failed to execute command 'cat /var/opt/managesoft/log/uploader.log', exit code: 1
+Error of 'cat /var/opt/managesoft/log/uploader.log': 
+nutanix/4u
+cat: /var/opt/managesoft/log/uploader.log: No such file or directory
+Executing command 'cat /var/opt/managesoft/log/uploader.log' as user 'nutanix'
+Command 'cat /var/opt/managesoft/log/uploader.log' executed successfully
+Output of 'cat /var/opt/managesoft/log/uploader.log': nutanix/4u
+[Tue 10 Sep 2024 10:41:25 PM UTC (G, 0)] {1998} ************************************************************
+[Tue 10 Sep 2024 10:41:25 PM UTC (G, 0)] {1998} Uploading started
+[Tue 10 Sep 2024 10:41:25 PM UTC (G, 0)] {1998} 
+------------------------------------------------------------
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Prioritizing servers for upload
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Starting to prioritize servers from "HKLM\Software\ManageSoft Corp\ManageSoft\Common\UploadSettings"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Applying prioritization algorithm "MgsRandom" with parameters ""
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Applying prioritization algorithm "MgsPing" with parameters ""
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} No ping response received from server phxitdmzflexprd
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} No ping response received from server rnoitdmzflexprd
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Average round-trip time to phxitflexerap1.corp.nutanix.com is 161 ms
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Average round-trip time to rnoitflexerap1.corp.nutanix.com is 183 ms
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Skipping prioritization algorithm "MgsADSiteMatch" with parameters "" as it does not apply to the current platform
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Finished prioritizing servers
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload directory is '/var/opt/managesoft/uploads/Logs'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Will attempt to upload file(s) '*.log'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload rule is 'Log'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Connecting to upload location 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload username is ''
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload proxy is ''
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Uploading file 'dpro_automation_1726007773 at 20240910T224125_{6565B6B0-5D4A-4A12-929D-9F40A8F9CA03}.log' to 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} File 'dpro_automation_1726007773 at 20240910T224125_{6565B6B0-5D4A-4A12-929D-9F40A8F9CA03}.log' removed from upload directory
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} Upload successful
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} Uploading finished
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} ************************************************************
+nutanix/4u
+[Tue 10 Sep 2024 10:41:25 PM UTC (G, 0)] {1998} ************************************************************
+[Tue 10 Sep 2024 10:41:25 PM UTC (G, 0)] {1998} Uploading started
+[Tue 10 Sep 2024 10:41:25 PM UTC (G, 0)] {1998} 
+------------------------------------------------------------
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Prioritizing servers for upload
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Starting to prioritize servers from "HKLM\Software\ManageSoft Corp\ManageSoft\Common\UploadSettings"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Applying prioritization algorithm "MgsRandom" with parameters ""
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 10:41:25 PM UTC (N, 2)] {1998} Applying prioritization algorithm "MgsPing" with parameters ""
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} No ping response received from server phxitdmzflexprd
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} No ping response received from server rnoitdmzflexprd
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Average round-trip time to phxitflexerap1.corp.nutanix.com is 161 ms
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Average round-trip time to rnoitflexerap1.corp.nutanix.com is 183 ms
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Skipping prioritization algorithm "MgsADSiteMatch" with parameters "" as it does not apply to the current platform
+[Tue 10 Sep 2024 10:41:26 PM UTC (N, 2)] {1998} Finished prioritizing servers
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload directory is '/var/opt/managesoft/uploads/Logs'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Will attempt to upload file(s) '*.log'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload rule is 'Log'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Connecting to upload location 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload username is ''
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Upload proxy is ''
+[Tue 10 Sep 2024 10:41:26 PM UTC (G, 0)] {1998} Uploading file 'dpro_automation_1726007773 at 20240910T224125_{6565B6B0-5D4A-4A12-929D-9F40A8F9CA03}.log' to 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} File 'dpro_automation_1726007773 at 20240910T224125_{6565B6B0-5D4A-4A12-929D-9F40A8F9CA03}.log' removed from upload directory
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} Upload successful
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} Uploading finished
+[Tue 10 Sep 2024 10:41:27 PM UTC (G, 0)] {1998} ************************************************************
+SSH connection closed

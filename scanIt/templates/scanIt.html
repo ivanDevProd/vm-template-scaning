@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>scan_It!</title>
+</head>
+{% block content %}
+    <style>
+        /* Body styling */
+        body {
+            background: url('static/scanIt/nutanix_background.jpg');
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex; /* Enable flexbox */
+            justify-content: center; /* Horizontally center */
+            align-items: center; /* Vertically center */
+            overflow: hidden; /* Prevent body from scrolling */
+        }
+
+        /* Scrollable container for form and other elements */
+        .scrollable-content {
+            width: 1100px; /* Set width to 1100px */    
+            position: relative;
+            max-height: 90vh; /* Adjust to control the visible portion */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding: 20px;
+            z-index: 1; /* Ensure it is above the background */
+            background-color: rgba(0, 0, 0, 0.2); /* Optional: Add semi-transparent background for better readability */
+            border-radius: 8px; /* Optional: Rounded corners for a cleaner look */
+            
+        }
+
+        /* Login link in the top-right corner */
+        .login-link, .help-link {
+            position: absolute;
+            top: 10px; 
+            right: 20px; 
+            color: white; /* Set login link color */
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        /* Help link in the top-right corner */
+        .help-link {
+            position: absolute;
+            top: 35px; 
+            right: 20px; 
+            color: white; /* Set login link color */
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        /* Container for form and other elements */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* Form container to center elements */
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* Styling for textarea input */
+        textarea {
+            width: 1050px; /* Set width for the text area */
+            height: 100px; /* Set height */
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Style for the submit button (disabled) */
+        #submitButtonUrl:disabled, 
+        #submitButtonFile:disabled {
+            background-color: transparent;
+            border: 2px solid #ccc;
+            color: #ccc;
+            cursor: not-allowed;
+            padding: 10px 20px; /* Adjust padding to make the button size smaller */
+            font-size: 16px; /* Adjust font size to be slightly larger */
+            border-radius: 4px; /* Optional: rounded corners */
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        /* Style for the enabled submit button */
+        #submitButtonUrl:enabled, 
+        #submitButtonFile:enabled {
+            background-color: #7855FA;
+            border-color: #7855FA;
+            color: white; /* White text */
+            cursor: pointer;
+            padding: 10px 20px; /* Adjust padding to make the button size smaller */
+            font-size: 16px; /* Adjust font size to be slightly larger */
+            border-radius: 4px; /* Optional: rounded corners */
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        /* Table styling */
+        .body-table {
+            width: 1050px; /* Match the width of the text area */
+            margin: 20px auto; /* Center the table horizontally */
+            border-collapse: collapse;
+            background-color: #1e1e1e; /* Dark background for modern look */
+            color: #fff; /* White text for contrast */
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Ensure rounded corners work */
+            font-size: 14px; /* Slightly smaller font size */
+        }
+
+        /* Table cells and headers styling */
+        .body-table th, .body-table td {
+            border: 1px solid #333; /* Slightly darker border for a modern feel */
+            padding: 12px 15px; /* Adjust padding for more space */
+            text-align: left;
+            white-space: normal; /* Allow text to wrap */
+            word-wrap: break-word; /* Break long words if necessary */
+            max-width: 300px; /* Limit max width of cells */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+        }
+
+        /* Table header background and text color */
+        .body-table th {
+            background-color: #2c2c2c; /* Darker header background */
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Zebra striping for rows */
+        .body-table tbody tr:nth-child(even) {
+            background-color: #2a2a2a; /* Slightly different shade for even rows */
+        }
+
+        /* Hover effect for rows */
+        .body-table tbody tr:hover {
+            background-color: #3a3a3a; /* Highlight on hover */
+        }
+
+        /* Links in table cells */
+        .body-table a {
+            color: #ec9006; /* White text color for links */
+            text-decoration: none; /* Remove underline */
+        }
+
+        /* Alert message styling */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            background-color: #d4edda; /* Light green background */
+            border-color: #c3e6cb;
+            color: #155724;
+            position: relative;
+        }
+
+        /* Close button inside alert */
+        .close {
+            cursor: pointer;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* Success, danger, and warning states for process status */
+        .success {
+            background-color: #d4edda; /* Light green background for SUCCEEDED */
+            color: #155724; /* Dark green text */
+        }
+
+        .danger {
+            background-color: #f8d7da; /* Light red background for FAILED */
+            color: #721c24; /* Dark red text */
+        }
+
+        .warning {
+            background-color: #fff3cd; /* Light yellow background for RUNNING or other states */
+            color: #856404; /* Dark yellow text */
+        }
+
+        /* Logo placement in bottom-left corner */
+        .logo {
+            position: absolute;
+            bottom: 10px;
+            left: 20px; /* Place logo in bottom-left */
+        }
+
+        /* Important Notes styling */
+        .important-notes {
+            width: 100%; /* Full width of the container */
+            max-width: 1050px; /* Same width as the text area */
+            background-color: rgba(0, 0, 0, 0.8); /* Black with transparency */
+            color: #fff; /* White text */
+            padding: 15px; /* Padding for spacing */
+            border-radius: 8px; /* Rounded corners */
+            margin: 10px auto 20px auto; /* Center horizontally and position 100px from top */
+            text-align: left; /* Align text to the left */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            font-size: 15px; /* Adjust text size */
+        }
+
+        .important-notes h3 {
+            margin-top: 0; /* Remove top margin for heading */
+        }
+
+        .important-notes ul {
+            list-style: disc; /* Use disc bullets for the list */
+            margin: 0; /* Remove default margin */
+            padding-left: 20px; /* Add padding to the left */
+        }
+
+        .important-notes li {
+            margin-bottom: 10px; /* Add space between list items */
+        }
+        .important-notes strong {
+            color: #7855FA; /* Different color for the strong part */
+        }
+         
+        /* Typewriter container styling */
+        .typewriter-container {
+            font-family: monospace;
+            font-size: 24px;
+            color: white;
+            background-color: transparent; /* Transparent background */
+            padding: 5px; /* Reduced padding */
+            border-radius: 8px;
+            width: fit-content; /* Automatically adjusts width to content */
+            margin: 5px auto; /* Less vertical margin */
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* Typing animation */
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+            to {
+                width: 8ch; /* Matches the length of the text 'scan_it!' */
+            }
+        }
+
+        /* Blinking cursor animation */
+        @keyframes blink {
+            50% {
+                border-right-color: transparent;
+            }
+        }
+
+        /* Typing text with blinking cursor */
+        .typewriter-text {
+            display: inline-block;
+            overflow: hidden;
+            border-right: 2px solid white; /* Blinking cursor */
+            white-space: nowrap;
+            width: 0; /* Start with no text displayed */
+            animation: typing 5s steps(8, end) forwards, blink 1.5s step-end infinite; /* Typing and blinking animation */
+        }
+
+        /* Remove blinking cursor after the text is fully typed */
+        .finished-blink {
+            animation: none;
+            border-right: none; /* Remove cursor at the end */
+        }
+
+         /* Container to center the buttons */
+        .button-container {
+            display: flex;
+            align-items: center; /* Center items vertically */
+            gap: 20px; /* Space between elements */
+        }
+
+       
+        /* Center the button container horizontally */
+        .button-container {
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            gap: 20px; /* Space between buttons and heading */
+            margin: 20px 0; /* Margin above and below the container */
+        }
+
+        /* Style for buttons */
+        .form-button {
+            background-color: #4B00AA;
+            color: white;
+            border: none;
+            border-radius: 8px; /* Optional border radius for square-like buttons */
+            width: 250px; /* Fixed width for square shape */
+            height: 100px; /* Fixed height for square shape */
+            font-size: 20px; /* Adjust font size for button text */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+            display: inline-block;
+        }
+
+        /* Button hover effect */
+        .form-button:hover {
+            background-color: #6A0DCE; /* Slightly lighter color on hover */
+        }
+        .form-button .main-text {
+            display: block; /* This ensures it's on its own row */
+            font-size: 20px; /* Larger font size for the first line */
+        }
+
+        .form-button .sub-text {
+            display: block; /* This ensures it's on the second row */
+            font-size: 12px; /* Smaller font size for the second line */
+            margin-top: 3px; /* Optional: Adjust the spacing between the lines */
+            opacity: 0.8; /* Optional: Make the second line slightly faded */
+        }
+
+        /* Styling for heading text */
+        .heading-text {
+            font-size: 18px;
+            color: #4B00AA; /* Match button color for consistency */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-container { display: none; }
+        .form-container.active { display: block; }
+        .btn-disabled { background-color: grey; cursor: not-allowed; }
+
+        hr {
+            border: none; /* Removes default border */
+            height: 2px; /* Thickness of the line */
+            background-color: #6A0DCE; /* Set your desired color */
+        }
+
+    </style>
+<body>
+
+    <!-- Login link in top-right corner -->
+    <div >
+        {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="login-link" style="background:none;border:none;color:white;cursor:pointer;">Logout &#9679</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="login-link">Admin Login &#9679</a>
+            <a href="{% url 'help_page' %}" class="help-link">Project Info &#9679</a>
+        {% endif %}
+    </div>
+
+    <!-- Display Django messages if present -->
+    {% if messages %}
+    <div class="container">
+        {% for message in messages %}
+        <div class="alert alert-success">
+            <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            <span class="close" onclick="this.parentElement.style.display='none';">&times;</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="scrollable-content">
+        <div class="typewriter-container">
+            <span class="typewriter-text">scan_it!</span>
+        </div>
+        <div class="important-notes">
+            <h2>Important:</h2>
+            <p>Please make sure to review the following points before submitting the image URL:</p>
+            <ul>
+                <li><strong>Ensure the URLs are correct and accessible.</strong></li>
+                <li><strong>Enable SSH for Linux Distributions:</strong> Ensure SSH is enabled on all Linux OS distributions and is listening on port 22 for secure remote access and management of VMs.</li>
+                <li><strong>Configure WinRM for Windows OS:</strong> Configure WinRM for Windows operating systems to allow remote management and administration. Include enabling WinRM service, allowing Basic authentication, unencrypted traffic, setting TrustedHosts to accept all connections, and enabling firewall rules for WinRM.</li>
+                <li><strong>DHCP NIC Configuration:</strong> Ensure VM templates have at least one NIC configured for DHCP. Configure an additional NIC with DHCP enabled if a static NIC is necessary.</li>
+                <li><strong>Nutanix User Configuration:</strong> Configure the Nutanix user with administrator or root privileges to ensure proper access and management capabilities. (This is already covered in the existing manual.)</li>
+                <li><strong>Avoid Using Deprecated OS Distributions:</strong> Ensure that no deprecated OS distributions are used in VM templates or configurations.</li>
+            </ul>
+        </div>
+
+    <!-- Button container with heading -->
+    <div class="button-container">
+        <button onclick="toggleForm('urlForm')" class="form-button">Enter URLs</button>
+        <h3 class="heading-text" style="color: white;">OR</h3>
+        <button onclick="toggleForm('fileForm')" class="form-button">
+            <span class="main-text">Upload File</span>
+            <span class="sub-text">(.img, .tar.gz, .qcow, .qcow2)</span>
+        </button>
+    </div>
+
+    <!-- URL Form -->
+        <div id="urlForm" class="form-container">
+            <div class="container">
+                <form method="POST">
+                    {% csrf_token %}
+                    <textarea name="urls" rows="4" placeholder="Enter URLs separated by semicolons"></textarea>
+                    <hr>
+                    <input type="checkbox" id="agreeUrl" onclick="toggleSubmitButton('agreeUrl', 'submitButtonUrl')">
+                    <label for="agreeUrl" style="color: white;">I am familiar with the recommended notes</label>
+                    <hr>
+                    <button type="submit" id="submitButtonUrl" disabled>Submit</button>
+                </form>
+            </div>
+        </div>
+        
+    <!-- File Upload Form -->
+        <div id="fileForm" class="form-container" style="margin-left: 30px; width: 1050px;">
+            <br>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="file" accept=".img,.tar.gz, .qcow,.qcow2, application/gzip">
+                <hr>
+                <input type="checkbox" id="agreeFile" onclick="toggleSubmitButton('agreeFile', 'submitButtonFile')">
+                <label for="agreeFile" style="color: white;">I am familiar with the recommended notes</label>
+                <hr>
+                <button type="submit" id="submitButtonFile" disabled>Submit</button>
+            </form>
+        </div>
+
+        <div class="container">
+            {% if user.is_authenticated %}
+                <!-- Table displaying process entries -->
+                {% if latest_entries %}
+                    <table class="body-table">
+                        <thead>
+                            <tr>
+                                <th>Process ID</th>
+                                <th>Description</th>
+                                <th>State</th>
+                                <th>Timestamp</th>
+                                <th>Image URL</th>
+                                <th>Stage</th>
+                                <th>Uploaded to Artifactory</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in latest_entries %}
+                            <tr>
+                                <td><a href="{% url 'vmTemplateEachProcess' entry.0 %}">{{ entry.0 }}</a></td>
+                                <td>{{ entry.1 }}</td> 
+                                <td class="{% if entry.2 == 'SUCCEEDED' %}success{% elif entry.2 == 'FAILED' %}danger{% else %}warning{% endif %}">
+                                    {{ entry.2 }}
+                                </td> 
+                                <td>{{ entry.3 }}</td>
+                                <td>{{ entry.4 }}</td>
+                                <td>{{ entry.5 }}</td>
+                                <td class="{% if entry.6 == 3 %}danger{% elif entry.6 == 1 %}warning{% elif entry.6 == 2 %}success{% endif %}">
+                                    {% if entry.6 == 0 %}
+                                        Upload <input type="checkbox" name="upload_{{ entry.0 }}" onclick="uploadFunction('{{ entry.0 }}')">
+                                    {% elif entry.6 == 1 %}
+                                        In Progress
+                                    {% elif entry.6 == 2 %}
+                                        Yes
+                                    {% elif entry.6 == 3 %}
+                                        Failed
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Logo in bottom-left corner -->
+    <div class="logo">
+        <img src="{% static 'scanIt/logo.png' %}" alt="Logo" style="width: 150px; height: auto;">
+    </div>
+    
+
+<script>
+    // Function to toggle between showing and hiding forms
+    function toggleForm(formId) {
+        const form = document.getElementById(formId);
+
+        // Check if the form is already visible
+        const isFormVisible = form.classList.contains('active');
+
+        // Hide all forms
+        document.querySelectorAll('.form-container').forEach(function(container) {
+            container.classList.remove('active');
+        });
+
+        // Toggle the form visibility
+        if (!isFormVisible) {
+            form.classList.add('active');
+        }
+    }
+
+    // Function to enable/disable the submit button based on checkbox
+    function toggleSubmitButton(checkboxId, buttonId) {
+        const checkbox = document.getElementById(checkboxId);
+        const button = document.getElementById(buttonId);
+        if (checkbox && button) {
+            button.disabled = !checkbox.checked;
+        } else {
+            console.error(`Checkbox with ID ${checkboxId} or button with ID ${buttonId} not found.`);
+        }
+    }
+
+    // Function to handle the upload to Artifactory
+    function uploadFunction(processId) {
+        if (confirm('Are you sure you want to initiate the upload?')) {
+            console.log(`Initiating upload for process ID: ${processId}`);
+            fetch(`/ScanVmTemplate/update_entry/?process_id=${processId}`, {
+                method: 'GET' // Adjust method if needed (e.g., POST)
+            })
+            .then(response => {
+                console.log('Response:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert('Upload initiated successfully.');
+                    location.reload();  // Optionally reload the page to reflect changes
+                } else {
+                    alert('Failed to initiate upload. Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        } else {
+            console.log('Upload canceled by user.');
+            location.reload(); // Refresh the page if the user cancels
+        }
+    }
+</script>
+
+    
+
+    
+</body>
+</html>
+{% endblock %}

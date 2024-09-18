@@ -1,0 +1,945 @@
+Processing payload with ID: b8e4762d-e3eb-4081-9f62-e7718522b819
+Filename: /home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    39     37.5 MiB     37.5 MiB           1   @profile
+    40                                         def download_and_extract_image(source_url, download_dir, extracted_dir, process_id):
+    41     37.5 MiB      0.0 MiB           1       file_size_bytes = 0
+    42     37.5 MiB      0.0 MiB           1       try:
+    43                                                 # Retrieve file size using HEAD request
+    44     37.6 MiB      0.1 MiB           1           response = requests.head(source_url)
+    45     37.6 MiB      0.0 MiB           1           file_size_bytes = int(response.headers.get('Content-Length', 0))
+    46     37.6 MiB      0.0 MiB           1           file_size_gb = file_size_bytes / (1024 ** 3)  # Convert bytes to gigabytes
+    47     37.6 MiB      0.0 MiB           1           logging.info(f"File size: {file_size_gb:.2f} GB")
+    48     39.6 MiB      2.0 MiB           1           log_to_database(process_id, f"Starting download of {source_url}. File size: {file_size_gb:.2f} GB", "INITIATED", source_url, "Download and Extraction")
+    49                                             except Exception as e:
+    50                                                 logging.error(f"Error retrieving file size: {e}")
+    51                                                 log_to_database(process_id, f"Error retrieving file size: {e}", "FAILED", source_url, "Download and Extraction")
+    52                                                 return None
+    53                                         
+    54     39.6 MiB      0.0 MiB           1       file_name = os.path.basename(source_url)
+    55     39.6 MiB      0.0 MiB           1       download_path = os.path.join(download_dir, file_name)
+    56                                         
+    57     39.6 MiB      0.0 MiB           1       try:
+    58                                                 # Download the file
+    59     39.6 MiB      0.0 MiB           1           logging.info(f"Downloading file to {download_path}")
+    60     39.6 MiB      0.0 MiB           1           urllib.request.urlretrieve(source_url, download_path)
+    61     39.6 MiB      0.0 MiB           1           logging.info(f"Downloaded file to {download_path}")
+    62     40.4 MiB      0.8 MiB           1           log_to_database(process_id, f"Downloaded file to {download_path}", "SUCCEEDED", source_url, "Download and Extraction")
+    63                                             except Exception as e:
+    64                                                 logging.error(f"Error during download: {e}")
+    65                                                 log_to_database(process_id, f"Error during download: {e}", "FAILED", source_url, "Download and Extraction")
+    66                                                 return None
+    67                                         
+    68     40.4 MiB      0.0 MiB           1       try:
+    69                                                 # Extract the .tar.gz file
+    70     40.4 MiB      0.0 MiB           1           logging.info(f"Extracting image from {download_path} to {extracted_dir}")
+    71     40.4 MiB      0.0 MiB           1           log_to_database(process_id, f"Extracting image from {download_path} to {extracted_dir}", "INITIATED", source_url, "Download and Extraction")
+    72                                         
+    73                                                 # with tarfile.open(download_path, "r:gz") as tar:
+    74                                                 #     tar.extractall(path=extracted_dir)
+    75                                                 #     logging.info(f"Extracted files to {extracted_dir}")
+    76                                         
+    77                                                 # try:
+    78                                                 #     with tarfile.open(download_path, "r:gz") as tar:
+    79                                                 #         for member in tar.getmembers():
+    80                                                 #             # Extract each member one by one
+    81                                                 #             logging.info(f"Extracting {member.name}...")
+    82                                                 #             tar.extract(member, path=extracted_dir)
+    83                                                 #     logging.info(f"Extraction completed to {extracted_dir}")
+    84                                                 # except Exception as e:
+    85                                                 #     logging.error(f"Error during extraction in chunks: {e}")
+    86                                         
+    87     40.4 MiB      0.0 MiB           1           try:
+    88     72.8 MiB      0.2 MiB           2               with tarfile.open(download_path, "r:gz") as tar:
+    89     72.8 MiB      0.0 MiB           2                   for member in tar.getmembers():
+    90     40.6 MiB      0.0 MiB           1                       if member.isfile():
+    91     40.6 MiB      0.0 MiB           1                           logging.info(f"Extracting {member.name}...")
+    92                                                                 
+    93                                                                 # Extract the file object
+    94     40.6 MiB      0.0 MiB           1                           extracted_file = tar.extractfile(member)
+    95     40.6 MiB      0.0 MiB           1                           if extracted_file:
+    96     40.6 MiB      0.0 MiB           1                               extracted_file_path = os.path.join(extracted_dir, member.name)
+    97                                                                     
+    98                                                                     # Open the file to write the data in chunks
+    99     72.8 MiB      0.0 MiB           2                               with open(extracted_file_path, "wb") as output_file:
+   100    584.8 MiB     -0.6 MiB          33                                   while True:
+   101    584.8 MiB     31.6 MiB          33                                       chunk = extracted_file.read(BUFFER_SIZE)
+   102    584.8 MiB   -512.6 MiB          33                                       if not chunk:
+   103     72.8 MiB   -512.0 MiB           1                                           break
+   104    584.8 MiB     -0.6 MiB          32                                       output_file.write(chunk)
+   105                                                                 
+   106     72.8 MiB      0.0 MiB           1                           logging.info(f"Extracted {member.name} to {extracted_file_path}")
+   107                                                                 
+   108     72.8 MiB      0.0 MiB           1               logging.info(f"Extraction completed to {extracted_dir}")
+   109                                         
+   110                                                 except Exception as e:
+   111                                                     logging.error(f"Error during extraction in chunks: {e}")
+   112                                         
+   113     72.8 MiB      0.0 MiB           1           extracted_files = os.listdir(extracted_dir)
+   114     72.8 MiB      0.0 MiB           1           if len(extracted_files) == 1:
+   115     72.8 MiB      0.0 MiB           1               extracted_file_name = extracted_files[0]
+   116     72.8 MiB      0.0 MiB           1               file_path = os.path.join(extracted_dir, extracted_file_name)
+   117     72.8 MiB      0.0 MiB           1               extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{extracted_file_name}"
+   118     72.8 MiB      0.0 MiB           1               logging.info(f"Extracted image URL: {extracted_image_url}")
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+   119     72.8 MiB      0.0 MiB           1               log_to_database(process_id, f"Extracted image URL: {extracted_image_url}", "SUCCEEDED", source_url, "Download and Extraction")
+   120                                         
+   121                                                     # Process the file (upload to cluster)
+   122                                                     # process_file(file_path)
+   123                                                     
+   124     72.8 MiB      0.0 MiB           1               return extracted_image_url
+   125                                                 else:
+   126                                                     error_message = "Multiple files extracted. Process aborted."
+   127                                                     logging.error(error_message)
+   128                                                     log_to_database(process_id, error_message, "FAILED", source_url, "Download and Extraction")
+   129                                         
+   130                                                     # Clean up extracted directory
+   131                                                     for file_name in extracted_files:
+   132                                                         file_path = os.path.join(extracted_dir, file_name)
+   133                                                         if os.path.isfile(file_path):
+   134                                                             os.remove(file_path)
+   135                                         
+   136                                                     return None
+   137                                             except Exception as e:
+   138                                                 logging.error(f"Error during extraction: {e}")
+   139                                                 log_to_database(process_id, f"Error during extraction: {e}", "FAILED", source_url, "Download and Extraction")
+   140                                                 return None
+
+
+Upload Response Code: 202
+Upload Response Content: {"status": {"state": "PENDING", "execution_context": {"task_uuid": "daccb971-0547-47c6-b56d-47a7b299cc5a"}}, "spec": {"name": "DPRO-AUTOMATION-agave-centos74.tar.gz", "resources": {"image_type": "DISK_IMAGE", "source_uri": "http://10.67.22.100/static/scanIt/extracted_images/centos74.img"}, "description": "http://endor.dyn.nutanix.com/GoldImages/agave/centos74.tar.gz"}, "api_version": "3.1", "metadata": {"owner_reference": {"kind": "user", "uuid": "70e48f7a-1248-577a-9fd8-e2a1f767c889", "name": "itts"}, "use_categories_mapping": false, "kind": "image", "spec_version": 0, "uuid": "30582b9d-bd4f-4e37-8084-11d82352e3ca"}}
+Image upload initiated successfully
+Task UUID: daccb971-0547-47c6-b56d-47a7b299cc5a
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: RUNNING, Percentage completed: 0%
+State: SUCCEEDED, Percentage completed: 100%
+Image upload completed successfully
+Image UUID on cluster: 30582b9d-bd4f-4e37-8084-11d82352e3ca
+Filename: /home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   191     37.5 MiB     37.5 MiB           1   @profile
+   192                                         def upload_image_to_nutanix():
+   193                                             # process_id = int(time.time() * 1000)  # Unique process ID using milliseconds
+   194     37.5 MiB      0.0 MiB           1       process_id = generate_unique_id()
+   195     37.5 MiB      0.0 MiB           1       json_data_str = sys.argv[1]
+   196     37.5 MiB      0.0 MiB           1       try:
+   197     37.5 MiB      0.0 MiB           1           payload = json.loads(json_data_str)
+   198     37.5 MiB      0.0 MiB           1           print(f"Processing payload with ID: {process_id}")
+   199                                             except json.JSONDecodeError as e:
+   200                                                 print(f"Error decoding JSON: {e}")
+   201                                                 return
+   202                                         
+   203                                             # Extract image name and source URL
+   204     37.5 MiB      0.0 MiB           1       image_name = payload['spec']['name']
+   205     37.5 MiB      0.0 MiB           1       source_url = payload['spec']['resources']['source_uri']
+   206                                             
+   207                                             # Define directories
+   208     37.5 MiB      0.0 MiB           1       download_dir = '/home/noc_admin/image_scanner_project/downloads/'
+   209     37.5 MiB      0.0 MiB           1       extracted_dir = '/home/noc_admin/image_scanner_project/static/scanIt/extracted_images/'
+   210                                         
+   211     37.5 MiB      0.0 MiB           1       if source_url.endswith('.tar.gz'):
+   212     72.8 MiB     35.3 MiB           1           new_source_url = download_and_extract_image(source_url, download_dir, extracted_dir, process_id)
+   213                                         
+   214     72.8 MiB      0.0 MiB           1           if new_source_url:
+   215     72.8 MiB      0.0 MiB           1               payload['spec']['resources']['source_uri'] = new_source_url
+   216                                                 else:
+   217                                                     print("Failed to download and extract image.")
+   218                                                     return
+   219                                         
+   220                                             # URL for image upload
+   221     72.8 MiB      0.0 MiB           1       upload_url = f"https://{cluster_ip}:9440/api/nutanix/v3/images"
+   222                                             
+   223     72.8 MiB      0.0 MiB           1       try:
+   224     72.8 MiB      0.0 MiB           2           upload_response = requests.post(
+   225     72.8 MiB      0.0 MiB           1               upload_url,
+   226     72.8 MiB      0.0 MiB           1               auth=HTTPBasicAuth(username, password),
+   227     72.8 MiB      0.0 MiB           1               json=payload,
+   228     72.8 MiB      0.0 MiB           1               verify=False
+   229                                                 )
+   230     72.8 MiB      0.0 MiB           1           print(f"Upload Response Code: {upload_response.status_code}")
+   231     72.8 MiB      0.0 MiB           1           print(f"Upload Response Content: {upload_response.text}")
+   232                                             except requests.RequestException as e:
+   233                                                 print(f"Failed to initiate image upload: {e}")
+   234                                                 return
+   235                                         
+   236     72.8 MiB      0.0 MiB           1       if upload_response.status_code == 202:
+   237     72.8 MiB      0.0 MiB           1           print("Image upload initiated successfully")
+   238     72.8 MiB      0.0 MiB           1           task_uuid = upload_response.json().get('status', {}).get('execution_context', {}).get('task_uuid', '')
+   239     72.8 MiB      0.0 MiB           1           print(f"Task UUID: {task_uuid}")
+   240                                         
+   241     72.8 MiB      0.0 MiB           1           task_url = f"https://{cluster_ip}:9440/api/nutanix/v3/tasks/{task_uuid}"
+   242                                         
+   243     72.8 MiB      0.0 MiB           1           try:
+   244     72.8 MiB      0.0 MiB           1               conn = mysql.connector.connect(**mysql_config)
+   245     72.8 MiB      0.0 MiB           1               cursor = conn.cursor()
+   246     72.8 MiB      0.0 MiB           2               cursor.execute(
+   247     72.8 MiB      0.0 MiB           1                   'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   248                                                         'VALUES (%s, %s, %s, %s, %s)',
+   249     72.8 MiB      0.0 MiB           1                   (process_id, f"Image upload initiated successfully. Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
+   250                                                     )
+   251     72.8 MiB      0.0 MiB           1               conn.commit()
+   252                                                 finally:
+   253     72.8 MiB      0.0 MiB           1               cursor.close()
+   254     72.8 MiB      0.0 MiB           1               conn.close()
+   255                                         
+   256     72.8 MiB      0.0 MiB          20           while True:
+   257     72.8 MiB      0.0 MiB          20               try:
+   258     72.8 MiB      0.0 MiB          20                   task_response = requests.get(task_url, auth=HTTPBasicAuth(username, password), verify=False)
+   259     72.8 MiB      0.0 MiB          20                   task_status = task_response.json()
+   260                                         
+   261     72.8 MiB      0.0 MiB          20                   state = task_status.get('status', 'UNKNOWN')
+   262     72.8 MiB      0.0 MiB          20                   percentage_complete = task_status.get('percentage_complete', 'N/A')
+   263     72.8 MiB      0.0 MiB          20                   print(f"State: {state}, Percentage completed: {percentage_complete}%")
+   264                                         
+   265     72.8 MiB      0.0 MiB          20                   if state == 'SUCCEEDED':
+   266     72.8 MiB      0.0 MiB           1                       print("Image upload completed successfully")
+   267     72.8 MiB      0.0 MiB           1                       uuid = task_status['entity_reference_list'][0]['uuid']
+   268     72.8 MiB      0.0 MiB           1                       print(f"Image UUID on cluster: {uuid}")
+   269                                         
+   270     72.8 MiB      0.0 MiB           1                       try:
+   271     72.8 MiB      0.0 MiB           1                           conn = mysql.connector.connect(**mysql_config)
+   272     72.8 MiB      0.0 MiB           1                           cursor = conn.cursor()
+   273     72.8 MiB      0.0 MiB           2                           cursor.execute(
+   274     72.8 MiB      0.0 MiB           1                               'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   275                                                                     'VALUES (%s, %s, %s, %s, %s)',
+   276     72.8 MiB      0.0 MiB           1                               (process_id, f"Image named <{image_name}> upload completed successfully. Image UUID: {uuid}", "SUCCEEDED", source_url, "Cluster Image Upload")
+   277                                                                 )
+   278     72.8 MiB      0.0 MiB           1                           conn.commit()
+   279                                                             finally:
+   280     72.8 MiB      0.0 MiB           1                           cursor.close()
+   281     72.8 MiB      0.0 MiB           1                           conn.close()
+   282                                         
+   283     72.8 MiB      0.0 MiB           1                       script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
+   284     72.8 MiB      0.0 MiB           1                       command = f"python3 {script_path} {process_id} {uuid} {image_name} {source_url}"
+   285     72.8 MiB      0.0 MiB           1                       subprocess.Popen(command, shell=True)
+   286                                         
+   287                                                             # Clean up the extracted file only if upload was successful
+   288     72.8 MiB      0.0 MiB           1                       cleanup_extracted_file(new_source_url, extracted_dir, process_id)
+   289     72.8 MiB      0.0 MiB           1                       break
+   290                                         
+   291     72.8 MiB      0.0 MiB          19                   elif state == 'FAILED':
+   292                                                             print("Image upload failed")
+   293                                                             try:
+   294                                                                 conn = mysql.connector.connect(**mysql_config)
+   295                                                                 cursor = conn.cursor()
+   296                                                                 cursor.execute(
+   297                                                                     'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   298                                                                     'VALUES (%s, %s, %s, %s, %s)',
+   299                                                                     (process_id, "Image upload failed", "FAILED", source_url, "Cluster Image Upload")
+   300                                                                 )
+   301                                                                 conn.commit()
+   302                                                             finally:
+   303                                                                 cursor.close()
+   304                                                                 conn.close()
+   305                                                             break
+   306                                         
+   307                                                     except requests.RequestException as e:
+   308                                                         print(f"Error retrieving task status: {e}")
+   309                                         
+   310     72.8 MiB      0.0 MiB          19               time.sleep(15)
+   311                                         
+   312                                             else:
+   313                                                 print("Failed to initiate image upload")
+   314                                                 print(f"Response Code: {upload_response.status_code}")
+   315                                                 print(f"Response Content: {upload_response.text}")
+
+
+Process 7961 dead!
+Process 7961 detected
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+b8e4762d-e3eb-4081-9f62-e7718522b819 30582b9d-bd4f-4e37-8084-11d82352e3ca DPRO-AUTOMATION-agave-centos74.tar.gz http://endor.dyn.nutanix.com/GoldImages/agave/centos74.tar.gz
+VM creation initiated successfully
+Task UUID: acc47ac5-4148-4ec8-8fd2-ba50fd9868c2
+Current state: RUNNING
+State not found in response
+Current state: SUCCEEDED
+VM creation completed successfully
+{'status': 'SUCCEEDED', 'last_update_time': '2024-09-10T22:16:57Z', 'logical_timestamp': 2, 'entity_reference_list': [{'kind': 'vm', 'uuid': '6622039d-9701-4653-9046-a4c4dac76bb3'}], 'start_time': '2024-09-10T22:16:53Z', 'creation_time': '2024-09-10T22:16:53Z', 'start_time_usecs': 1726006613150150, 'cluster_reference': {'kind': 'cluster', 'uuid': '0005cc04-f8bc-a8bc-154c-ac1f6b3fdbfe'}, 'subtask_reference_list': [], 'completion_time': '2024-09-10T22:16:57Z', 'creation_time_usecs': 1726006613072072, 'progress_message': 'create_vm', 'operation_type': 'create_vm_intentful', 'completion_time_usecs': 1726006617824951, 'percentage_complete': 100, 'api_version': '3.1', 'uuid': 'acc47ac5-4148-4ec8-8fd2-ba50fd9868c2'}
+VM IP Address: 10.67.22.243
+SSH connection to 10.67.22.243 established successfully with user nutanix
+Check Result: SSH
+VM avialable via ssh/winRM
+SSH connection to 10.67.22.243 established successfully with username: nutanix
+Executing command 'uname -s' as user 'nutanix'
+Detected OS type: Linux
+Checking linux distro
+Executing command 'cat /etc/os-release' as user 'nutanix'
+Detected distribution: CentOS Linux 7 (Core) 
+Version: 7.0
+Executing command 'hostnamectl set-hostname DPRO_AUTOMATION_1726006664' as user 'nutanix'
+Command 'hostnamectl set-hostname DPRO_AUTOMATION_1726006664' executed successfully
+Output of 'hostnamectl set-hostname DPRO_AUTOMATION_1726006664': nutanix/4u
+nutanix/4u
+Executing command 'yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm' as user 'nutanix'
+Command 'yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm' executed successfully
+Output of 'yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm': nutanix/4u
+Loaded plugins: fastestmirror
+artifactory-centos-rocky-1.1-1.el9.noarch.rpm            | 8.1 kB     00:00     
+Examining /var/tmp/yum-root-bA4yyE/artifactory-centos-rocky-1.1-1.el9.noarch.rpm: artifactory-centos-rocky-1.1-1.el9.noarch
+Marking /var/tmp/yum-root-bA4yyE/artifactory-centos-rocky-1.1-1.el9.noarch.rpm to be installed
+Resolving Dependencies
+--> Running transaction check
+---> Package artifactory-centos-rocky.noarch 0:1.1-1.el9 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package      Arch   Version   Repository                                  Size
+================================================================================
+Installing:
+ [1martifactory-centos-rocky[m
+              noarch 1.1-1.el9 /artifactory-centos-rocky-1.1-1.el9.noarch 4.0 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total size: 4.0 k
+Installed size: 4.0 k
+Downloading packages:
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : artifactory-centos-rocky-1.1 [                             ] 1/1  Installing : artifactory-centos-rocky-1.1 [########                     ] 1/1  Installing : artifactory-centos-rocky-1.1 [###################          ] 1/1  Installing : artifactory-centos-rocky-1.1 [############################ ] 1/1  Installing : artifactory-centos-rocky-1.1-1.el9.noarch                    1/1 
+  Verifying  : artifactory-centos-rocky-1.1-1.el9.noarch                    1/1 
+
+Installed:
+  artifactory-centos-rocky.noarch 0:1.1-1.el9                                   
+
+Complete!
+nutanix/4u
+Loaded plugins: fastestmirror
+artifactory-centos-rocky-1.1-1.el9.noarch.rpm            | 8.1 kB     00:00     
+Examining /var/tmp/yum-root-bA4yyE/artifactory-centos-rocky-1.1-1.el9.noarch.rpm: artifactory-centos-rocky-1.1-1.el9.noarch
+Marking /var/tmp/yum-root-bA4yyE/artifactory-centos-rocky-1.1-1.el9.noarch.rpm to be installed
+Resolving Dependencies
+--> Running transaction check
+---> Package artifactory-centos-rocky.noarch 0:1.1-1.el9 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package      Arch   Version   Repository                                  Size
+================================================================================
+Installing:
+ [1martifactory-centos-rocky[m
+              noarch 1.1-1.el9 /artifactory-centos-rocky-1.1-1.el9.noarch 4.0 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total size: 4.0 k
+Installed size: 4.0 k
+Downloading packages:
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : artifactory-centos-rocky-1.1 [                             ] 1/1  Installing : artifactory-centos-rocky-1.1 [########                     ] 1/1  Installing : artifactory-centos-rocky-1.1 [###################          ] 1/1  Installing : artifactory-centos-rocky-1.1 [############################ ] 1/1  Installing : artifactory-centos-rocky-1.1-1.el9.noarch                    1/1 
+  Verifying  : artifactory-centos-rocky-1.1-1.el9.noarch                    1/1 
+
+Installed:
+  artifactory-centos-rocky.noarch 0:1.1-1.el9                                   
+
+Complete!
+Executing command 'yum install -y curl' as user 'nutanix'
+Command 'yum install -y curl' executed successfully
+Output of 'yum install -y curl': nutanix/4u
+Loaded plugins: fastestmirror
+artifactory-base                                         | 3.6 kB     00:00     
+artifactory-extras                                       | 2.9 kB     00:00     
+artifactory-updates                                      | 2.9 kB     00:00     
+(2/4): artifactory-base/7/ 0% [                 ]  0.0 B/s |    0 B   --:-- ETA (2/4): artifactory-base/7/ 0% [                 ]  0.0 B/s |  38 kB   --:-- ETA (2/4): artifactory-base/7/ 0% [                 ] 255 kB/s | 202 kB   02:15 ETA (1/4): artifactory-extras/7/x86_64/primary_db              | 253 kB   00:01     
+(3/4): artifactory-base/7/ 1% [                 ] 312 kB/s | 567 kB   01:49 ETA (2/4): artifactory-base/7/x86_64/group_gz                  | 153 kB   00:01     
+(3/4): artifactory-base/7/ 2% [                 ] 327 kB/s | 744 kB   01:43 ETA (3/4): artifactory-base/7/ 2% [                 ] 327 kB/s | 864 kB   01:43 ETA (3/4): artifactory-base/7/ 2% [                 ] 332 kB/s | 992 kB   01:41 ETA (4/4): artifactory-updates 3% [-                ] 338 kB/s | 1.1 MB   01:39 ETA (4/4): artifactory-updates 3% [-                ] 348 kB/s | 1.3 MB   01:36 ETA (4/4): artifactory-updates 4% [-                ] 358 kB/s | 1.4 MB   01:32 ETA (4/4): artifactory-updates 4% [-                ] 370 kB/s | 1.6 MB   01:29 ETA (3/4): artifactory-base/7/ 5% [-                ] 384 kB/s | 1.8 MB   01:25 ETA (3/4): artifactory-base/7/ 5% [-                ] 400 kB/s | 2.0 MB   01:21 ETA (3/4): artifactory-base/7/ 6% [=                ] 420 kB/s | 2.2 MB   01:17 ETA (3/4): artifactory-base/7/ 7% [=                ] 443 kB/s | 2.4 MB   01:12 ETA (4/4): artifactory-updates 7% [=                ] 466 kB/s | 2.7 MB   01:08 ETA (4/4): artifactory-updates 8% [=                ] 495 kB/s | 3.0 MB   01:03 ETA (4/4): artifactory-updates 9% [=-               ] 531 kB/s | 3.3 MB   00:58 ETA (4/4): artifactory-updates 10% [=-              ] 573 kB/s | 3.7 MB   00:54 ETA (3/4): artifactory-base/7/ 12% [=-              ] 625 kB/s | 4.1 MB   00:48 ETA (3/4): artifactory-base/7/ 13% [==              ] 687 kB/s | 4.6 MB   00:43 ETA (3/4): artifactory-base/7/ 15% [==              ] 760 kB/s | 5.2 MB   00:38 ETA (3/4): artifactory-base/7/ 17% [==-             ] 843 kB/s | 5.8 MB   00:34 ETA (4/4): artifactory-updates 19% [===             ] 940 kB/s | 6.6 MB   00:29 ETA (4/4): artifactory-updates 21% [===             ] 1.0 MB/s | 7.4 MB   00:25 ETA (4/4): artifactory-updates 24% [===-            ] 1.1 MB/s | 8.3 MB   00:22 ETA (4/4): artifactory-updates 27% [====            ] 1.3 MB/s | 9.4 MB   00:19 ETA (3/4): artifactory-base/7/ 31% [====-           ] 1.4 MB/s |  11 MB   00:16 ETA (3/4): artifactory-base/7/ 34% [=====-          ] 1.6 MB/s |  12 MB   00:13 ETA (3/4): artifactory-base/7/x86_64/primary_db                | 6.1 MB   00:09     
+(4/4): artifactory-updates 39% [======          ] 1.8 MB/s |  13 MB   00:11 ETA (4/4): artifactory-updates 41% [======-         ] 1.8 MB/s |  14 MB   00:10 ETA (4/4): artifactory-updates 44% [=======         ] 1.9 MB/s |  15 MB   00:09 ETA (4/4): artifactory-updates 47% [=======-        ] 2.0 MB/s |  16 MB   00:08 ETA (4/4): artifactory-updates 50% [========        ] 2.1 MB/s |  17 MB   00:08 ETA (4/4): artifactory-updates 54% [========-       ] 2.2 MB/s |  18 MB   00:07 ETA (4/4): artifactory-updates 58% [=========       ] 2.3 MB/s |  20 MB   00:06 ETA (4/4): artifactory-updates 62% [==========      ] 2.4 MB/s |  21 MB   00:05 ETA (4/4): artifactory-updates 67% [==========-     ] 2.6 MB/s |  23 MB   00:04 ETA (4/4): artifactory-updates 72% [===========-    ] 2.8 MB/s |  25 MB   00:03 ETA (4/4): artifactory-updates 78% [============-   ] 3.0 MB/s |  26 MB   00:02 ETA (4/4): artifactory-updates 84% [=============   ] 3.2 MB/s |  29 MB   00:01 ETA (4/4): artifactory-updates 90% [==============- ] 3.5 MB/s |  31 MB   00:00 ETA (4/4): artifactory-updates 98% [===============-] 3.7 MB/s |  33 MB   00:00 ETA (4/4): artifactory-updates/7/x86_64/primary_db             |  27 MB   00:14     
+Determining fastest mirrors
+Resolving Dependencies
+--> Running transaction check
+---> Package curl.x86_64 0:7.29.0-42.el7 will be updated
+---> Package curl.x86_64 0:7.29.0-59.el7_9.2 will be an update
+--> Processing Dependency: libcurl = 7.29.0-59.el7_9.2 for package: curl-7.29.0-59.el7_9.2.x86_64
+--> Running transaction check
+---> Package libcurl.x86_64 0:7.29.0-42.el7 will be updated
+---> Package libcurl.x86_64 0:7.29.0-59.el7_9.2 will be an update
+--> Processing Dependency: nss-pem(x86-64) >= 1.0.3-5 for package: libcurl-7.29.0-59.el7_9.2.x86_64
+--> Processing Dependency: libssh2(x86-64) >= 1.8.0 for package: libcurl-7.29.0-59.el7_9.2.x86_64
+--> Processing Dependency: libnss3.so(NSS_3.34)(64bit) for package: libcurl-7.29.0-59.el7_9.2.x86_64
+--> Running transaction check
+---> Package libssh2.x86_64 0:1.4.3-10.el7_2.1 will be updated
+---> Package libssh2.x86_64 0:1.8.0-4.el7_9.1 will be an update
+---> Package nss.x86_64 0:3.28.4-8.el7 will be updated
+--> Processing Dependency: nss = 3.28.4-8.el7 for package: nss-sysinit-3.28.4-8.el7.x86_64
+--> Processing Dependency: nss(x86-64) = 3.28.4-8.el7 for package: nss-tools-3.28.4-8.el7.x86_64
+---> Package nss.x86_64 0:3.90.0-2.el7_9 will be an update
+--> Processing Dependency: nss-util >= 3.90.0-1 for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: nss-softokn(x86-64) >= 3.90.0-1 for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: nspr >= 4.35.0 for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.82)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.59)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.39)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.38)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.31)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+---> Package nss-pem.x86_64 0:1.0.3-4.el7 will be updated
+---> Package nss-pem.x86_64 0:1.0.3-7.el7_9.1 will be an update
+--> Running transaction check
+---> Package nspr.x86_64 0:4.13.1-1.0.el7_3 will be updated
+---> Package nspr.x86_64 0:4.35.0-1.el7_9 will be an update
+---> Package nss-softokn.x86_64 0:3.28.3-6.el7 will be updated
+---> Package nss-softokn.x86_64 0:3.90.0-6.el7_9 will be an update
+--> Processing Dependency: nss-softokn-freebl(x86-64) >= 3.90.0-6.el7_9 for package: nss-softokn-3.90.0-6.el7_9.x86_64
+---> Package nss-sysinit.x86_64 0:3.28.4-8.el7 will be updated
+---> Package nss-sysinit.x86_64 0:3.90.0-2.el7_9 will be an update
+---> Package nss-tools.x86_64 0:3.28.4-8.el7 will be updated
+---> Package nss-tools.x86_64 0:3.90.0-2.el7_9 will be an update
+---> Package nss-util.x86_64 0:3.28.4-3.el7 will be updated
+---> Package nss-util.x86_64 0:3.90.0-1.el7_9 will be an update
+--> Running transaction check
+---> Package nss-softokn-freebl.x86_64 0:3.28.3-6.el7 will be updated
+---> Package nss-softokn-freebl.x86_64 0:3.90.0-6.el7_9 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package              Arch     Version              Repository             Size
+================================================================================
+Updating:
+ curl                 x86_64   7.29.0-59.el7_9.2    artifactory-updates   271 k
+Updating for dependencies:
+ libcurl              x86_64   7.29.0-59.el7_9.2    artifactory-updates   223 k
+ libssh2              x86_64   1.8.0-4.el7_9.1      artifactory-updates    88 k
+ nspr                 x86_64   4.35.0-1.el7_9       artifactory-updates   128 k
+ nss                  x86_64   3.90.0-2.el7_9       artifactory-updates   905 k
+ nss-pem              x86_64   1.0.3-7.el7_9.1      artifactory-updates    75 k
+ nss-softokn          x86_64   3.90.0-6.el7_9       artifactory-updates   383 k
+ nss-softokn-freebl   x86_64   3.90.0-6.el7_9       artifactory-updates   321 k
+ nss-sysinit          x86_64   3.90.0-2.el7_9       artifactory-updates    67 k
+ nss-tools            x86_64   3.90.0-2.el7_9       artifactory-updates   557 k
+ nss-util             x86_64   3.90.0-1.el7_9       artifactory-updates    80 k
+
+Transaction Summary
+================================================================================
+Upgrade  1 Package (+10 Dependent packages)
+
+Total download size: 3.0 M
+Downloading packages:
+Delta RPMs disabled because /usr/bin/applydeltarpm not installed.
+(2/11): libcurl-7.29.0-59. 0% [                 ]  0.0 B/s |    0 B   --:-- ETA (2/11): libcurl-7.29.0-59. 1% [                 ]  0.0 B/s |  39 kB   --:-- ETA (2/11): libcurl-7.29.0-59. 7% [=                ] 299 kB/s | 231 kB   00:09 ETA (1/11): libcurl-7.29.0-59.el7_9.2.x86_64.rpm               | 223 kB   00:01     
+(2/11): curl-7.29.0-59.el7_9.2.x86_64.rpm                  | 271 kB   00:01     
+(3/11): libssh2-1.8.0-4.el7_9.1.x86_64.rpm                 |  88 kB   00:00     
+(4/11): nspr-4.35.0-1.el7_9.x86_64.rpm                     | 128 kB   00:00     
+(5/11): nss-pem-1.0.3-7.el7_9.1.x86_64.rpm                 |  75 kB   00:00     
+(6/11): nss-3.90.0-2.el7_9 47% [=======-        ] 508 kB/s | 1.4 MB   00:03 ETA (6/11): nss-3.90.0-2.el7_9.x86_64.rpm                      | 905 kB   00:00     
+(7/11): nss-softokn-3.90.0-6.el7_9.x86_64.rpm              | 383 kB   00:00     
+(8/11): nss-softokn-freebl-3.90.0-6.el7_9.x86_64.rpm       | 321 kB   00:00     
+(9/11): nss-sysinit-3.90.0-2.el7_9.x86_64.rpm              |  67 kB   00:00     
+(10/11): nss-tools-3.90.0-2.el7_9.x86_64.rpm               | 557 kB   00:00     
+(11/11): nss-util-3.90.0-1.el7_9.x86_64.rpm                |  80 kB   00:00     
+--------------------------------------------------------------------------------
+Total                                              1.2 MB/s | 3.0 MB  00:02     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Updating   : nspr-4.35.0-1.el7_9.x86_64 [                             ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [######                       ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [############                 ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [###################          ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [#########################    ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [###########################  ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [############################ ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64                                  1/22 
+  Updating   : nss-util-3.90.0-1.el7_9.x86 [                            ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [########                    ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [#################           ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [##########################  ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [########################### ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86_64                              2/22 
+  Updating   : nss-softokn-freebl-3.90.0-6 [                            ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [##                          ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#####                       ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#######                     ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [##########                  ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [############                ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [###############             ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#################           ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [####################        ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [######################      ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#########################   ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [########################### ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6.el7_9.x86_64                    3/22 
+  Updating   : nss-softokn-3.90.0-6.el7_9. [                            ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#                           ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##                          ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [###                         ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#####                       ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [######                      ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#######                     ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [########                    ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##########                  ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [###########                 ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [############                ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##############              ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [###############             ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [################            ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#################           ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##################          ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [####################        ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#####################       ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [######################      ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#######################     ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [########################    ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##########################  ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [########################### ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9.x86_64                           4/22 
+  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [                            ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [########                    ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [#################           ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [########################    ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [########################### ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86_64                              5/22 
+  Updating   : nss-sysinit-3.90.0-2.el7_9. [                            ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9. [###                         ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9. [#########################   ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9. [########################### ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9.x86_64                           6/22 
+  Updating   : nss-3.90.0-2.el7_9.x86_64 [                              ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#                             ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##                            ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###                           ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [####                          ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#####                         ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [######                        ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#######                       ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [########                      ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#########                     ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##########                    ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###########                   ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [############                  ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#############                 ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##############                ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###############               ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [################              ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#################             ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##################            ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###################           ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [####################          ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#####################         ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [######################        ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#######################       ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [########################      ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#########################     ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##########################    ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###########################   ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [############################  ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [############################# ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64                                   7/22 
+  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [                            ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [#########                   ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [###################         ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [########################### ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86_64                              8/22 
+  Updating   : libcurl-7.29.0-59.el7_9.2.x [                            ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [###                         ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [########                    ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [############                ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [################            ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [####################        ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [########################    ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [########################### ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x86_64                            9/22 
+  Updating   : curl-7.29.0-59.el7_9.2.x86_ [                            ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [###                         ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [######                      ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#######                     ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [########                    ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [###########                 ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [###############             ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [##################          ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#####################       ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#######################     ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [########################    ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#########################   ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [##########################  ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [########################### ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_64                              10/22 
+  Updating   : nss-tools-3.90.0-2.el7_9.x8 [                            ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#                           ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##                          ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###                         ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [####                        ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#####                       ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [######                      ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#######                     ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [########                    ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#########                   ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##########                  ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###########                 ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [############                ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#############               ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##############              ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###############             ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [################            ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#################           ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##################          ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###################         ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [####################        ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#####################       ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [######################      ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#######################     ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [########################    ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#########################   ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##########################  ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [########################### ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x86_64                            11/22 
+  Cleanup    : nss-tools-3.28.4-8.el7.x86_64                              12/22 
+  Cleanup    : curl-7.29.0-42.el7.x86_64                                  13/22 
+  Cleanup    : libcurl-7.29.0-42.el7.x86_64                               14/22 
+  Cleanup    : nss-pem-1.0.3-4.el7.x86_64                                 15/22 
+  Cleanup    : nss-sysinit-3.28.4-8.el7.x86_64                            16/22 
+  Cleanup    : nss-3.28.4-8.el7.x86_64                                    17/22 
+  Cleanup    : nss-softokn-3.28.3-6.el7.x86_64                            18/22 
+  Cleanup    : nss-util-3.28.4-3.el7.x86_64                               19/22 
+  Cleanup    : nspr-4.13.1-1.0.el7_3.x86_64                               20/22 
+  Cleanup    : nss-softokn-freebl-3.28.3-6.el7.x86_64                     21/22 
+  Cleanup    : libssh2-1.4.3-10.el7_2.1.x86_64                            22/22 
+  Verifying  : nss-softokn-3.90.0-6.el7_9.x86_64                           1/22 
+  Verifying  : libcurl-7.29.0-59.el7_9.2.x86_64                            2/22 
+  Verifying  : libssh2-1.8.0-4.el7_9.1.x86_64                              3/22 
+  Verifying  : nss-pem-1.0.3-7.el7_9.1.x86_64                              4/22 
+  Verifying  : curl-7.29.0-59.el7_9.2.x86_64                               5/22 
+  Verifying  : nss-softokn-freebl-3.90.0-6.el7_9.x86_64                    6/22 
+  Verifying  : nss-util-3.90.0-1.el7_9.x86_64                              7/22 
+  Verifying  : nss-tools-3.90.0-2.el7_9.x86_64                             8/22 
+  Verifying  : nspr-4.35.0-1.el7_9.x86_64                                  9/22 
+  Verifying  : nss-sysinit-3.90.0-2.el7_9.x86_64                          10/22 
+  Verifying  : nss-3.90.0-2.el7_9.x86_64                                  11/22 
+  Verifying  : nspr-4.13.1-1.0.el7_3.x86_64                               12/22 
+  Verifying  : nss-pem-1.0.3-4.el7.x86_64                                 13/22 
+  Verifying  : libcurl-7.29.0-42.el7.x86_64                               14/22 
+  Verifying  : nss-softokn-3.28.3-6.el7.x86_64                            15/22 
+  Verifying  : nss-util-3.28.4-3.el7.x86_64                               16/22 
+  Verifying  : curl-7.29.0-42.el7.x86_64                                  17/22 
+  Verifying  : libssh2-1.4.3-10.el7_2.1.x86_64                            18/22 
+  Verifying  : nss-3.28.4-8.el7.x86_64                                    19/22 
+  Verifying  : nss-sysinit-3.28.4-8.el7.x86_64                            20/22 
+  Verifying  : nss-tools-3.28.4-8.el7.x86_64                              21/22 
+  Verifying  : nss-softokn-freebl-3.28.3-6.el7.x86_64                     22/22 
+
+Updated:
+  curl.x86_64 0:7.29.0-59.el7_9.2                                               
+
+Dependency Updated:
+  libcurl.x86_64 0:7.29.0-59.el7_9.2                                            
+  libssh2.x86_64 0:1.8.0-4.el7_9.1                                              
+  nspr.x86_64 0:4.35.0-1.el7_9                                                  
+  nss.x86_64 0:3.90.0-2.el7_9                                                   
+  nss-pem.x86_64 0:1.0.3-7.el7_9.1                                              
+  nss-softokn.x86_64 0:3.90.0-6.el7_9                                           
+  nss-softokn-freebl.x86_64 0:3.90.0-6.el7_9                                    
+  nss-sysinit.x86_64 0:3.90.0-2.el7_9                                           
+  nss-tools.x86_64 0:3.90.0-2.el7_9                                             
+  nss-util.x86_64 0:3.90.0-1.el7_9                                              
+
+Complete!
+nutanix/4u
+Loaded plugins: fastestmirror
+artifactory-base                                         | 3.6 kB     00:00     
+artifactory-extras                                       | 2.9 kB     00:00     
+artifactory-updates                                      | 2.9 kB     00:00     
+(2/4): artifactory-base/7/ 0% [                 ]  0.0 B/s |    0 B   --:-- ETA (2/4): artifactory-base/7/ 0% [                 ]  0.0 B/s |  38 kB   --:-- ETA (2/4): artifactory-base/7/ 0% [                 ] 255 kB/s | 202 kB   02:15 ETA (1/4): artifactory-extras/7/x86_64/primary_db              | 253 kB   00:01     
+(3/4): artifactory-base/7/ 1% [                 ] 312 kB/s | 567 kB   01:49 ETA (2/4): artifactory-base/7/x86_64/group_gz                  | 153 kB   00:01     
+(3/4): artifactory-base/7/ 2% [                 ] 327 kB/s | 744 kB   01:43 ETA (3/4): artifactory-base/7/ 2% [                 ] 327 kB/s | 864 kB   01:43 ETA (3/4): artifactory-base/7/ 2% [                 ] 332 kB/s | 992 kB   01:41 ETA (4/4): artifactory-updates 3% [-                ] 338 kB/s | 1.1 MB   01:39 ETA (4/4): artifactory-updates 3% [-                ] 348 kB/s | 1.3 MB   01:36 ETA (4/4): artifactory-updates 4% [-                ] 358 kB/s | 1.4 MB   01:32 ETA (4/4): artifactory-updates 4% [-                ] 370 kB/s | 1.6 MB   01:29 ETA (3/4): artifactory-base/7/ 5% [-                ] 384 kB/s | 1.8 MB   01:25 ETA (3/4): artifactory-base/7/ 5% [-                ] 400 kB/s | 2.0 MB   01:21 ETA (3/4): artifactory-base/7/ 6% [=                ] 420 kB/s | 2.2 MB   01:17 ETA (3/4): artifactory-base/7/ 7% [=                ] 443 kB/s | 2.4 MB   01:12 ETA (4/4): artifactory-updates 7% [=                ] 466 kB/s | 2.7 MB   01:08 ETA (4/4): artifactory-updates 8% [=                ] 495 kB/s | 3.0 MB   01:03 ETA (4/4): artifactory-updates 9% [=-               ] 531 kB/s | 3.3 MB   00:58 ETA (4/4): artifactory-updates 10% [=-              ] 573 kB/s | 3.7 MB   00:54 ETA (3/4): artifactory-base/7/ 12% [=-              ] 625 kB/s | 4.1 MB   00:48 ETA (3/4): artifactory-base/7/ 13% [==              ] 687 kB/s | 4.6 MB   00:43 ETA (3/4): artifactory-base/7/ 15% [==              ] 760 kB/s | 5.2 MB   00:38 ETA (3/4): artifactory-base/7/ 17% [==-             ] 843 kB/s | 5.8 MB   00:34 ETA (4/4): artifactory-updates 19% [===             ] 940 kB/s | 6.6 MB   00:29 ETA (4/4): artifactory-updates 21% [===             ] 1.0 MB/s | 7.4 MB   00:25 ETA (4/4): artifactory-updates 24% [===-            ] 1.1 MB/s | 8.3 MB   00:22 ETA (4/4): artifactory-updates 27% [====            ] 1.3 MB/s | 9.4 MB   00:19 ETA (3/4): artifactory-base/7/ 31% [====-           ] 1.4 MB/s |  11 MB   00:16 ETA (3/4): artifactory-base/7/ 34% [=====-          ] 1.6 MB/s |  12 MB   00:13 ETA (3/4): artifactory-base/7/x86_64/primary_db                | 6.1 MB   00:09     
+(4/4): artifactory-updates 39% [======          ] 1.8 MB/s |  13 MB   00:11 ETA (4/4): artifactory-updates 41% [======-         ] 1.8 MB/s |  14 MB   00:10 ETA (4/4): artifactory-updates 44% [=======         ] 1.9 MB/s |  15 MB   00:09 ETA (4/4): artifactory-updates 47% [=======-        ] 2.0 MB/s |  16 MB   00:08 ETA (4/4): artifactory-updates 50% [========        ] 2.1 MB/s |  17 MB   00:08 ETA (4/4): artifactory-updates 54% [========-       ] 2.2 MB/s |  18 MB   00:07 ETA (4/4): artifactory-updates 58% [=========       ] 2.3 MB/s |  20 MB   00:06 ETA (4/4): artifactory-updates 62% [==========      ] 2.4 MB/s |  21 MB   00:05 ETA (4/4): artifactory-updates 67% [==========-     ] 2.6 MB/s |  23 MB   00:04 ETA (4/4): artifactory-updates 72% [===========-    ] 2.8 MB/s |  25 MB   00:03 ETA (4/4): artifactory-updates 78% [============-   ] 3.0 MB/s |  26 MB   00:02 ETA (4/4): artifactory-updates 84% [=============   ] 3.2 MB/s |  29 MB   00:01 ETA (4/4): artifactory-updates 90% [==============- ] 3.5 MB/s |  31 MB   00:00 ETA (4/4): artifactory-updates 98% [===============-] 3.7 MB/s |  33 MB   00:00 ETA (4/4): artifactory-updates/7/x86_64/primary_db             |  27 MB   00:14     
+Determining fastest mirrors
+Resolving Dependencies
+--> Running transaction check
+---> Package curl.x86_64 0:7.29.0-42.el7 will be updated
+---> Package curl.x86_64 0:7.29.0-59.el7_9.2 will be an update
+--> Processing Dependency: libcurl = 7.29.0-59.el7_9.2 for package: curl-7.29.0-59.el7_9.2.x86_64
+--> Running transaction check
+---> Package libcurl.x86_64 0:7.29.0-42.el7 will be updated
+---> Package libcurl.x86_64 0:7.29.0-59.el7_9.2 will be an update
+--> Processing Dependency: nss-pem(x86-64) >= 1.0.3-5 for package: libcurl-7.29.0-59.el7_9.2.x86_64
+--> Processing Dependency: libssh2(x86-64) >= 1.8.0 for package: libcurl-7.29.0-59.el7_9.2.x86_64
+--> Processing Dependency: libnss3.so(NSS_3.34)(64bit) for package: libcurl-7.29.0-59.el7_9.2.x86_64
+--> Running transaction check
+---> Package libssh2.x86_64 0:1.4.3-10.el7_2.1 will be updated
+---> Package libssh2.x86_64 0:1.8.0-4.el7_9.1 will be an update
+---> Package nss.x86_64 0:3.28.4-8.el7 will be updated
+--> Processing Dependency: nss = 3.28.4-8.el7 for package: nss-sysinit-3.28.4-8.el7.x86_64
+--> Processing Dependency: nss(x86-64) = 3.28.4-8.el7 for package: nss-tools-3.28.4-8.el7.x86_64
+---> Package nss.x86_64 0:3.90.0-2.el7_9 will be an update
+--> Processing Dependency: nss-util >= 3.90.0-1 for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: nss-softokn(x86-64) >= 3.90.0-1 for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: nspr >= 4.35.0 for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.82)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.59)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.39)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.38)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+--> Processing Dependency: libnssutil3.so(NSSUTIL_3.31)(64bit) for package: nss-3.90.0-2.el7_9.x86_64
+---> Package nss-pem.x86_64 0:1.0.3-4.el7 will be updated
+---> Package nss-pem.x86_64 0:1.0.3-7.el7_9.1 will be an update
+--> Running transaction check
+---> Package nspr.x86_64 0:4.13.1-1.0.el7_3 will be updated
+---> Package nspr.x86_64 0:4.35.0-1.el7_9 will be an update
+---> Package nss-softokn.x86_64 0:3.28.3-6.el7 will be updated
+---> Package nss-softokn.x86_64 0:3.90.0-6.el7_9 will be an update
+--> Processing Dependency: nss-softokn-freebl(x86-64) >= 3.90.0-6.el7_9 for package: nss-softokn-3.90.0-6.el7_9.x86_64
+---> Package nss-sysinit.x86_64 0:3.28.4-8.el7 will be updated
+---> Package nss-sysinit.x86_64 0:3.90.0-2.el7_9 will be an update
+---> Package nss-tools.x86_64 0:3.28.4-8.el7 will be updated
+---> Package nss-tools.x86_64 0:3.90.0-2.el7_9 will be an update
+---> Package nss-util.x86_64 0:3.28.4-3.el7 will be updated
+---> Package nss-util.x86_64 0:3.90.0-1.el7_9 will be an update
+--> Running transaction check
+---> Package nss-softokn-freebl.x86_64 0:3.28.3-6.el7 will be updated
+---> Package nss-softokn-freebl.x86_64 0:3.90.0-6.el7_9 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package              Arch     Version              Repository             Size
+================================================================================
+Updating:
+ curl                 x86_64   7.29.0-59.el7_9.2    artifactory-updates   271 k
+Updating for dependencies:
+ libcurl              x86_64   7.29.0-59.el7_9.2    artifactory-updates   223 k
+ libssh2              x86_64   1.8.0-4.el7_9.1      artifactory-updates    88 k
+ nspr                 x86_64   4.35.0-1.el7_9       artifactory-updates   128 k
+ nss                  x86_64   3.90.0-2.el7_9       artifactory-updates   905 k
+ nss-pem              x86_64   1.0.3-7.el7_9.1      artifactory-updates    75 k
+ nss-softokn          x86_64   3.90.0-6.el7_9       artifactory-updates   383 k
+ nss-softokn-freebl   x86_64   3.90.0-6.el7_9       artifactory-updates   321 k
+ nss-sysinit          x86_64   3.90.0-2.el7_9       artifactory-updates    67 k
+ nss-tools            x86_64   3.90.0-2.el7_9       artifactory-updates   557 k
+ nss-util             x86_64   3.90.0-1.el7_9       artifactory-updates    80 k
+
+Transaction Summary
+================================================================================
+Upgrade  1 Package (+10 Dependent packages)
+
+Total download size: 3.0 M
+Downloading packages:
+Delta RPMs disabled because /usr/bin/applydeltarpm not installed.
+(2/11): libcurl-7.29.0-59. 0% [                 ]  0.0 B/s |    0 B   --:-- ETA (2/11): libcurl-7.29.0-59. 1% [                 ]  0.0 B/s |  39 kB   --:-- ETA (2/11): libcurl-7.29.0-59. 7% [=                ] 299 kB/s | 231 kB   00:09 ETA (1/11): libcurl-7.29.0-59.el7_9.2.x86_64.rpm               | 223 kB   00:01     
+(2/11): curl-7.29.0-59.el7_9.2.x86_64.rpm                  | 271 kB   00:01     
+(3/11): libssh2-1.8.0-4.el7_9.1.x86_64.rpm                 |  88 kB   00:00     
+(4/11): nspr-4.35.0-1.el7_9.x86_64.rpm                     | 128 kB   00:00     
+(5/11): nss-pem-1.0.3-7.el7_9.1.x86_64.rpm                 |  75 kB   00:00     
+(6/11): nss-3.90.0-2.el7_9 47% [=======-        ] 508 kB/s | 1.4 MB   00:03 ETA (6/11): nss-3.90.0-2.el7_9.x86_64.rpm                      | 905 kB   00:00     
+(7/11): nss-softokn-3.90.0-6.el7_9.x86_64.rpm              | 383 kB   00:00     
+(8/11): nss-softokn-freebl-3.90.0-6.el7_9.x86_64.rpm       | 321 kB   00:00     
+(9/11): nss-sysinit-3.90.0-2.el7_9.x86_64.rpm              |  67 kB   00:00     
+(10/11): nss-tools-3.90.0-2.el7_9.x86_64.rpm               | 557 kB   00:00     
+(11/11): nss-util-3.90.0-1.el7_9.x86_64.rpm                |  80 kB   00:00     
+--------------------------------------------------------------------------------
+Total                                              1.2 MB/s | 3.0 MB  00:02     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Updating   : nspr-4.35.0-1.el7_9.x86_64 [                             ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [######                       ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [############                 ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [###################          ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [#########################    ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [###########################  ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64 [############################ ]  1/22  Updating   : nspr-4.35.0-1.el7_9.x86_64                                  1/22 
+  Updating   : nss-util-3.90.0-1.el7_9.x86 [                            ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [########                    ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [#################           ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [##########################  ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86 [########################### ]  2/22  Updating   : nss-util-3.90.0-1.el7_9.x86_64                              2/22 
+  Updating   : nss-softokn-freebl-3.90.0-6 [                            ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [##                          ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#####                       ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#######                     ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [##########                  ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [############                ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [###############             ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#################           ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [####################        ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [######################      ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [#########################   ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6 [########################### ]  3/22  Updating   : nss-softokn-freebl-3.90.0-6.el7_9.x86_64                    3/22 
+  Updating   : nss-softokn-3.90.0-6.el7_9. [                            ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#                           ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##                          ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [###                         ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#####                       ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [######                      ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#######                     ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [########                    ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##########                  ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [###########                 ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [############                ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##############              ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [###############             ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [################            ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#################           ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##################          ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [####################        ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#####################       ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [######################      ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [#######################     ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [########################    ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [##########################  ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9. [########################### ]  4/22  Updating   : nss-softokn-3.90.0-6.el7_9.x86_64                           4/22 
+  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [                            ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [########                    ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [#################           ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [########################    ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86 [########################### ]  5/22  Updating   : nss-pem-1.0.3-7.el7_9.1.x86_64                              5/22 
+  Updating   : nss-sysinit-3.90.0-2.el7_9. [                            ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9. [###                         ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9. [#########################   ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9. [########################### ]  6/22  Updating   : nss-sysinit-3.90.0-2.el7_9.x86_64                           6/22 
+  Updating   : nss-3.90.0-2.el7_9.x86_64 [                              ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#                             ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##                            ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###                           ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [####                          ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#####                         ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [######                        ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#######                       ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [########                      ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#########                     ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##########                    ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###########                   ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [############                  ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#############                 ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##############                ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###############               ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [################              ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#################             ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##################            ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###################           ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [####################          ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#####################         ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [######################        ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#######################       ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [########################      ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [#########################     ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [##########################    ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [###########################   ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [############################  ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64 [############################# ]  7/22  Updating   : nss-3.90.0-2.el7_9.x86_64                                   7/22 
+  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [                            ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [#########                   ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [###################         ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86 [########################### ]  8/22  Updating   : libssh2-1.8.0-4.el7_9.1.x86_64                              8/22 
+  Updating   : libcurl-7.29.0-59.el7_9.2.x [                            ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [###                         ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [########                    ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [############                ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [################            ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [####################        ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [########################    ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x [########################### ]  9/22  Updating   : libcurl-7.29.0-59.el7_9.2.x86_64                            9/22 
+  Updating   : curl-7.29.0-59.el7_9.2.x86_ [                            ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [###                         ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [######                      ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#######                     ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [########                    ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [###########                 ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [###############             ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [##################          ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#####################       ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#######################     ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [########################    ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [#########################   ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [##########################  ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_ [########################### ] 10/22  Updating   : curl-7.29.0-59.el7_9.2.x86_64                              10/22 
+  Updating   : nss-tools-3.90.0-2.el7_9.x8 [                            ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#                           ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##                          ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###                         ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [####                        ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#####                       ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [######                      ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#######                     ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [########                    ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#########                   ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##########                  ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###########                 ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [############                ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#############               ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##############              ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###############             ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [################            ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#################           ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##################          ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [###################         ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [####################        ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#####################       ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [######################      ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#######################     ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [########################    ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [#########################   ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [##########################  ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x8 [########################### ] 11/22  Updating   : nss-tools-3.90.0-2.el7_9.x86_64                            11/22 
+  Cleanup    : nss-tools-3.28.4-8.el7.x86_64                              12/22 
+  Cleanup    : curl-7.29.0-42.el7.x86_64                                  13/22 
+  Cleanup    : libcurl-7.29.0-42.el7.x86_64                               14/22 
+  Cleanup    : nss-pem-1.0.3-4.el7.x86_64                                 15/22 
+  Cleanup    : nss-sysinit-3.28.4-8.el7.x86_64                            16/22 
+  Cleanup    : nss-3.28.4-8.el7.x86_64                                    17/22 
+  Cleanup    : nss-softokn-3.28.3-6.el7.x86_64                            18/22 
+  Cleanup    : nss-util-3.28.4-3.el7.x86_64                               19/22 
+  Cleanup    : nspr-4.13.1-1.0.el7_3.x86_64                               20/22 
+  Cleanup    : nss-softokn-freebl-3.28.3-6.el7.x86_64                     21/22 
+  Cleanup    : libssh2-1.4.3-10.el7_2.1.x86_64                            22/22 
+  Verifying  : nss-softokn-3.90.0-6.el7_9.x86_64                           1/22 
+  Verifying  : libcurl-7.29.0-59.el7_9.2.x86_64                            2/22 
+  Verifying  : libssh2-1.8.0-4.el7_9.1.x86_64                              3/22 
+  Verifying  : nss-pem-1.0.3-7.el7_9.1.x86_64                              4/22 
+  Verifying  : curl-7.29.0-59.el7_9.2.x86_64                               5/22 
+  Verifying  : nss-softokn-freebl-3.90.0-6.el7_9.x86_64                    6/22 
+  Verifying  : nss-util-3.90.0-1.el7_9.x86_64                              7/22 
+  Verifying  : nss-tools-3.90.0-2.el7_9.x86_64                             8/22 
+  Verifying  : nspr-4.35.0-1.el7_9.x86_64                                  9/22 
+  Verifying  : nss-sysinit-3.90.0-2.el7_9.x86_64                          10/22 
+  Verifying  : nss-3.90.0-2.el7_9.x86_64                                  11/22 
+  Verifying  : nspr-4.13.1-1.0.el7_3.x86_64                               12/22 
+  Verifying  : nss-pem-1.0.3-4.el7.x86_64                                 13/22 
+  Verifying  : libcurl-7.29.0-42.el7.x86_64                               14/22 
+  Verifying  : nss-softokn-3.28.3-6.el7.x86_64                            15/22 
+  Verifying  : nss-util-3.28.4-3.el7.x86_64                               16/22 
+  Verifying  : curl-7.29.0-42.el7.x86_64                                  17/22 
+  Verifying  : libssh2-1.4.3-10.el7_2.1.x86_64                            18/22 
+  Verifying  : nss-3.28.4-8.el7.x86_64                                    19/22 
+  Verifying  : nss-sysinit-3.28.4-8.el7.x86_64                            20/22 
+  Verifying  : nss-tools-3.28.4-8.el7.x86_64                              21/22 
+  Verifying  : nss-softokn-freebl-3.28.3-6.el7.x86_64                     22/22 
+
+Updated:
+  curl.x86_64 0:7.29.0-59.el7_9.2                                               
+
+Dependency Updated:
+  libcurl.x86_64 0:7.29.0-59.el7_9.2                                            
+  libssh2.x86_64 0:1.8.0-4.el7_9.1                                              
+  nspr.x86_64 0:4.35.0-1.el7_9                                                  
+  nss.x86_64 0:3.90.0-2.el7_9                                                   
+  nss-pem.x86_64 0:1.0.3-7.el7_9.1                                              
+  nss-softokn.x86_64 0:3.90.0-6.el7_9                                           
+  nss-softokn-freebl.x86_64 0:3.90.0-6.el7_9                                    
+  nss-sysinit.x86_64 0:3.90.0-2.el7_9                                           
+  nss-tools.x86_64 0:3.90.0-2.el7_9                                             
+  nss-util.x86_64 0:3.90.0-1.el7_9                                              
+
+Complete!
+Executing command 'curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?' as user 'nutanix'
+Command 'curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?' executed successfully
+Output of 'curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?': nutanix/4u
+0
+nutanix/4u
+0
+Executing command 'curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?' as user 'nutanix'
+Command 'curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?' executed successfully
+Output of 'curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?': nutanix/4u
+0
+nutanix/4u
+0
+Executing command 'curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo' as user 'nutanix'
+Command 'curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo' executed successfully
+Output of 'curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo': nutanix/4u
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   323  100   323    0     0    319      0  0:00:01  0:00:01 --:--:--   319
+nutanix/4u
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   323  100   323    0     0    319      0  0:00:01  0:00:01 --:--:--   319
+Executing command 'yum -y install managesoft-autoconf' as user 'nutanix'
+Command 'yum -y install managesoft-autoconf' executed successfully
+Output of 'yum -y install managesoft-autoconf': nutanix/4u
+Loaded plugins: fastestmirror
+flexera                                                  | 2.9 kB     00:00     
+flexera/x86_64/primary_db  0% [                 ]  0.0 B/s |    0 B   --:-- ETA flexera/x86_64/primary_db                                  | 3.2 kB   00:00     
+Loading mirror speeds from cached hostfile
+Resolving Dependencies
+--> Running transaction check
+---> Package managesoft-autoconf.noarch 0:230927-2 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                    Arch          Version          Repository      Size
+================================================================================
+Installing:
+ managesoft-autoconf        noarch        230927-2         flexera         12 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 12 k
+Installed size: 14 k
+Downloading packages:
+managesoft-autoconf-230927 0% [                 ]  0.0 B/s |    0 B   --:-- ETA warning: /var/cache/yum/x86_64/7/flexera/packages/managesoft-autoconf-230927-2.noarch.rpm: Header V4 RSA/SHA1 Signature, key ID 0f85b663: NOKEY
+Public key for managesoft-autoconf-230927-2.noarch.rpm is not installed
+managesoft-autoconf-230927-2.noarch.rpm                    |  12 kB   00:00     
+Retrieving key from https://rpm-mirror.corp.nutanix.com/corp/RPM-GPG-KEY-NTNX-Corp-7
+Importing GPG key 0x0F85B663:
+ Userid     : "Corp Packages (Nutanix IT-SE) <itse@nutanix.com>"
+ Fingerprint: a25e c600 3bef a2d4 8126 a48f 0605 e002 0f85 b663
+ From       : https://rpm-mirror.corp.nutanix.com/corp/RPM-GPG-KEY-NTNX-Corp-7
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : managesoft-autoconf-230927-2 [                             ] 1/1  Installing : managesoft-autoconf-230927-2 [########                     ] 1/1  Installing : managesoft-autoconf-230927-2 [############################ ] 1/1  Installing : managesoft-autoconf-230927-2.noarch                          1/1 
+  Verifying  : managesoft-autoconf-230927-2.noarch                          1/1 
+
+Installed:
+  managesoft-autoconf.noarch 0:230927-2                                         
+
+Complete!
+nutanix/4u
+Loaded plugins: fastestmirror
+flexera                                                  | 2.9 kB     00:00     
+flexera/x86_64/primary_db  0% [                 ]  0.0 B/s |    0 B   --:-- ETA flexera/x86_64/primary_db                                  | 3.2 kB   00:00     
+Loading mirror speeds from cached hostfile
+Resolving Dependencies
+--> Running transaction check
+---> Package managesoft-autoconf.noarch 0:230927-2 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                    Arch          Version          Repository      Size
+================================================================================
+Installing:
+ managesoft-autoconf        noarch        230927-2         flexera         12 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 12 k
+Installed size: 14 k
+Downloading packages:
+managesoft-autoconf-230927 0% [                 ]  0.0 B/s |    0 B   --:-- ETA warning: /var/cache/yum/x86_64/7/flexera/packages/managesoft-autoconf-230927-2.noarch.rpm: Header V4 RSA/SHA1 Signature, key ID 0f85b663: NOKEY
+Public key for managesoft-autoconf-230927-2.noarch.rpm is not installed
+managesoft-autoconf-230927-2.noarch.rpm                    |  12 kB   00:00     
+Retrieving key from https://rpm-mirror.corp.nutanix.com/corp/RPM-GPG-KEY-NTNX-Corp-7
+Importing GPG key 0x0F85B663:
+ Userid     : "Corp Packages (Nutanix IT-SE) <itse@nutanix.com>"
+ Fingerprint: a25e c600 3bef a2d4 8126 a48f 0605 e002 0f85 b663
+ From       : https://rpm-mirror.corp.nutanix.com/corp/RPM-GPG-KEY-NTNX-Corp-7
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : managesoft-autoconf-230927-2 [                             ] 1/1  Installing : managesoft-autoconf-230927-2 [########                     ] 1/1  Installing : managesoft-autoconf-230927-2 [############################ ] 1/1  Installing : managesoft-autoconf-230927-2.noarch                          1/1 
+  Verifying  : managesoft-autoconf-230927-2.noarch                          1/1 
+
+Installed:
+  managesoft-autoconf.noarch 0:230927-2                                         
+
+Complete!
+Executing command 'cat /var/opt/managesoft/log/uploader.log' as user 'nutanix'
+Failed to execute command 'cat /var/opt/managesoft/log/uploader.log', exit code: 1
+Error of 'cat /var/opt/managesoft/log/uploader.log': 
+nutanix/4u
+cat: /var/opt/managesoft/log/uploader.log: No such file or directory
+Executing command 'cat /var/opt/managesoft/log/uploader.log' as user 'nutanix'
+Command 'cat /var/opt/managesoft/log/uploader.log' executed successfully
+Output of 'cat /var/opt/managesoft/log/uploader.log': nutanix/4u
+[Tue 10 Sep 2024 06:22:16 PM EDT (G, 0)] {1718} ************************************************************
+[Tue 10 Sep 2024 06:22:16 PM EDT (G, 0)] {1718} Uploading started
+[Tue 10 Sep 2024 06:22:16 PM EDT (G, 0)] {1718} 
+------------------------------------------------------------
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Prioritizing servers for upload
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Starting to prioritize servers from "HKLM\Software\ManageSoft Corp\ManageSoft\Common\UploadSettings"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Applying prioritization algorithm "MgsRandom" with parameters ""
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Applying prioritization algorithm "MgsPing" with parameters ""
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Average round-trip time to rnoitflexerap1.corp.nutanix.com is 183 ms
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} No ping response received from server rnoitdmzflexprd
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Average round-trip time to phxitflexerap1.corp.nutanix.com is 161 ms
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} No ping response received from server phxitdmzflexprd
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Skipping prioritization algorithm "MgsADSiteMatch" with parameters "" as it does not apply to the current platform
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Finished prioritizing servers
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload directory is '/var/opt/managesoft/uploads/Logs'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Will attempt to upload file(s) '*.log'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload rule is 'Log'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Connecting to upload location 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload username is ''
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload proxy is ''
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Uploading file 'dpro_automation_1726006664 at 20240910T182216_{150BC0B7-7650-443B-AE32-BB69941FF6C3}.log' to 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} File 'dpro_automation_1726006664 at 20240910T182216_{150BC0B7-7650-443B-AE32-BB69941FF6C3}.log' removed from upload directory
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} Upload successful
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} Uploading finished
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} ************************************************************
+nutanix/4u
+[Tue 10 Sep 2024 06:22:16 PM EDT (G, 0)] {1718} ************************************************************
+[Tue 10 Sep 2024 06:22:16 PM EDT (G, 0)] {1718} Uploading started
+[Tue 10 Sep 2024 06:22:16 PM EDT (G, 0)] {1718} 
+------------------------------------------------------------
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Prioritizing servers for upload
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Starting to prioritize servers from "HKLM\Software\ManageSoft Corp\ManageSoft\Common\UploadSettings"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Applying prioritization algorithm "MgsRandom" with parameters ""
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 06:22:16 PM EDT (N, 2)] {1718} Applying prioritization algorithm "MgsPing" with parameters ""
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Average round-trip time to rnoitflexerap1.corp.nutanix.com is 183 ms
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://rnoitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} No ping response received from server rnoitdmzflexprd
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Average round-trip time to phxitflexerap1.corp.nutanix.com is 161 ms
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Calculating priority for server "https://phxitdmzflexprd/ManageSoftRL/"
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} No ping response received from server phxitdmzflexprd
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 10
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://rnoitflexerap1.corp.nutanix.com/ManageSoftRL/" a priority of 40
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://rnoitdmzflexprd/ManageSoftRL/" a priority of 69
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Assigned server "https://phxitdmzflexprd/ManageSoftRL/" a priority of 99
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Skipping prioritization algorithm "MgsADSiteMatch" with parameters "" as it does not apply to the current platform
+[Tue 10 Sep 2024 06:22:17 PM EDT (N, 2)] {1718} Finished prioritizing servers
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload directory is '/var/opt/managesoft/uploads/Logs'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Will attempt to upload file(s) '*.log'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload rule is 'Log'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Connecting to upload location 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload username is ''
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Upload proxy is ''
+[Tue 10 Sep 2024 06:22:17 PM EDT (G, 0)] {1718} Uploading file 'dpro_automation_1726006664 at 20240910T182216_{150BC0B7-7650-443B-AE32-BB69941FF6C3}.log' to 'https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/Logs/'
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} File 'dpro_automation_1726006664 at 20240910T182216_{150BC0B7-7650-443B-AE32-BB69941FF6C3}.log' removed from upload directory
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} Upload successful
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} Uploading finished
+[Tue 10 Sep 2024 06:22:18 PM EDT (G, 0)] {1718} ************************************************************
+SSH connection closed

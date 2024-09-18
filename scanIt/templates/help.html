@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    {% block content %}
+    <title>help > scan_It!</title>
+    <style>
+        /* Body styling */
+        body {
+            background: url('http://10.67.22.100/static/scanIt/nutanix_background.jpg');
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden; /* Prevent body from scrolling */
+        }
+
+        /* Scrollable container for form and other elements */
+        .scrollable-content {
+            width: 1100px; /* Set width to 1100px */    
+            position: relative;
+            max-height: 86vh; /* Adjust to control the visible portion */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding: 20px;
+            z-index: 1; /* Ensure it is above the background */
+            background-color: rgba(0, 0, 0, 0.2); /* Optional: Add semi-transparent background for better readability */
+            border-radius: 8px; /* Optional: Rounded corners for a cleaner look */
+            margin: auto;margin: 30px auto 0 auto; /* Lower it by 30px from the top and center horizontally */
+        }
+
+        /* Login link in the top-right corner */
+        .back-link {
+            position: absolute;
+            color: #f0f0f0;
+            top: 10px;
+            right: 20px;
+            color: white; /* Set login link color */
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+    <br>
+    <!-- Login link in top-right corner -->
+    <div >
+        <p><a href="{{ request.META.HTTP_REFERER }}" class="back-link">Home Page</a>
+    </div>
+
+    <div class="scrollable-content">
+
+    </div>
+    </body>
+    </html>
+    
+    {% endblock %}

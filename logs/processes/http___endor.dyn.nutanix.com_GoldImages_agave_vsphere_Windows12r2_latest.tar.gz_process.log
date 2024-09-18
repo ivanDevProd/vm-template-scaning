@@ -1,0 +1,264 @@
+Processing payload with ID: 3b7bfed2-b887-47ee-9b85-1bcd5776b231
+Filename: /home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    36     37.5 MiB     37.5 MiB           1   @profile
+    37                                         def download_and_extract_image(source_url, download_dir, extracted_dir, process_id):
+    38     37.5 MiB      0.0 MiB           1       file_size_bytes = 0
+    39     37.5 MiB      0.0 MiB           1       try:
+    40                                                 # Retrieve file size using HEAD request
+    41     37.8 MiB      0.2 MiB           1           response = requests.head(source_url)
+    42     37.8 MiB      0.0 MiB           1           file_size_bytes = int(response.headers.get('Content-Length', 0))
+    43     37.8 MiB      0.0 MiB           1           file_size_gb = file_size_bytes / (1024 ** 3)  # Convert bytes to gigabytes
+    44     37.8 MiB      0.0 MiB           1           logging.info(f"File size: {file_size_gb:.2f} GB")
+    45     39.6 MiB      1.9 MiB           1           log_to_database(process_id, f"Starting download of {source_url}. File size: {file_size_gb:.2f} GB", "INITIATED", source_url, "Download and Extraction")
+    46                                             except Exception as e:
+    47                                                 logging.error(f"Error retrieving file size: {e}")
+    48                                                 log_to_database(process_id, f"Error retrieving file size: {e}", "FAILED", source_url, "Download and Extraction")
+    49                                                 return None
+    50                                         
+    51     39.6 MiB      0.0 MiB           1       file_name = os.path.basename(source_url)
+    52     39.6 MiB      0.0 MiB           1       download_path = os.path.join(download_dir, file_name)
+    53                                         
+    54     39.6 MiB      0.0 MiB           1       try:
+    55                                                 # Download the file
+    56     39.6 MiB      0.0 MiB           1           logging.info(f"Downloading file to {download_path}")
+    57     39.6 MiB      0.0 MiB           1           urllib.request.urlretrieve(source_url, download_path)
+    58     39.6 MiB      0.0 MiB           1           logging.info(f"Downloaded file to {download_path}")
+    59     40.4 MiB      0.8 MiB           1           log_to_database(process_id, f"Downloaded file to {download_path}", "SUCCEEDED", source_url, "Download and Extraction")
+    60                                             except Exception as e:
+    61                                                 logging.error(f"Error during download: {e}")
+    62                                                 log_to_database(process_id, f"Error during download: {e}", "FAILED", source_url, "Download and Extraction")
+    63                                                 return None
+    64                                         
+    65     40.4 MiB      0.0 MiB           1       try:
+    66                                                 # Extract the .tar.gz file
+    67     40.4 MiB      0.0 MiB           1           logging.info(f"Extracting image from {download_path} to {extracted_dir}")
+    68     40.4 MiB      0.0 MiB           1           log_to_database(process_id, f"Extracting image from {download_path} to {extracted_dir}", "INITIATED", source_url, "Download and Extraction")
+    69                                         
+    70                                                 
+    71     40.4 MiB      0.0 MiB           1           try:
+    72     40.6 MiB      0.1 MiB           2               with tarfile.open(download_path, "r:gz") as tar:
+    73                                                         # Extract one member at a time to minimize memory usage
+    74     40.8 MiB      0.0 MiB          10                   for member in tar.getmembers():
+    75     40.8 MiB      0.0 MiB           9                       logging.info(f"Extracting {member.name}...")
+    76     40.8 MiB      0.1 MiB           9                       tar.extract(member, path=extracted_dir)
+    77     40.6 MiB     -0.1 MiB           1               logging.info(f"Extraction completed to {extracted_dir}")
+    78                                                 except Exception as e:
+    79                                                     logging.error(f"Error during extraction in chunks: {e}")
+    80                                         
+    81                                                 
+    82                                                 # Define your buffer size in bytes (e.g., 512 MB)
+    83                                                 # BUFFER_SIZE = 512 * 1024 * 1024  # 512 MB buffer size
+    84                                                 # try:
+    85                                                 #     with tarfile.open(download_path, "r:gz") as tar:
+    86                                                 #         for member in tar.getmembers():
+    87                                                 #             # Extract each member one by one
+    88                                                 #             logging.info(f"Extracting {member.name}...")
+    89                                                 #             tar.extract(member, path=extracted_dir)
+    90                                                 #     logging.info(f"Extraction completed to {extracted_dir}")
+    91                                                 # except Exception as e:
+    92                                                 #     logging.error(f"Error during extraction in chunks: {e}")
+    93                                         
+    94                                                 # try:
+    95                                                 #     with tarfile.open(download_path, "r:gz") as tar:
+    96                                                 #         for member in tar.getmembers():
+    97                                                 #             if member.isfile():
+    98                                                 #                 logging.info(f"Extracting {member.name}...")
+    99                                                                 
+   100                                                 #                 # Extract the file object
+   101                                                 #                 extracted_file = tar.extractfile(member)
+   102                                                 #                 if extracted_file:
+   103                                                 #                     extracted_file_path = os.path.join(extracted_dir, member.name)
+   104                                                                     
+   105                                                 #                     # Open the file to write the data in chunks
+   106                                                 #                     with open(extracted_file_path, "wb") as output_file:
+   107                                                 #                         while True:
+   108                                                 #                             chunk = extracted_file.read(BUFFER_SIZE)
+   109                                                 #                             if not chunk:
+   110                                                 #                                 break
+   111                                                 #                             output_file.write(chunk)
+   112                                                                 
+   113                                                 #                 logging.info(f"Extracted {member.name} to {extracted_file_path}")
+   114                                                                 
+   115                                                 #     logging.info(f"Extraction completed to {extracted_dir}")
+   116                                         
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+   117                                                 # except Exception as e:
+   118                                                 #     logging.error(f"Error during extraction in chunks: {e}")
+   119                                         
+   120                                                 
+   121                                         
+   122     40.6 MiB      0.0 MiB           1           extracted_files = os.listdir(extracted_dir)
+   123     40.6 MiB      0.0 MiB           1           if len(extracted_files) == 1:
+   124     40.6 MiB      0.0 MiB           1               extracted_file_name = extracted_files[0]
+   125     40.6 MiB      0.0 MiB           1               file_path = os.path.join(extracted_dir, extracted_file_name)
+   126     40.6 MiB      0.0 MiB           1               extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{extracted_file_name}"
+   127     40.6 MiB      0.0 MiB           1               logging.info(f"Extracted image URL: {extracted_image_url}")
+   128     40.6 MiB      0.0 MiB           1               log_to_database(process_id, f"Extracted image URL: {extracted_image_url}", "SUCCEEDED", source_url, "Download and Extraction")
+   129                                         
+   130     40.6 MiB      0.0 MiB           1               return extracted_image_url
+   131                                                 else:
+   132                                                     error_message = "Multiple files extracted. Process aborted."
+   133                                                     logging.error(error_message)
+   134                                                     log_to_database(process_id, error_message, "FAILED", source_url, "Download and Extraction")
+   135                                         
+   136                                                     # Clean up extracted directory
+   137                                                     for file_name in extracted_files:
+   138                                                         file_path = os.path.join(extracted_dir, file_name)
+   139                                                         if os.path.isfile(file_path):
+   140                                                             os.remove(file_path)
+   141                                         
+   142                                                     return None
+   143                                             except Exception as e:
+   144                                                 logging.error(f"Error during extraction: {e}")
+   145                                                 log_to_database(process_id, f"Error during extraction: {e}", "FAILED", source_url, "Download and Extraction")
+   146                                                 return None
+
+
+Upload Response Code: 202
+Upload Response Content: {"status": {"state": "PENDING", "execution_context": {"task_uuid": "24798e0a-c97e-476a-8852-0763586d10ba"}}, "spec": {"name": "DPRO-AUTOMATION-vsphere-Windows12r2_latest.tar.gz", "resources": {"image_type": "DISK_IMAGE", "source_uri": "http://10.67.22.100/static/scanIt/extracted_images/windows_2012r2"}, "description": "http://endor.dyn.nutanix.com/GoldImages/agave/vsphere/Windows12r2_latest.tar.gz"}, "api_version": "3.1", "metadata": {"owner_reference": {"kind": "user", "uuid": "70e48f7a-1248-577a-9fd8-e2a1f767c889", "name": "itts"}, "use_categories_mapping": false, "kind": "image", "spec_version": 0, "uuid": "f23ec090-e6b7-4d73-9d9d-520061224a0a"}}
+Image upload initiated successfully
+Task UUID: 24798e0a-c97e-476a-8852-0763586d10ba
+State: RUNNING, Percentage completed: 0%
+State: FAILED, Percentage completed: 100%
+Image upload failed
+Filename: /home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   188     37.5 MiB     37.5 MiB           1   @profile
+   189                                         def upload_image_to_nutanix():
+   190                                             # process_id = int(time.time() * 1000)  # Unique process ID using milliseconds
+   191     37.5 MiB      0.0 MiB           1       process_id = generate_unique_id()
+   192     37.5 MiB      0.0 MiB           1       json_data_str = sys.argv[1]
+   193     37.5 MiB      0.0 MiB           1       try:
+   194     37.5 MiB      0.0 MiB           1           payload = json.loads(json_data_str)
+   195     37.5 MiB      0.0 MiB           1           print(f"Processing payload with ID: {process_id}")
+   196                                             except json.JSONDecodeError as e:
+   197                                                 print(f"Error decoding JSON: {e}")
+   198                                                 return
+   199                                         
+   200                                             # Extract image name and source URL
+   201     37.5 MiB      0.0 MiB           1       image_name = payload['spec']['name']
+   202     37.5 MiB      0.0 MiB           1       source_url = payload['spec']['resources']['source_uri']
+   203                                             
+   204                                             # Define directories
+   205     37.5 MiB      0.0 MiB           1       download_dir = '/home/noc_admin/image_scanner_project/downloads/'
+   206     37.5 MiB      0.0 MiB           1       extracted_dir = '/home/noc_admin/image_scanner_project/static/scanIt/extracted_images/'
+   207                                         
+   208     37.5 MiB      0.0 MiB           1       if source_url.endswith('.tar.gz'):
+   209     40.6 MiB      3.1 MiB           1           new_source_url = download_and_extract_image(source_url, download_dir, extracted_dir, process_id)
+   210                                         
+   211     40.6 MiB      0.0 MiB           1           if new_source_url:
+   212     40.6 MiB      0.0 MiB           1               payload['spec']['resources']['source_uri'] = new_source_url
+   213                                                 else:
+   214                                                     print("Failed to download and extract image.")
+   215                                                     return
+   216                                         
+   217                                             # URL for image upload
+   218     40.6 MiB      0.0 MiB           1       upload_url = f"https://{cluster_ip}:9440/api/nutanix/v3/images"
+   219                                             
+   220     40.6 MiB      0.0 MiB           1       try:
+   221     40.6 MiB      0.0 MiB           2           upload_response = requests.post(
+   222     40.6 MiB      0.0 MiB           1               upload_url,
+   223     40.6 MiB      0.0 MiB           1               auth=HTTPBasicAuth(username, password),
+   224     40.6 MiB      0.0 MiB           1               json=payload,
+   225     40.6 MiB      0.0 MiB           1               verify=False
+   226                                                 )
+   227     40.6 MiB      0.0 MiB           1           print(f"Upload Response Code: {upload_response.status_code}")
+   228     40.6 MiB      0.0 MiB           1           print(f"Upload Response Content: {upload_response.text}")
+   229                                             except requests.RequestException as e:
+   230                                                 print(f"Failed to initiate image upload: {e}")
+   231                                                 return
+   232                                         
+   233     40.6 MiB      0.0 MiB           1       if upload_response.status_code == 202:
+   234     40.6 MiB      0.0 MiB           1           print("Image upload initiated successfully")
+   235     40.6 MiB      0.0 MiB           1           task_uuid = upload_response.json().get('status', {}).get('execution_context', {}).get('task_uuid', '')
+   236     40.6 MiB      0.0 MiB           1           print(f"Task UUID: {task_uuid}")
+   237                                         
+   238     40.6 MiB      0.0 MiB           1           task_url = f"https://{cluster_ip}:9440/api/nutanix/v3/tasks/{task_uuid}"
+   239                                         
+   240     40.6 MiB      0.0 MiB           1           try:
+   241     41.4 MiB      0.9 MiB           1               conn = mysql.connector.connect(**mysql_config)
+   242     41.4 MiB      0.0 MiB           1               cursor = conn.cursor()
+   243     41.4 MiB      0.0 MiB           2               cursor.execute(
+   244     41.4 MiB      0.0 MiB           1                   'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   245                                                         'VALUES (%s, %s, %s, %s, %s)',
+   246     41.4 MiB      0.0 MiB           1                   (process_id, f"Image upload initiated successfully. Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
+   247                                                     )
+   248     41.4 MiB      0.0 MiB           1               conn.commit()
+   249                                                 finally:
+   250     41.4 MiB      0.0 MiB           1               cursor.close()
+   251     41.4 MiB      0.0 MiB           1               conn.close()
+   252                                         
+   253     41.4 MiB      0.0 MiB           2           while True:
+   254     41.4 MiB      0.0 MiB           2               try:
+   255     42.3 MiB      0.9 MiB           2                   task_response = requests.get(task_url, auth=HTTPBasicAuth(username, password), verify=False)
+   256     42.3 MiB      0.0 MiB           2                   task_status = task_response.json()
+   257                                         
+   258     42.3 MiB      0.0 MiB           2                   state = task_status.get('status', 'UNKNOWN')
+   259     42.3 MiB      0.0 MiB           2                   percentage_complete = task_status.get('percentage_complete', 'N/A')
+   260     42.3 MiB      0.0 MiB           2                   print(f"State: {state}, Percentage completed: {percentage_complete}%")
+   261                                         
+   262     42.3 MiB      0.0 MiB           2                   if state == 'SUCCEEDED':
+   263                                                             print("Image upload completed successfully")
+   264                                                             uuid = task_status['entity_reference_list'][0]['uuid']
+   265                                                             print(f"Image UUID on cluster: {uuid}")
+   266                                         
+   267                                                             try:
+   268                                                                 conn = mysql.connector.connect(**mysql_config)
+   269                                                                 cursor = conn.cursor()
+   270                                                                 cursor.execute(
+   271                                                                     'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   272                                                                     'VALUES (%s, %s, %s, %s, %s)',
+   273                                                                     (process_id, f"Image named <{image_name}> upload completed successfully. Image UUID: {uuid}", "SUCCEEDED", source_url, "Cluster Image Upload")
+   274                                                                 )
+   275                                                                 conn.commit()
+   276                                                             finally:
+   277                                                                 cursor.close()
+   278                                                                 conn.close()
+   279                                         
+   280                                                             script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
+   281                                                             command = f"python3 {script_path} {process_id} {uuid} {image_name} {source_url}"
+   282                                                             subprocess.Popen(command, shell=True)
+   283                                         
+   284                                                             # Clean up the extracted file only if upload was successful
+   285                                                             cleanup_extracted_file(new_source_url, extracted_dir, process_id)
+   286                                                             break
+   287                                         
+   288     42.3 MiB      0.0 MiB           2                   elif state == 'FAILED':
+   289     42.3 MiB      0.0 MiB           1                       print("Image upload failed")
+   290     42.3 MiB      0.0 MiB           1                       try:
+   291     42.3 MiB      0.0 MiB           1                           conn = mysql.connector.connect(**mysql_config)
+   292     42.3 MiB      0.0 MiB           1                           cursor = conn.cursor()
+   293     42.3 MiB      0.0 MiB           2                           cursor.execute(
+   294     42.3 MiB      0.0 MiB           1                               'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+   295                                                                     'VALUES (%s, %s, %s, %s, %s)',
+   296     42.3 MiB      0.0 MiB           1                               (process_id, "Image upload failed", "FAILED", source_url, "Cluster Image Upload")
+   297                                                                 )
+   298     42.3 MiB      0.0 MiB           1                           conn.commit()
+   299                                                             finally:
+   300     42.3 MiB      0.0 MiB           1                           cursor.close()
+   301     42.3 MiB      0.0 MiB           1                           conn.close()
+   302     42.3 MiB      0.0 MiB           1                       break
+   303                                         
+   304                                                     except requests.RequestException as e:
+   305                                                         print(f"Error retrieving task status: {e}")
+   306                                         
+   307     41.4 MiB      0.0 MiB           1               time.sleep(15)
+   308                                         
+   309                                             else:
+   310                                                 print("Failed to initiate image upload")
+   311                                                 print(f"Response Code: {upload_response.status_code}")
+   312                                                 print(f"Response Content: {upload_response.text}")
+
+
+Process 8276 dead!
+Process 8276 detected

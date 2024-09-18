@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    {% block content %}
+    <title>scan_It! - Process Details</title>
+    <style>
+        /* Body styling */
+        body {
+            background: url('http://10.67.22.100/static/scanIt/nutanix_background.jpg');
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden; /* Prevent body from scrolling */
+        }
+
+        /* Scrollable container for form and other elements */
+        .scrollable-content {
+            width: 1100px; /* Set width to 1100px */    
+            position: relative;
+            max-height: 86vh; /* Adjust to control the visible portion */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding: 20px;
+            z-index: 1; /* Ensure it is above the background */
+            background-color: rgba(0, 0, 0, 0.2); /* Optional: Add semi-transparent background for better readability */
+            border-radius: 8px; /* Optional: Rounded corners for a cleaner look */
+            margin: auto;margin: 30px auto 0 auto; /* Lower it by 30px from the top and center horizontally */
+        }
+
+        /* Login link in the top-right corner */
+        .login-link {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: white; /* Set login link color */
+            text-decoration: none;
+            font-size: 16px;
+        }
+        /* Back  link in the top-right corner */
+        .back-link {
+            position: absolute;
+            color: #f0f0f0;
+            top: 35px;
+            right: 20px;
+            color: white; /* Set login link color */
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        /* Table styling */
+        .body-table {
+            width: 1050px; /* Match the width of the text area */
+            margin: 20px auto; /* Center the table horizontally */
+            border-collapse: collapse;
+            background-color: #1e1e1e; /* Dark background for modern look */
+            color: #fff; /* White text for contrast */
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Ensure rounded corners work */
+            font-size: 14px; /* Slightly smaller font size */
+        }
+
+        /* Table cells and headers styling */
+        .body-table th, .body-table td {
+            border: 1px solid #333; /* Slightly darker border for a modern feel */
+            padding: 12px 15px; /* Adjust padding for more space */
+            text-align: left;
+            white-space: normal; /* Allow text to wrap */
+            word-wrap: break-word; /* Break long words if necessary */
+            max-width: 300px; /* Limit max width of cells */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+        }
+
+        /* Table header background and text color */
+        .body-table th {
+            background-color: #2c2c2c; /* Darker header background */
+            color: #ddd; /* Lighter text color */
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Zebra striping for rows */
+        .body-table tbody tr:nth-child(even) {
+            background-color: #2a2a2a; /* Slightly different shade for even rows */
+        }
+
+        /* Hover effect for rows */
+        .body-table tbody tr:hover {
+            background-color: #3a3a3a; /* Highlight on hover */
+        }
+
+        /* Links in table cells */
+        .body-table a {
+            color: #ec9006; /* White text color for links */
+            text-decoration: none; /* Remove underline */
+        }
+
+        /* Alert message styling */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            background-color: #d4edda; /* Light green background */
+            border-color: #c3e6cb;
+            color: #155724;
+            position: relative;
+        }
+
+        /* Close button inside alert */
+        .close {
+            cursor: pointer;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* Success, danger, and warning states for process status */
+        .success {
+            background-color: #d4edda; /* Light green background for SUCCEEDED */
+            color: #155724; /* Dark green text */
+        }
+
+        .danger {
+            background-color: #f8d7da; /* Light red background for FAILED */
+            color: #721c24; /* Dark red text */
+        }
+
+        .warning {
+            background-color: #fff3cd; /* Light yellow background for RUNNING or other states */
+            color: #856404; /* Dark yellow text */
+        }
+
+        /* Logo placement in bottom-left corner */
+        .logo {
+            position: absolute;
+            bottom: 10px;
+            left: 20px; /* Place logo in bottom-left */
+        }
+
+    </style>
+</head>
+<body>
+    <br>
+    <!-- Login link in top-right corner -->
+    <div >
+        {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="login-link" style="background:none;border:none;color:white;cursor:pointer;">Logout &#9679</button>
+            </form>
+            <p><a href="{{ request.META.HTTP_REFERER }}" class="back-link">Home Page &#9679</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="login-link">Admin Login &#9679</a>
+        {% endif %}
+    </div>
+
+    <div class="scrollable-content">
+        <h2 style="text-align: center; color: white;">Details for Process ID: {{ process_id }}</h2>
+        <table class="body-table">
+            <thead>
+                <tr>
+                    <th>Process ID</th>
+                    <th>Description</th>
+                    <th>State</th>
+                    <th>Timestamp</th>
+                    <th>Stage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.0 }}</td>
+                    <td>{{ record.1 }}</td>
+                    <td>{{ record.2 }}</td>
+                    <td>{{ record.3 }}</td>
+                    <td>{{ record.5 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- Logo in bottom-left corner -->
+    <div class="logo">
+        <img src="{% static 'scanIt/logo.png' %}" alt="Logo" style="width: 150px; height: auto;">
+    </div>
+</body>
+</html>
+
+{% endblock %}
