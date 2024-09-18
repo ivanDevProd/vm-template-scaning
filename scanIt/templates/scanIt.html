@@ -165,7 +165,13 @@
             background-color: #d4edda; /* Light green background */
             border-color: #c3e6cb;
             color: #155724;
-            position: relative;
+            position: absolute; /* Position it relative to .scrollable-content */
+            top: 0; /* Stick to the top */
+            left: 0; /* Align to the left */
+            right: 0; /* Stretch to the right */
+            z-index: 1000; /* Make sure it appears on top of all content within .scrollable-content */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
+            text-align: center; /* Center the text */
         }
 
         /* Close button inside alert */
@@ -368,14 +374,14 @@
 
     <!-- Display Django messages if present -->
     {% if messages %}
-    <div class="container">
+    
         {% for message in messages %}
         <div class="alert alert-success">
             <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
             <span class="close" onclick="this.parentElement.style.display='none';">&times;</span>
         </div>
         {% endfor %}
-    </div>
+
     {% endif %}
 
     <div class="scrollable-content">

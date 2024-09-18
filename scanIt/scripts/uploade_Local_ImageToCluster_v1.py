@@ -240,7 +240,7 @@ def upload_image_to_nutanix():
         log_to_database(process_id, f"The file has been archived. File size: {file_size_mb:.2f} MB. It needs to be extracted before uploading.", "INFO", "Local file uploaded - Self-service", "Processing of the received file")
 
         if new_jira_task:
-            add_comment_to_jira_task(new_jira_task, f"The file has been archived. File size: {file_size_mb:.2f} MB. It needs to be extracted before uploading.", "INFO", "Local file uploaded - Self-service", "Processing of the received file.")
+            add_comment_to_jira_task(new_jira_task, f"The file has been archived. File size: {file_size_mb:.2f} MB. It needs to be extracted before uploading.")
 
         source_url = extract_image(file_path, extracted_dir, process_id, new_jira_task)
 

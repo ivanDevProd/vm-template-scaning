@@ -680,3 +680,47 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-09-18 19:48:05,782 - INFO - Image upload initiated successfully
 2024-09-18 19:48:08,774 - INFO - Image upload completed successfully
 2024-09-18 19:48:10,822 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-18 21:30:23,521 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 111, in url_input_view
+    with open(log_file_for_process, 'w') as log_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log'
+2024-09-18 21:32:51,738 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 111, in url_input_view
+    with open(log_file_for_process, 'w') as log_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log'
+2024-09-18 21:34:55,556 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 21:34:58,730 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-18 21:34:59,025 - INFO - Image upload initiated successfully
+2024-09-18 21:35:02,766 - INFO - Image upload completed successfully
+2024-09-18 21:35:04,879 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-18 21:44:51,115 - INFO - Started scanning process for entrypoint.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/entrypoint.tar.gz_process.log
+2024-09-18 21:44:54,283 - INFO - entrypoint.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/entrypoint.tar.gz
+2024-09-18 21:44:54,327 - INFO - The file has been archived. File size: 0.51 MB. It needs to be extracted before uploading.
+2024-09-18 21:47:12,686 - INFO - Started scanning process for entrypoint.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/entrypoint.tar.gz_process.log
+2024-09-18 21:47:15,759 - INFO - entrypoint.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/entrypoint.tar.gz
+2024-09-18 21:47:15,801 - INFO - The file has been archived. File size: 0.51 MB. It needs to be extracted before uploading.
+2024-09-18 21:47:17,867 - INFO - Number of files in archive: 198
+2024-09-18 21:47:17,867 - INFO - Total size of files: 2.36 MB
+2024-09-18 21:47:17,912 - ERROR - Multiple files found in archive. Found 198 files. Process aborted.
+2024-09-18 21:52:41,830 - INFO - Started scanning process for entrypoint.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/entrypoint.tar.gz_process.log
+2024-09-18 21:52:44,981 - INFO - entrypoint.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/entrypoint.tar.gz
+2024-09-18 21:52:45,024 - INFO - The file has been archived. File size: 0.51 MB. It needs to be extracted before uploading.
+2024-09-18 21:52:46,630 - INFO - Number of files in archive: 198
+2024-09-18 21:52:46,630 - INFO - Total size of files: 2.36 MB
+2024-09-18 21:52:46,674 - ERROR - Multiple files found in archive. Found 198 files. Process aborted.
