@@ -4,3 +4,4 @@ static/scanIt/extracted_images
 logs/
 .env
 .log
+download_extract.log
