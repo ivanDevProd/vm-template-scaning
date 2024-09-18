@@ -1,0 +1,6 @@
+# Ignore
+downloads/
+static/scanIt/extracted_images
+logs/
+.env
+.log

@@ -10,68 +10,18 @@
   warnings.warn(
 /home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
   warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
-/home/noc_admin/myenv/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host '10.67.4.25'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-  warnings.warn(
+Task created successfully!
+Task Key: DPROREQ-1047
 Upload Response Code: 202
-Upload Response Content: {"status": {"state": "PENDING", "execution_context": {"task_uuid": "36509e80-d0e9-4c0c-9676-ebb9fb014fb0"}}, "spec": {"name": "DPRO-AUTOMATION-LOCAL_FILE-cirros.qcow2", "resources": {"image_type": "DISK_IMAGE", "source_uri": "http://10.67.22.100/static/scanIt/extracted_images/cirros.qcow2"}, "description": "User local image - self-service"}, "api_version": "3.1", "metadata": {"owner_reference": {"kind": "user", "uuid": "70e48f7a-1248-577a-9fd8-e2a1f767c889", "name": "itts"}, "use_categories_mapping": false, "kind": "image", "spec_version": 0, "uuid": "ced17f44-3d5d-41e2-b85d-016bc16766a5"}}
-Task UUID: 36509e80-d0e9-4c0c-9676-ebb9fb014fb0
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
-State: RUNNING, Percentage completed: 0%
+Upload Response Content: {"status": {"state": "PENDING", "execution_context": {"task_uuid": "de117229-57df-4b8e-ad5d-3ecde14a3989"}}, "spec": {"name": "DPRO-AUTOMATION-LOCAL_FILE-cirros.qcow2", "resources": {"image_type": "DISK_IMAGE", "source_uri": "http://10.67.22.100/static/scanIt/extracted_images/cirros.qcow2"}, "description": "User local image - self-service"}, "api_version": "3.1", "metadata": {"owner_reference": {"kind": "user", "uuid": "70e48f7a-1248-577a-9fd8-e2a1f767c889", "name": "itts"}, "use_categories_mapping": false, "kind": "image", "spec_version": 0, "uuid": "c5f70bac-72f3-48a7-9fc5-056bdfbc764f"}}
+Task UUID: de117229-57df-4b8e-ad5d-3ecde14a3989
+Comment added successfully!
 State: RUNNING, Percentage completed: 0%
 State: RUNNING, Percentage completed: 0%
 State: RUNNING, Percentage completed: 0%
 State: RUNNING, Percentage completed: 0%
 State: SUCCEEDED, Percentage completed: 100%
-Image UUID on cluster: ced17f44-3d5d-41e2-b85d-016bc16766a5
-Process 58117 dead!
-Process 58117 detected
+Image UUID on cluster: c5f70bac-72f3-48a7-9fc5-056bdfbc764f
+Comment added successfully!
+Process 77039 dead!
+Process 77039 detected

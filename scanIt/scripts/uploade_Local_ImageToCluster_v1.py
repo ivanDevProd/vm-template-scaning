@@ -9,12 +9,23 @@ from requests.auth import HTTPBasicAuth
 import requests
 import shutil
 import json
+from dotenv import load_dotenv
 
+
+# Load the .env file
+load_dotenv()
 
 # DB parameters
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
+CLUSTER_IP = os.getenv("CLUSTER_IP")
+CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
+CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
+
+
 mysql_config = {
     'user': 'root',
-    'password': 'Cupra2022!',
+    'password': MYSQL_PASSWORD,
     'host': '127.0.0.1',
     'database': 'vm_template_scan',
     'port': '3306'
@@ -23,13 +34,13 @@ mysql_config = {
 # Jira parameters 
 jira_base_url = "https://jira.nutanix.com/"
 jira_email = "ivan.perkovic@nutanix.com"
-jira_bearer_token = "NDEyMTc1NDU3Nzk1OtS+AnxaKv6SXW/Bgr2933qGuKVO"
+jira_bearer_token = JIRA_BEARER_TOKEN
 
 
 # Cluster variables
-cluster_ip = "10.67.4.25"
-username = "itts"
-password = "Nije$vejedno2021"
+cluster_ip = CLUSTER_IP
+username = CLUSTER_USERNAME
+password = CLUSTER_PASSWORD
 
 # Initial Payload 
 payload = {
@@ -207,11 +218,11 @@ def upload_image_to_nutanix():
     file_name = os.path.basename(file_path)
 
     # Create Jira case
-    new_jira_task = create_jira_task(f"New scan request - {file_name}", f"A ticket created based on a request received through the self-selfice portal. New image scan request {file_name}")
+    new_jira_task = create_jira_task(f"System Image Scan request - {file_name}", f"A ticket created based on a request received through the self-selfice portal. New image scan request {file_name}")
     if new_jira_task:
-        log_to_database(process_id, f"Jira ticket: {new_jira_task}", "SUCCEEDED", source_url, "Jira case")
+        log_to_database(process_id, f"Jira ticket: {new_jira_task}", "SUCCEEDED", "Local file uploaded - Self-service", "Jira case")
     else:
-        log_to_database(process_id, f"Jira ticket not created. There was a problem. The scanning process will continue without recording in the ticket", "FAILED", source_url, "Jira case")
+        log_to_database(process_id, f"Jira ticket not created. There was a problem. The scanning process will continue without recording in the ticket", "FAILED", "Local file uploaded - Self-service", "Jira case")
 
     logging.info(f"{file_name} recived to be scaned. It is stored at: {file_path}")
     log_to_database(process_id, f"{file_name} img recived to be scaned. It is stored at: {file_path}", "SUCCEEDED", "Local file uploaded - Self-service", "Processing of the received file")

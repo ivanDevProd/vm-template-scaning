@@ -661,3 +661,22 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-09-18 07:32:40,108 - INFO - Image upload initiated successfully
 2024-09-18 07:34:00,988 - INFO - Image upload completed successfully
 2024-09-18 07:34:01,660 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos71_NGT_AHV.img has been deleted successfully.
+2024-09-18 19:09:41,849 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:18:21,800 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:18:24,155 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-18 19:18:24,446 - INFO - Image upload initiated successfully
+2024-09-18 19:18:27,898 - INFO - Image upload completed successfully
+2024-09-18 19:18:30,120 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-18 19:38:53,984 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:38:57,360 - ERROR - Database error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+2024-09-18 19:40:37,615 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:40:40,872 - ERROR - Database error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+2024-09-18 19:42:41,252 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:42:44,572 - ERROR - Database error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2024-09-18 19:45:34,815 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:45:37,045 - ERROR - Database error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+2024-09-18 19:48:03,129 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-18 19:48:05,473 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-18 19:48:05,782 - INFO - Image upload initiated successfully
+2024-09-18 19:48:08,774 - INFO - Image upload completed successfully
+2024-09-18 19:48:10,822 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.

@@ -3,10 +3,18 @@ import mysql.connector
 import winrm
 import time
 import sys
+import os
+from dotenv import load_dotenv
+
+
+# Load the .env file
+load_dotenv()
+
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 
 mysql_config = {
     'user': 'root',
-    'password': 'Cupra2022!',
+    'password': MYSQL_PASSWORD,
     'host': '127.0.0.1',
     'database': 'vm_template_scan',
     'port': '3306'

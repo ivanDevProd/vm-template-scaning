@@ -10,25 +10,39 @@ import mysql.connector
 import json
 from mysql.connector import Error
 import logging
+import os
+from dotenv import load_dotenv
+
+
+# Load the .env file
+load_dotenv()
+
+# DB parameters
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
+CLUSTER_IP = os.getenv("CLUSTER_IP")
+CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
+CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
 
 
 mysql_config = {
     'user': 'root',
-    'password': 'Cupra2022!',
+    'password': MYSQL_PASSWORD,
     'host': '127.0.0.1',
     'database': 'vm_template_scan',
     'port': '3306'
 }
 
 # Define variables
-cluster_ip = "10.67.4.25"
-username = "itts"
-password = "Nije$vejedno2021"
+cluster_ip = CLUSTER_IP
+username = CLUSTER_USERNAME
+password = CLUSTER_PASSWORD
 
 # Jira parameters 
 jira_base_url = "https://jira.nutanix.com/"
 jira_email = "ivan.perkovic@nutanix.com"
-jira_bearer_token = "NDEyMTc1NDU3Nzk1OtS+AnxaKv6SXW/Bgr2933qGuKVO"
+jira_bearer_token = JIRA_BEARER_TOKEN
+
 
 # Function for adding comment in Jira case
 def add_comment_to_jira_task(task_key, comment):
