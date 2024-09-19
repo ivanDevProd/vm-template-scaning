@@ -161,6 +161,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 output, error, exit_code = execute_command(ssh, "cat /etc/os-release")
                 distro = "Unknown"
                 version = "Unknown"
+
                 if exit_code == 0:
                     for line in output.split('\n'):
                         if line.startswith("PRETTY_NAME"):
@@ -174,8 +175,19 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             except ValueError:
                                 version = version_str
                                 # print(f"Version string: {version}")  # Debug print
+
+                # Fallback to /etc/system-release if /etc/os-release is not available
+                else:
+                    output, error, exit_code = execute_command(ssh, "cat /etc/system-release")
+                    if exit_code == 0:
+                        distro = output.strip()
+                        # Try to extract version if possible
+                        version_parts = distro.split()
+                        if len(version_parts) > 1:
+                            version = version_parts[-1]  # Assume version is the last word in the line
+
                 print(f"Detected distribution: {distro} \nVersion: {version}")
-                insert_workflow_state(process_id, f"Detected distribution: {distro}: {version}", "SUCCEEDED", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Detected distribution: {distro}, Version: {version}", "SUCCEEDED", "Commands execution", source_url)
 
                 new_hostname = 'DPRO_AUTOMATION_' + str(int(time.time()))
                 if "Ubuntu" in distro and isinstance(version, float) and version >= 20.0:
