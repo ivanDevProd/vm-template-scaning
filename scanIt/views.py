@@ -85,12 +85,11 @@ def url_input_view(request):
                         command = ["/usr/bin/cpulimit", "--limit=90", "--", "python3", script_path, json_data_str]
                         try:
                             subprocess.Popen(command, stdout=log_file, stderr=subprocess.STDOUT)
-                            logging.info(f"Started scanning process for {file.name if 'file' in request.FILES else source_url}, logging to {log_file_for_process}")
+                            logging.info(f"Started scanning process for URL{file.name if 'file' in request.FILES else source_url}, logging to {log_file_for_process}")
                         except Exception as e:
                             logging.error(f"Failed to start scanning process for {file.name if 'file' in request.FILES else source_url}: {e}")
                             messages.error(request, f"Failed to initiate scanning for {file.name if 'file' in request.FILES else source_url}.")
 
-                        logging.info(f"Started scanning process for URL {source_url}, logging to {log_file_for_process}")
                         messages.success(request, f"Scanning initiated for {source_url} image.")
 
                 return redirect('scanIt')  # Redirect after form submission

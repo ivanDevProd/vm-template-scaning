@@ -309,7 +309,7 @@ def upload_image_to_nutanix():
     source_url = payload['spec']['resources']['source_uri']
     
     # Create Jira case
-    new_jira_task = create_jira_task("New scan request", "A ticket created based on a request received through the self-selfice portal. New image scan request")
+    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}", f"A ticket created based on a request received through the self-selfice portal. System Image Scan request. URL: {source_url}")
     if new_jira_task:
         log_to_database(process_id, f"Jira ticket: {new_jira_task}", "SUCCEEDED", source_url, "Jira case")
     else:

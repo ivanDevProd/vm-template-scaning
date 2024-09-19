@@ -729,3 +729,25 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/noc_admin/image_s
 2024-09-19 08:40:23,649 - INFO - Image upload initiated successfully
 2024-09-19 08:40:29,116 - INFO - Image upload completed successfully
 2024-09-19 08:40:31,190 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-19 09:01:55,798 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-19 09:02:00,867 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-19 09:02:01,162 - INFO - Image upload initiated successfully
+2024-09-19 09:02:05,014 - INFO - Image upload completed successfully
+2024-09-19 09:02:07,199 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-19 09:04:18,810 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-19 09:04:21,182 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-19 09:04:21,470 - INFO - Image upload initiated successfully
+2024-09-19 09:04:28,994 - INFO - Image upload completed successfully
+2024-09-19 09:04:31,219 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-19 09:19:53,937 - INFO - Started scanning process for Centos71_NGT_AHV.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/Centos71_NGT_AHV.tar.gz_process.log
+2024-09-19 09:19:56,329 - INFO - Centos71_NGT_AHV.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Centos71_NGT_AHV.tar.gz
+2024-09-19 09:19:56,370 - INFO - The file has been archived. File size: 715.51 MB. It needs to be extracted before uploading.
+2024-09-19 09:20:12,953 - INFO - Number of files in archive: 1
+2024-09-19 09:20:12,953 - INFO - Total size of files: 4096.00 MB
+2024-09-19 09:20:32,089 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-09-19 09:20:34,203 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos71_NGT_AHV.img
+2024-09-19 09:20:34,468 - INFO - Image upload initiated successfully
+2024-09-19 09:21:36,426 - INFO - Image upload completed successfully
+2024-09-19 09:21:39,290 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos71_NGT_AHV.img has been deleted successfully.
+2024-09-19 09:23:15,690 - INFO - Started scanning process for http://endor.dyn.nutanix.com/acro_images/automation/centos_5G.img, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_centos_5G.img_process.log
+2024-09-19 09:23:15,690 - INFO - Started scanning process for URL http://endor.dyn.nutanix.com/acro_images/automation/centos_5G.img, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_centos_5G.img_process.log
