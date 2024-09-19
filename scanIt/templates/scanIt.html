@@ -62,24 +62,16 @@
             width: 100%;
         }
 
-        /* Form container to center elements */
-        .form-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            width: 100%;
-        }
-
         /* Styling for textarea input */
         textarea {
-            width: 1050px; /* Set width for the text area */
-            height: 100px; /* Set height */
-            padding: 10px;
-            box-sizing: border-box;
+            width: 500px; /* Make the textarea take up full width of the container */
+            height: 100px;
+            box-sizing: border-box; /* Ensure padding is included in the width */
+            resize: none; /* Disable resizing if you want to control the size */
+            padding: 10px; /* Add padding for readability */
+            font-size: 14px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            margin-bottom: 10px;
         }
 
         /* Style for the submit button (disabled) */
@@ -346,8 +338,43 @@
             justify-content: center;
         }
 
-        .form-container { display: none; }
-        .form-container.active { display: block; }
+        /* Overlay for dark background */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+            z-index: 999; /* Above page content */
+        }
+
+        /* Form container as a modal popup */
+        .form-container {
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000; /* Above the overlay */
+            width: auto; /* Adjust to fit the content */
+            min-width: 600px; /* Minimum width for small content */
+            max-width: 800px; /* Adjust max width based on your design */
+            overflow: hidden; /* Prevent content from overflowing */
+            box-sizing: border-box; /* Ensure padding is inside the width */
+        }
+
+        /* Active class for showing the popup and overlay */
+        .form-container.active,
+        .overlay.active {
+            display: block;
+        }
+
         .btn-disabled { background-color: grey; cursor: not-allowed; }
 
         hr {
@@ -401,44 +428,46 @@
             </ul>
         </div>
 
-    <!-- Button container with heading -->
-    <div class="button-container">
-        <button onclick="toggleForm('urlForm')" class="form-button">Enter URLs</button>
-        <h3 class="heading-text" style="color: white;">OR</h3>
-        <button onclick="toggleForm('fileForm')" class="form-button">
-            <span class="main-text">Upload File</span>
-            <span class="sub-text">(.img, .tar.gz, .qcow, .qcow2)</span>
-        </button>
-    </div>
+    <!-- Dark overlay -->
+<div class="overlay"></div>
 
-    <!-- URL Form -->
-        <div id="urlForm" class="form-container">
-            <div class="container">
-                <form method="POST">
-                    {% csrf_token %}
-                    <textarea name="urls" rows="4" placeholder="Enter URLs separated by semicolons"></textarea>
-                    <hr>
-                    <input type="checkbox" id="agreeUrl" onclick="toggleSubmitButton('agreeUrl', 'submitButtonUrl')">
-                    <label for="agreeUrl" style="color: white;">I am familiar with the recommended notes</label>
-                    <hr>
-                    <button type="submit" id="submitButtonUrl" disabled>Submit</button>
-                </form>
-            </div>
-        </div>
-        
-    <!-- File Upload Form -->
-        <div id="fileForm" class="form-container" style="margin-left: 30px; width: 1050px;">
-            <br>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" name="file" accept=".img,.tar.gz, .qcow,.qcow2, application/gzip">
-                <hr>
-                <input type="checkbox" id="agreeFile" onclick="toggleSubmitButton('agreeFile', 'submitButtonFile')">
-                <label for="agreeFile" style="color: white;">I am familiar with the recommended notes</label>
-                <hr>
-                <button type="submit" id="submitButtonFile" disabled>Submit</button>
-            </form>
-        </div>
+<!-- Button container with heading -->
+<div class="button-container">
+    <button onclick="toggleForm('urlForm')" class="form-button">Enter URLs</button>
+    <h3 class="heading-text" style="color: white;">OR</h3>
+    <button onclick="toggleForm('fileForm')" class="form-button">
+        <span class="main-text">Upload File</span>
+        <span class="sub-text">(.img, .tar.gz, .qcow, .qcow2)</span>
+    </button>
+</div>
+
+<!-- URL Form -->
+<div id="urlForm" class="form-container">
+    <div class="container">
+        <form method="POST">
+            {% csrf_token %}
+            <textarea name="urls" rows="4" placeholder="Enter URLs separated by semicolons"></textarea>
+            <hr>
+            <input type="checkbox" id="agreeUrl" onclick="toggleSubmitButton('agreeUrl', 'submitButtonUrl')">
+            <label for="agreeUrl">I am familiar with the recommended notes</label>
+            <hr>
+            <button type="submit" id="submitButtonUrl" disabled>Submit</button>
+        </form>
+    </div>
+</div>
+
+<!-- File Upload Form -->
+<div id="fileForm" class="form-container">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file" accept=".img,.tar.gz, .qcow,.qcow2, application/gzip">
+        <hr>
+        <input type="checkbox" id="agreeFile" onclick="toggleSubmitButton('agreeFile', 'submitButtonFile')">
+        <label for="agreeFile">I am familiar with the recommended notes</label>
+        <hr>
+        <button type="submit" id="submitButtonFile" disabled>Submit</button>
+    </form>
+</div>
 
         <div class="container">
             {% if user.is_authenticated %}
@@ -494,23 +523,21 @@
     
 
 <script>
-    // Function to toggle between showing and hiding forms
-    function toggleForm(formId) {
-        const form = document.getElementById(formId);
+    // Function to toggle the form and overlay
+function toggleForm(formId) {
+    const formContainer = document.getElementById(formId);
+    const overlay = document.querySelector('.overlay');
 
-        // Check if the form is already visible
-        const isFormVisible = form.classList.contains('active');
+    // Toggle visibility of the form and overlay
+    formContainer.classList.toggle('active');
+    overlay.classList.toggle('active');
 
-        // Hide all forms
-        document.querySelectorAll('.form-container').forEach(function(container) {
-            container.classList.remove('active');
-        });
-
-        // Toggle the form visibility
-        if (!isFormVisible) {
-            form.classList.add('active');
-        }
-    }
+    // Close form when clicking on overlay
+    overlay.addEventListener('click', function() {
+        formContainer.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+}
 
     // Function to enable/disable the submit button based on checkbox
     function toggleSubmitButton(checkboxId, buttonId) {

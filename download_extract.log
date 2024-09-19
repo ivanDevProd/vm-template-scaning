@@ -724,3 +724,8 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/noc_admin/image_s
 2024-09-18 21:52:46,630 - INFO - Number of files in archive: 198
 2024-09-18 21:52:46,630 - INFO - Total size of files: 2.36 MB
 2024-09-18 21:52:46,674 - ERROR - Multiple files found in archive. Found 198 files. Process aborted.
+2024-09-19 08:40:20,026 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-19 08:40:23,350 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-19 08:40:23,649 - INFO - Image upload initiated successfully
+2024-09-19 08:40:29,116 - INFO - Image upload completed successfully
+2024-09-19 08:40:31,190 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
