@@ -10,6 +10,7 @@ import requests
 import shutil
 import json
 from dotenv import load_dotenv
+import subprocess
 
 
 # Load the .env file
@@ -312,9 +313,9 @@ def upload_image_to_nutanix():
                     if new_jira_task:
                         add_comment_to_jira_task(new_jira_task, f"Image successfully uploaded.")
 
-                    # script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
-                    # command = f"python3 {script_path} {process_id} {uuid} {image_name} {source_url} {new_jira_task}"
-                    # subprocess.Popen(command, shell=True)
+                    script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
+                    command = f"python3 {script_path} {process_id} {uuid} {image_name} {source_url} {new_jira_task}"
+                    subprocess.Popen(command, shell=True)
 
                     # Clean up the extracted file only if upload was successful
                     try:

@@ -119,13 +119,13 @@ def url_input_view(request):
 
                 return redirect('scanIt')  # Redirect after file submission
             else:
-                return render(request, 'scanIt.html', {'form': URLInputForm(), 'file_form': file_form, 'latest_entries': checkWorkflows()})
-
-    else:
-        form = URLInputForm()
-        file_form = FileUploadForm()
+                for error in file_form.errors:
+                    messages.error(request, f"{error}: {file_form.errors[error]}")
+                return render(request, 'scanIt.html', {'form': FileUploadForm(),'file_form':file_form, 'latest_entries': checkWorkflows()})
 
     latest_entries = checkWorkflows() if request.user.is_authenticated else None
+    form = URLInputForm()
+    file_form = FileUploadForm()
 
     return render(request, 'scanIt.html', {'form': form, 'file_form': file_form, 'latest_entries': latest_entries})
 

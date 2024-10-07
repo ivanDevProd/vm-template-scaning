@@ -752,3 +752,127 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/noc_admin/image_s
 2024-09-19 09:23:15,690 - INFO - Started scanning process for http://endor.dyn.nutanix.com/acro_images/automation/centos_5G.img, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_centos_5G.img_process.log
 2024-09-19 09:23:15,690 - INFO - Started scanning process for URL http://endor.dyn.nutanix.com/acro_images/automation/centos_5G.img, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_centos_5G.img_process.log
 2024-09-19 10:32:29,116 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/acro_images/automation/centos_5G.img, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_centos_5G.img_process.log
+2024-09-20 11:02:12,616 - WARNING - Not Found: /favicon.ico
+2024-09-24 10:16:55,918 - WARNING - Forbidden (CSRF token from POST incorrect.): /
+2024-09-24 12:30:53,849 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', {'form': form, 'file_form': file_form, 'latest_entries': latest_entries})
+                                                   ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+2024-09-24 12:31:53,499 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', {'form': form, 'file_form': file_form, 'latest_entries': latest_entries})
+                                                   ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+2024-09-24 12:32:24,394 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', {'form': form, 'file_form': file_form, 'latest_entries': latest_entries})
+                                                   ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+2024-09-24 12:34:31,299 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', {'form': form, 'file_form': file_form, 'latest_entries': latest_entries})
+                                                   ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+2024-09-24 12:35:30,364 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', { 'file_form': file_form, 'latest_entries': latest_entries})
+                                                         ^^^^^^^^^
+UnboundLocalError: cannot access local variable 'file_form' where it is not associated with a value
+2024-09-24 12:35:34,699 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', { 'file_form': file_form, 'latest_entries': latest_entries})
+                                                         ^^^^^^^^^
+UnboundLocalError: cannot access local variable 'file_form' where it is not associated with a value
+2024-09-24 12:42:35,094 - ERROR - Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/myenv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noc_admin/image_scanner_project/scanIt/views.py", line 130, in url_input_view
+    return render(request, 'scanIt.html', {'form': form, 'file_form': file_form, 'latest_entries': latest_entries})
+                                                   ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+2024-09-24 12:46:38,830 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-24 12:46:42,053 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-24 12:46:42,349 - INFO - Image upload initiated successfully
+2024-09-24 12:46:46,126 - INFO - Image upload completed successfully
+2024-09-24 12:46:48,354 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-24 13:05:36,698 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-09-24 13:05:39,850 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-09-24 13:05:40,143 - INFO - Image upload initiated successfully
+2024-09-24 13:05:42,967 - INFO - Image upload completed successfully
+2024-09-24 13:05:44,613 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-09-24 13:44:26,509 - INFO - Started scanning process for go1.20.4.linux-amd64.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/go1.20.4.linux-amd64.tar.gz_process.log
+2024-09-24 13:44:29,645 - INFO - go1.20.4.linux-amd64.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/go1.20.4.linux-amd64.tar.gz
+2024-09-24 13:44:29,689 - INFO - The file has been archived. File size: 95.51 MB. It needs to be extracted before uploading.
+2024-09-24 13:44:33,493 - INFO - Number of files in archive: 12010
+2024-09-24 13:44:33,493 - INFO - Total size of files: 232.93 MB
+2024-09-24 13:44:33,536 - ERROR - Multiple files found in archive. Found 12010 files. Process aborted.
+2024-09-24 14:02:52,724 - INFO - Started scanning process for Centos71_NGT_AHV.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/Centos71_NGT_AHV.tar.gz_process.log
+2024-09-24 14:02:56,039 - INFO - Centos71_NGT_AHV.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Centos71_NGT_AHV.tar.gz
+2024-09-24 14:02:56,080 - INFO - The file has been archived. File size: 715.51 MB. It needs to be extracted before uploading.
+2024-09-24 14:03:12,322 - INFO - Number of files in archive: 1
+2024-09-24 14:03:12,322 - INFO - Total size of files: 4096.00 MB
+2024-09-24 14:03:31,406 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-09-24 14:03:33,829 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos71_NGT_AHV.img
+2024-09-24 14:03:34,215 - INFO - Image upload initiated successfully
+2024-09-24 14:04:46,086 - INFO - Image upload completed successfully
+2024-09-24 14:04:48,468 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos71_NGT_AHV.img has been deleted successfully.
+2024-09-24 14:07:14,216 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/agave/goldimages/kvm/Rocky8_510-1.0.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_agave_goldimages_kvm_Rocky8_510-1.0.tar.gz_process.log
+2024-09-24 14:07:17,955 - INFO - File size: 1.17 GB
+2024-09-24 14:07:20,135 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-09-24 14:09:57,668 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-09-24 14:09:59,941 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-09-24 14:11:38,248 - INFO - Number of files in archive: 1
+2024-09-24 14:11:38,249 - INFO - Total size of files: 8192.00 MB
+2024-09-24 14:11:40,595 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-09-24 14:13:50,910 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-09-24 14:13:50,912 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-09-24 14:16:30,406 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-01 10:38:15,278 - WARNING - Not Found: /favicon.ico
