@@ -9,6 +9,11 @@ class URLInputForm(forms.Form):
         label="Enter URLs",
         help_text="Separate multiple URLs using semicolons"
     )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'placeholder': 'Enter your email'}),
+        label="Email Address"
+    )
 
     def clean_urls(self):
         data = self.cleaned_data['urls'].strip()
@@ -34,6 +39,12 @@ class URLInputForm(forms.Form):
                 raise forms.ValidationError(f"Invalid URL: {url}")
 
         return data
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            raise forms.ValidationError("Please provide a valid email address.")
+        return email
 
     
     

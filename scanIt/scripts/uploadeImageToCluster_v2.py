@@ -15,10 +15,32 @@ from memory_profiler import profile
 import logging
 from urllib.parse import urlparse, unquote
 from dotenv import load_dotenv
-
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 # Load the .env file
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(filename='download_extract.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+# mail function 
+def emailing(email_content, recipients):
+    user =  os.getenv("SVC_MAIL_USER")
+    password = os.getenv("SVC_MAIL_PASS")
+    server = smtplib.SMTP('smtp.office365.com', 587)
+    server.ehlo()
+    server.starttls()
+
+    sender = os.getenv("SVC_MAIL_USER")
+    server.login(user, password)
+
+    server.sendmail(sender, recipients, '{}'.format(email_content))
+    server.close()
+
 
 # DB parameters
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
@@ -46,10 +68,6 @@ password = CLUSTER_PASSWORD
 jira_base_url = "https://jira.nutanix.com/"
 jira_email = "ivan.perkovic@nutanix.com"
 jira_bearer_token = JIRA_BEARER_TOKEN
-
-# Configure logging
-logging.basicConfig(filename='download_extract.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 
 def create_jira_task(summary, description):
@@ -297,6 +315,7 @@ def generate_unique_id():
 def upload_image_to_nutanix():
     process_id = generate_unique_id()
     json_data_str = sys.argv[1]
+    user_email = sys.argv[2]
     try:
         payload = json.loads(json_data_str)
         print(f"Processing payload with ID: {process_id}")
@@ -309,11 +328,39 @@ def upload_image_to_nutanix():
     source_url = payload['spec']['resources']['source_uri']
     
     # Create Jira case
-    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}", f"A ticket created based on a request received through the self-selfice portal. System Image Scan request. URL: {source_url}")
+    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}", f"A ticket created based on a request received through the self-selfice portal. System Image Scan request. URL: {source_url}. The scan was initiated by: {user_email}.")
     if new_jira_task:
-        log_to_database(process_id, f"Jira ticket: {new_jira_task}", "SUCCEEDED", source_url, "Jira case")
+        log_to_database(process_id, f"Jira ticket: {new_jira_task}", "INFO", source_url, "Jira case")
+        log_to_database(process_id, f"Scan triggered by: {user_email}", "INFO", source_url, "Jira case")
+
+        body_text = f'Hi {user_email.split('.')[0].capitalize()},'\
+                    f'<p>Scanning of the image {source_url} has been successfully initiated.'\
+                    f'<br>You can follow all the details about the progress through the Jira ticket {new_jira_task}.'\
+                    f"<p>Kind regards,"\
+                    '<br>DevProd Team'
+        
+        msg = MIMEMultipart('mixed')
+        msg['Subject'] = f'Scanning of the image {source_url} has been successfully initiated.'
+        part1 = MIMEText(body_text, 'html')
+        msg.attach(part1)
+        try:
+            emailing(msg.as_string(), f'{user_email}')
+            log_to_database(process_id, f"The initial mail was successfully sent to: {user_email}", "INFO", source_url, "Mailing")
+        except Exception as e:
+            log_to_database(process_id, f"The mail was not successfully sent to the user. Error: {e}", "INFO", source_url, "Mailing")
+        
     else:
         log_to_database(process_id, f"Jira ticket not created. There was a problem. The scanning process will continue without recording in the ticket", "FAILED", source_url, "Jira case")
+    
+    logging.info(f"Initiating image upload to the Artifactory")
+    log_to_database(process_id, f"Initiating image upload to the Artifactory", "INITIATED", source_url, "Artifactory Upload")
+    jfrog_artifactory_upload_script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/upload_image_from_url_to_artifactory.py'
+    command = f"python3 {jfrog_artifactory_upload_script_path} {source_url} {user_email} {process_id} {new_jira_task}"
+    try:
+        subprocess.Popen(command, shell=True)
+    except Exception as e:
+        log_to_database(process_id, f"An error occurred while initiating the upload: {str(e)}", "ERROR", source_url, "Artifactory Upload")
+
     
     # Define directories
     download_dir = '/home/noc_admin/image_scanner_project/downloads/'
@@ -345,17 +392,17 @@ def upload_image_to_nutanix():
         return
 
     if upload_response.status_code == 202:
-        print("Image upload initiated successfully")
+        print("Image upload to cluster initiated successfully.")
         
         task_uuid = upload_response.json().get('status', {}).get('execution_context', {}).get('task_uuid', '')
         print(f"Task UUID: {task_uuid}")
 
         task_url = f"https://{cluster_ip}:9440/api/nutanix/v3/tasks/{task_uuid}"
 
-        log_to_database(process_id, f"Image upload initiated successfully. Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
+        log_to_database(process_id, f"Image upload to cluster initiated successfully. . Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
 
         if new_jira_task:
-            add_comment_to_jira_task(new_jira_task, f"Image upload initiated successfully.")
+            add_comment_to_jira_task(new_jira_task, f"Image upload to cluster initiated successfully. .")
 
         while True:
             try:

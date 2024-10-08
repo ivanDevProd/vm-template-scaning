@@ -66,7 +66,8 @@ def url_input_view(request):
             form = URLInputForm(request.POST)
             if form.is_valid():
                 urls = form.cleaned_data['urls']
-                json_data_list = parse_urls(urls)  # Ensure this function is defined
+                email = request.POST.get('email')  # Get email from the form
+                json_data_list = parse_urls(urls)  # call parse_urls function 
 
                 # Create the logs/processes folder if it doesn't exist
                 os.makedirs(log_directory, exist_ok=True)
@@ -82,7 +83,7 @@ def url_input_view(request):
 
                     # Open the log file for writing output
                     with open(log_file_for_process, 'w') as log_file:
-                        command = ["/usr/bin/cpulimit", "--limit=90", "--", "python3", script_path, json_data_str]
+                        command = ["/usr/bin/cpulimit", "--limit=90", "--", "python3", script_path, json_data_str, email]
                         try:
                             subprocess.Popen(command, stdout=log_file, stderr=subprocess.STDOUT)
                             logging.info(f"Started scanning process for URL{file.name if 'file' in request.FILES else source_url}, logging to {log_file_for_process}")
@@ -102,13 +103,14 @@ def url_input_view(request):
             if file_form.is_valid():
                 file = request.FILES['file']
                 file_path = handle_uploaded_file(file)
+                email = request.POST.get('email')  # Get email from the form
 
                 # Run the Python script with the file path
                 script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/uploade_Local_ImageToCluster_v1.py'
                 log_file_for_process = os.path.join(log_directory, f"{file.name}_process.log")
 
                 with open(log_file_for_process, 'w') as log_file:
-                    command = ["/usr/bin/cpulimit", "--limit=90", "--", "python3", script_path, file_path]
+                    command = ["/usr/bin/cpulimit", "--limit=90", "--", "python3", script_path, file_path, email]
                     try:
                         subprocess.Popen(command, stdout=log_file, stderr=subprocess.STDOUT)
                         logging.info(f"Started scanning process for {file.name}, logging to {log_file_for_process}")
