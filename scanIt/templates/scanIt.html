@@ -532,7 +532,6 @@
                                 <th>Timestamp</th>
                                 <th>Image URL</th>
                                 <th>Stage</th>
-                                <th>Uploaded to Artifactory</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -546,17 +545,6 @@
                                 <td>{{ entry.3 }}</td>
                                 <td>{{ entry.4 }}</td>
                                 <td>{{ entry.5 }}</td>
-                                <td class="{% if entry.6 == 3 %}danger{% elif entry.6 == 1 %}warning{% elif entry.6 == 2 %}success{% endif %}">
-                                    {% if entry.6 == 0 %}
-                                        Upload <input type="checkbox" name="upload_{{ entry.0 }}" onclick="uploadFunction('{{ entry.0 }}')">
-                                    {% elif entry.6 == 1 %}
-                                        In Progress
-                                    {% elif entry.6 == 2 %}
-                                        Yes
-                                    {% elif entry.6 == 3 %}
-                                        Failed
-                                    {% endif %}
-                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -608,36 +596,6 @@
                 overlay.classList.remove('active');
             });
         }
-
-            // Function to handle the upload to Artifactory
-            function uploadFunction(processId) {
-                if (confirm('Are you sure you want to initiate the upload?')) {
-                    console.log(`Initiating upload for process ID: ${processId}`);
-                    fetch(`/ScanVmTemplate/update_entry/?process_id=${processId}`, {
-                        method: 'GET' // Adjust method if needed (e.g., POST)
-                    })
-                    .then(response => {
-                        console.log('Response:', response);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Response data:', data);
-                        if (data.success) {
-                            alert('Upload initiated successfully.');
-                            location.reload();  // Optionally reload the page to reflect changes
-                        } else {
-                            alert('Failed to initiate upload. Error: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please try again.');
-                    });
-                } else {
-                    console.log('Upload canceled by user.');
-                    location.reload(); // Refresh the page if the user cancels
-                }
-            }
     </script>
 
     <script>

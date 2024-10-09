@@ -20,6 +20,7 @@ load_dotenv()
 # DB parameters
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_HOST = os.getenv("MYSQL_HOST")
+
 JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
 CLUSTER_IP = os.getenv("CLUSTER_IP")
 CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
@@ -34,7 +35,7 @@ mysql_config = {
     'port': '3306'
 }
 
-# Define variables
+# Cluster variables
 cluster_ip = CLUSTER_IP
 username = CLUSTER_USERNAME
 password = CLUSTER_PASSWORD
@@ -92,6 +93,36 @@ def log_to_database(process_id, description, state, image_url, stage):
         if conn.is_connected():
             cursor.close()
             conn.close()
+
+
+# Function that adds information to the DB (waitForFlexera table)
+def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip):
+    try:
+        conn = mysql.connector.connect(**mysql_config)
+        cursor = conn.cursor()
+
+        # Insert new record or update the existing record if process_ID already exists
+        cursor.execute(
+            '''
+            INSERT INTO vm_template_scan.waitForFlexera (process_ID, vm_hostname, vm_uuid, vm_ip) 
+            VALUES (%s, %s, %s, %s) 
+            ON DUPLICATE KEY UPDATE
+            vm_hostname = COALESCE(%s, vm_hostname),
+            vm_uuid = COALESCE(%s, vm_uuid),
+            vm_ip = COALESCE(%s, vm_ip)
+            ''',
+            (process_id, vm_hostname, vm_uuid, vm_ip, vm_hostname, vm_uuid, vm_ip)
+        )
+        
+        conn.commit()
+    except mysql.connector.Error as err:
+        logging.error(f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
 
 
 def get_image_size(image_uuid):
@@ -250,6 +281,7 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url):
                         vm_uuid = task_status['entity_reference_list'][0]['uuid']
 
                         log_to_database(process_id, f"UEFI VM <{vm_name}>creation completed successfully. VM UUID on cluster: {vm_uuid}", "SUCCEEDED", source_url, "VM deployment")
+                        log_to_database_waitForFlexera(process_id, '-', vm_uuid, '-')
 
                         # Wait for a few seconds to ensure the VM is fully initialized
                         time.sleep(45)
@@ -262,6 +294,7 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url):
                         if vm_ip:
                             print(f"VM IP Address: {vm_ip}")
                             log_to_database(process_id, f"IP address for deployed UEFI VM {vm_name}: {vm_ip}", "SUCCEEDED", source_url, "VM deployment")
+                            log_to_database_waitForFlexera(process_id, '-', None, vm_ip)
 
                             log_to_database(process_id, f"Checking machine access via ssh/winrm. The pre-check method has been initiated. It can take a couple of minutes.", "RUNNING", source_url, "VM deployment")
 
@@ -407,6 +440,7 @@ def deploy_vm():
                         vm_uuid = task_status['entity_reference_list'][0]['uuid']
 
                         log_to_database(process_id, f"VM <{vm_name}>creation completed successfully. VM UUID on cluster: {vm_uuid}", "SUCCEEDED", source_url, "VM deployment")
+                        log_to_database_waitForFlexera(process_id, '-', vm_uuid, '-')
 
                         if new_jira_task:
                             add_comment_to_jira_task(new_jira_task, f"VM successfully created.")
@@ -422,6 +456,7 @@ def deploy_vm():
                         if vm_ip:
                             print(f"VM IP Address: {vm_ip}")
                             log_to_database(process_id, f"IP address for deployed VM {vm_name}: {vm_ip}", "SUCCEEDED", source_url, "VM deployment")
+                            log_to_database_waitForFlexera(process_id, '-', None, vm_ip)
 
                             if new_jira_task:
                                 add_comment_to_jira_task(new_jira_task, f"IP address for deployed VM {vm_name}: {vm_ip}")

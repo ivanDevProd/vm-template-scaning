@@ -153,7 +153,7 @@
                 {% csrf_token %}
                 <button type="submit" class="login-link" style="background:none;border:none;color:white;cursor:pointer;">Logout &#9679</button>
             </form>
-            <p><a href="{{ request.META.HTTP_REFERER }}" class="back-link">Home Page &#9679</a>
+            <p><a href="{% url 'scanIt' %}" class="back-link">Home Page &#9679</a>
         {% else %}
             <a href="{% url 'login' %}" class="login-link">Admin Login &#9679</a>
         {% endif %}

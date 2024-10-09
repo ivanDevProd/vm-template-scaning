@@ -44,13 +44,12 @@ def emailing(email_content, recipients):
 
 # DB parameters
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
 CLUSTER_IP = os.getenv("CLUSTER_IP")
 CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
 CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
 
 
-# DB parameters
+# DB config
 mysql_config = {
     'user': 'root',
     'password': MYSQL_PASSWORD,
@@ -66,8 +65,7 @@ password = CLUSTER_PASSWORD
 
 # Jira parameters 
 jira_base_url = "https://jira.nutanix.com/"
-jira_email = "ivan.perkovic@nutanix.com"
-jira_bearer_token = JIRA_BEARER_TOKEN
+jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN")
 
 
 def create_jira_task(summary, description):
@@ -304,6 +302,7 @@ def log_to_database(process_id, description, state, image_url, stage):
             cursor.close()
             conn.close()
 
+
 # function generate a unique UUID
 def generate_unique_id():
     process_id = str(uuid.uuid4())  
@@ -340,7 +339,7 @@ def upload_image_to_nutanix():
                     '<br>DevProd Team'
         
         msg = MIMEMultipart('mixed')
-        msg['Subject'] = f'Scanning of the image {source_url} has been successfully initiated.'
+        msg['Subject'] = f'VM image scan progress'
         part1 = MIMEText(body_text, 'html')
         msg.attach(part1)
         try:
@@ -399,10 +398,10 @@ def upload_image_to_nutanix():
 
         task_url = f"https://{cluster_ip}:9440/api/nutanix/v3/tasks/{task_uuid}"
 
-        log_to_database(process_id, f"Image upload to cluster initiated successfully. . Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
+        log_to_database(process_id, f"Image upload to cluster initiated successfully. Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
 
         if new_jira_task:
-            add_comment_to_jira_task(new_jira_task, f"Image upload to cluster initiated successfully. .")
+            add_comment_to_jira_task(new_jira_task, f"Image upload to cluster initiated successfully.")
 
         while True:
             try:

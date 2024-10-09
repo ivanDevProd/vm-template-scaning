@@ -38,7 +38,6 @@ def emailing(email_content, recipients):
 # DB parameters
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_HOST = os.getenv("MYSQL_HOST")
-JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
 CLUSTER_IP = os.getenv("CLUSTER_IP")
 CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
 CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
@@ -54,8 +53,7 @@ mysql_config = {
 
 # Jira parameters 
 jira_base_url = "https://jira.nutanix.com/"
-jira_email = "ivan.perkovic@nutanix.com"
-jira_bearer_token = JIRA_BEARER_TOKEN
+jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN") 
 
 
 # Cluster variables
@@ -252,7 +250,7 @@ def upload_image_to_nutanix():
                     '<br>DevProd Team'
         
         msg = MIMEMultipart('mixed')
-        msg['Subject'] = f'Scanning of the image {file_name} has been successfully initiated.'
+        msg['Subject'] = f'VM image scan progress'
         part1 = MIMEText(body_text, 'html')
         msg.attach(part1)
         try:
@@ -266,6 +264,15 @@ def upload_image_to_nutanix():
 
     logging.info(f"{file_name} recived to be scaned. It is stored at: {file_path}")
     log_to_database(process_id, f"{file_name} img recived to be scaned. It is stored at: {file_path}", "SUCCEEDED", "Local file uploaded - Self-service", "Processing of the received file")
+
+    logging.info(f"Initiating image upload to the Artifactory")
+    log_to_database(process_id, f"Initiating image upload to the Artifactory", "INITIATED", "Local file uploaded - Self-service", "Artifactory Upload")
+    jfrog_artifactory_upload_script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/upload_local_image_to_artifactory.py'
+    command = f"python3 {jfrog_artifactory_upload_script_path} {file_path} {user_email} {process_id} {new_jira_task}"
+    try:
+        subprocess.Popen(command, shell=True)
+    except Exception as e:
+        log_to_database(process_id, f"An error occurred while initiating the upload: {str(e)}", "ERROR", source_url, "Artifactory Upload")
 
     extracted_dir = '/home/noc_admin/image_scanner_project/static/scanIt/extracted_images/'
 
@@ -297,10 +304,10 @@ def upload_image_to_nutanix():
         
     elif file_path.endswith(('.qcow', '.qcow2', '.img')):
         # move file to extracted_dir using shutil function
-        remove_file_path = shutil.move(file_path, extracted_dir)
+        remove_file_path = shutil.copy(file_path, extracted_dir)
         image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{file_name}"
 
-        log_to_database(process_id, f"File moved to Apache folder. Image URL: {image_url}", "SUCCEEDED", f"Local file uploaded {file_name} - Self-service", "Processing of the received file")
+        log_to_database(process_id, f"File copied to Apache folder. Image URL: {image_url}", "SUCCEEDED", f"Local file uploaded {file_name} - Self-service", "Processing of the received file")
         
         image_name = "DPRO-AUTOMATION-LOCAL_FILE-" + f"{file_name}"
         payload['spec']['name'] = image_name
@@ -355,13 +362,13 @@ def upload_image_to_nutanix():
                     command = f"python3 {script_path} {process_id} {uuid} {image_name} {image_url} {new_jira_task}"
                     subprocess.Popen(command, shell=True)
 
-                    # Clean up the extracted file only if upload was successful
+                    # Clean up the extracted file only if upload was successful 
                     try:
                         if os.path.exists(remove_file_path):
                             os.remove(remove_file_path)
                             # print(f"{remove_file_path} has been deleted successfully.")
                             logging.info(f"{remove_file_path} has been deleted successfully.")
-                            log_to_database(process_id, f"Image {file_name} removed from server. Path was: {remove_file_path}", "SUCCEEDED", image_url, "Processing of the received file")
+                            log_to_database(process_id, f"Image {file_name} removed from Apache server. Path was: {remove_file_path}", "SUCCEEDED", image_url, "Processing of the received file")
                         else:
                             # print(f"File {remove_file_path} does not exist.")
                             logging.info(f"File {remove_file_path} does not exist.")
@@ -369,6 +376,7 @@ def upload_image_to_nutanix():
                         # print(f"Error occurred while deleting file: {e}")
                         logging.info(f"Error occurred while deleting file: {e}")
                         log_to_database(process_id, f"Error occurred while deleting image from server: {e}", "FAILED", image_url, "Processing of the received file")
+                    
                     break
 
                 elif state == 'FAILED':

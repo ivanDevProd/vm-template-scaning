@@ -5,6 +5,7 @@ import time
 import sys
 import os
 from dotenv import load_dotenv
+import logging
 
 
 # Load the .env file
@@ -30,6 +31,35 @@ def insert_workflow_state(process_id, description, state, stage, source_url):
     )
     conn.commit()
     cursor.close()
+
+
+# Function that adds information to the DB (waitForFlexera table)
+def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip):
+    try:
+        conn = mysql.connector.connect(**mysql_config)
+        cursor = conn.cursor()
+
+        # Insert new record or update the existing record if process_ID already exists
+        cursor.execute(
+            '''
+            INSERT INTO vm_template_scan.waitForFlexera (process_ID, vm_hostname, vm_uuid, vm_ip) 
+            VALUES (%s, %s, %s, %s) 
+            ON DUPLICATE KEY UPDATE
+            vm_hostname = COALESCE(%s, vm_hostname),
+            vm_uuid = COALESCE(%s, vm_uuid),
+            vm_ip = COALESCE(%s, vm_ip)
+            ''',
+            (process_id, vm_hostname, vm_uuid, vm_ip, vm_hostname, vm_uuid, vm_ip)
+        )
+        
+        conn.commit()
+    except mysql.connector.Error as err:
+        logging.error(f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 
 def execute_command(ssh, command, use_sudo=False, use_pty=False, sudo_password=None):
     # Get the username used for SSH connection
@@ -253,6 +283,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
                         insert_workflow_state(process_id, f"Command '{command}' executed successfully", "SUCCEEDED", "Commands execution", source_url)
+                        if command == f'hostnamectl set-hostname {new_hostname}':
+                            log_to_database_waitForFlexera(process_id, new_hostname, None, None)
                     print(output)
                     time.sleep(30)
 

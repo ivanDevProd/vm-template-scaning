@@ -914,3 +914,142 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-08 10:45:54,892 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/SYSTEST/ahv/centoslight_run_fioboot.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_SYSTEST_ahv_centoslight_run_fioboot.qcow2_process.log
 2024-10-08 10:46:01,346 - INFO - Initiating image upload to the Artifactory
 2024-10-08 10:49:18,936 - INFO - Image uploaded successfully to ivan.perkovic/ahv/centoslight_run_fioboot.qcow2.
+2024-10-08 11:18:56,909 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/SYSTEST/ahv/centoslight_run_fioboot.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_SYSTEST_ahv_centoslight_run_fioboot.qcow2_process.log
+2024-10-08 11:19:03,696 - INFO - Initiating image upload to the Artifactory
+2024-10-08 11:22:45,745 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv/centoslight_run_fioboot.qcow2.
+2024-10-08 12:32:47,749 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-08 12:32:54,841 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-08 12:32:54,883 - INFO - Initiating image upload to the Artifactory
+2024-10-08 12:34:55,290 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-08 12:35:01,863 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-08 12:35:01,907 - INFO - Initiating image upload to the Artifactory
+2024-10-08 12:35:02,227 - INFO - Image upload initiated successfully
+2024-10-08 12:35:08,099 - INFO - Image upload completed successfully
+2024-10-08 12:35:09,657 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-08 12:44:05,912 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-08 12:44:12,252 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-08 12:44:12,295 - INFO - Initiating image upload to the Artifactory
+2024-10-08 12:44:12,593 - INFO - Image upload initiated successfully
+2024-10-08 12:44:15,770 - INFO - Image upload completed successfully
+2024-10-08 12:44:17,721 - INFO - Image upload completed successfully
+2024-10-08 12:44:20,731 - INFO - Image upload completed successfully
+2024-10-08 12:44:22,553 - INFO - Image upload completed successfully
+2024-10-08 12:44:24,436 - INFO - Image upload completed successfully
+2024-10-08 12:44:26,360 - INFO - Image upload completed successfully
+2024-10-08 12:44:28,181 - INFO - Image upload completed successfully
+2024-10-08 12:44:29,880 - INFO - Image upload completed successfully
+2024-10-08 12:44:31,773 - INFO - Image upload completed successfully
+2024-10-08 12:44:33,934 - INFO - Image upload completed successfully
+2024-10-08 12:44:36,176 - INFO - Image upload completed successfully
+2024-10-08 12:44:38,339 - INFO - Image upload completed successfully
+2024-10-08 12:44:40,457 - INFO - Image upload completed successfully
+2024-10-08 12:44:42,960 - INFO - Image upload completed successfully
+2024-10-08 12:44:45,158 - INFO - Image upload completed successfully
+2024-10-08 12:44:46,856 - INFO - Image upload completed successfully
+2024-10-08 12:44:49,108 - INFO - Image upload completed successfully
+2024-10-08 12:44:50,901 - INFO - Image upload completed successfully
+2024-10-08 12:44:53,159 - INFO - Image upload completed successfully
+2024-10-08 12:44:55,352 - INFO - Image upload completed successfully
+2024-10-08 12:44:57,583 - INFO - Image upload completed successfully
+2024-10-08 12:44:59,837 - INFO - Image upload completed successfully
+2024-10-08 12:45:02,084 - INFO - Image upload completed successfully
+2024-10-08 12:45:04,272 - INFO - Image upload completed successfully
+2024-10-08 12:45:06,061 - INFO - Image upload completed successfully
+2024-10-08 12:45:07,783 - INFO - Image upload completed successfully
+2024-10-08 12:45:10,037 - INFO - Image upload completed successfully
+2024-10-08 12:45:11,858 - INFO - Image upload completed successfully
+2024-10-08 12:45:14,067 - INFO - Image upload completed successfully
+2024-10-08 12:45:16,263 - INFO - Image upload completed successfully
+2024-10-08 12:45:18,686 - INFO - Image upload completed successfully
+2024-10-08 12:45:21,221 - INFO - Image upload completed successfully
+2024-10-08 12:45:23,470 - INFO - Image upload completed successfully
+2024-10-08 12:45:25,228 - INFO - Image upload completed successfully
+2024-10-08 12:45:27,623 - INFO - Image upload completed successfully
+2024-10-08 12:45:29,875 - INFO - Image upload completed successfully
+2024-10-08 12:45:32,268 - INFO - Image upload completed successfully
+2024-10-08 12:45:34,719 - INFO - Image upload completed successfully
+2024-10-08 12:45:36,636 - INFO - Image upload completed successfully
+2024-10-08 12:45:38,982 - INFO - Image upload completed successfully
+2024-10-08 12:45:41,241 - INFO - Image upload completed successfully
+2024-10-08 12:45:43,156 - INFO - Image upload completed successfully
+2024-10-08 12:45:45,518 - INFO - Image upload completed successfully
+2024-10-08 12:45:47,285 - INFO - Image upload completed successfully
+2024-10-08 12:45:49,778 - INFO - Image upload completed successfully
+2024-10-08 12:45:52,114 - INFO - Image upload completed successfully
+2024-10-08 12:45:53,989 - INFO - Image upload completed successfully
+2024-10-08 12:45:58,178 - INFO - Image upload completed successfully
+2024-10-08 12:46:00,468 - INFO - Image upload completed successfully
+2024-10-08 12:46:02,388 - INFO - Image upload completed successfully
+2024-10-08 12:46:04,824 - INFO - Image upload completed successfully
+2024-10-08 12:46:06,781 - INFO - Image upload completed successfully
+2024-10-08 12:46:09,082 - INFO - Image upload completed successfully
+2024-10-08 12:46:11,018 - INFO - Image upload completed successfully
+2024-10-08 12:53:48,454 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-08 12:53:53,491 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-08 12:53:53,534 - INFO - Initiating image upload to the Artifactory
+2024-10-08 13:02:28,279 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-08 13:02:34,024 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-08 13:02:34,069 - INFO - Initiating image upload to the Artifactory
+2024-10-08 13:02:34,377 - INFO - Image upload initiated successfully
+2024-10-08 13:02:38,035 - INFO - Image upload completed successfully
+2024-10-08 13:24:04,305 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-08 13:24:10,791 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-08 13:24:10,836 - INFO - Initiating image upload to the Artifactory
+2024-10-08 13:24:11,215 - INFO - Image upload initiated successfully
+2024-10-08 13:24:14,128 - INFO - Image upload completed successfully
+2024-10-08 13:24:30,294 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-08 13:24:35,018 - INFO - [Mailing] Process ID: b540d706-4a34-4a15-a3a6-baa12e822e1c, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-08 13:24:35,018 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:26:01,501 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-09 09:26:09,702 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-09 09:26:09,744 - INFO - Initiating image upload to the Artifactory
+2024-10-09 09:26:10,058 - INFO - Image upload initiated successfully
+2024-10-09 09:26:13,259 - INFO - Image upload completed successfully
+2024-10-09 09:26:14,872 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:26:23,131 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-09 09:26:28,505 - INFO - [Mailing] Process ID: 1db25c11-843f-4f5b-b744-14d0c7a7f8d8, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-09 09:26:28,506 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:32:14,056 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-09 09:32:20,358 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-09 09:32:20,402 - INFO - Initiating image upload to the Artifactory
+2024-10-09 09:32:20,729 - INFO - Image upload initiated successfully
+2024-10-09 09:32:24,584 - INFO - Image upload completed successfully
+2024-10-09 09:32:26,123 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:32:31,960 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-09 09:32:36,784 - INFO - [Mailing] Process ID: 316203e0-bdc0-424d-869b-11c86be0746f, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-09 09:32:36,784 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:39:52,808 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-09 09:39:58,895 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-09 09:39:58,938 - INFO - Initiating image upload to the Artifactory
+2024-10-09 09:39:59,263 - INFO - Image upload initiated successfully
+2024-10-09 09:40:10,667 - INFO - Image upload completed successfully
+2024-10-09 09:40:12,820 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:40:16,080 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-09 09:40:21,292 - INFO - [Mailing] Process ID: 5b26488a-8b5c-4a96-8354-b8df712e78c9, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-09 09:40:21,292 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-09 09:55:38,871 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/agave/centos74.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_agave_centos74.tar.gz_process.log
+2024-10-09 09:55:45,132 - INFO - Initiating image upload to the Artifactory
+2024-10-09 09:55:45,739 - INFO - File size: 0.58 GB
+2024-10-09 09:55:47,902 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-09 09:57:32,823 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-09 09:57:34,721 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-09 09:59:03,354 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/centos74.tar.gz.
+2024-10-09 10:00:40,187 - INFO - Number of files in archive: 1
+2024-10-09 10:00:40,188 - INFO - Total size of files: 16384.00 MB
+2024-10-09 10:00:42,626 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 10:04:53,583 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 10:04:53,584 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/centos74.img
+2024-10-09 10:09:21,452 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/centos74.img
+2024-10-09 10:18:06,017 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/agave/centos74.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_agave_centos74.tar.gz_process.log
+2024-10-09 10:18:12,055 - INFO - Initiating image upload to the Artifactory
+2024-10-09 10:18:12,659 - INFO - File size: 0.58 GB
+2024-10-09 10:18:14,379 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-09 10:19:48,562 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-09 10:19:50,774 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-09 10:21:23,997 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/centos74.tar.gz.
+2024-10-09 10:22:56,683 - INFO - Number of files in archive: 1
+2024-10-09 10:22:56,684 - INFO - Total size of files: 16384.00 MB
+2024-10-09 10:22:58,971 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 10:27:08,662 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 10:27:08,664 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/centos74.img
+2024-10-09 10:31:36,245 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/centos74.img

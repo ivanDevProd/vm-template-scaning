@@ -1,10 +1,9 @@
+import os
 import sys
 import requests
-import os
-from dotenv import load_dotenv
-from urllib.parse import urlparse
 import logging
 import smtplib
+from dotenv import load_dotenv
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import mysql.connector
@@ -36,14 +35,12 @@ def emailing(email_content, recipients):
 
 # DB parameters
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-
-# Cluster parameters
 CLUSTER_IP = os.getenv("CLUSTER_IP")
 CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
 CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
 
 
-# DB config
+# DB parameters
 mysql_config = {
     'user': 'root',
     'password': MYSQL_PASSWORD,
@@ -55,6 +52,7 @@ mysql_config = {
 
 # Jira parameters 
 jira_base_url = "https://jira.nutanix.com/"
+jira_email = "ivan.perkovic@nutanix.com"
 jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN")
 
 
@@ -107,47 +105,47 @@ def log_to_database(process_id, description, state, image_url, stage):
             conn.close()
 
 
-def create_repo_path(email, image_url):
+def create_repo_path(email, file_path):
     user_name = email.split('@')[0]
+    file_name = os.path.basename(file_path)
+    # Combine username and file name to create the repository path
+    return f"{user_name}/{file_name}"
 
-    # Parse the image URL and remove the domain
-    parsed_url = urlparse(image_url)
-    image_path = parsed_url.path.split('/', 3)[-1]  # Get the path after the domain
+def log_to_database(process_id, message, log_level, source, operation):
+    # Implement your logging logic here (to a database, file, etc.)
+    if log_level == "INFO":
+        logging.info(f"[{operation}] Process ID: {process_id}, Source: {source} - {message}")
+    elif log_level == "ERROR":
+        logging.error(f"[{operation}] Process ID: {process_id}, Source: {source} - {message}")
 
-    # Combine user name and image file name to create the repo path
-    repo_path = f"{user_name}/{image_path}"
-
-    return repo_path
-
-
-def upload_image_from_url_to_artifactory(image_url, email, process_id, task_key):
+def upload_local_image_to_artifactory(file_path, email, process_id, task_key):
     artifactory_url = "https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images"  
-    api_token = os.getenv("JFROG_API_TOKEN")
+    api_token = os.getenv("JFROG_API_TOKEN")  # Retrieve API token from environment variables
 
-    repo_path = create_repo_path(email, image_url) # Create the repo path dynamically
+    # Check if the file exists before attempting to upload
+    if not os.path.isfile(file_path):
+        print(f"File not found: {file_path}")
+        log_to_database(process_id, f"File not found: {file_path}", 'FAILED', file_path, "Artifactory Upload")
+        return
+
+    repo_path = create_repo_path(email, file_path)  # Create the repository path dynamically
 
     try:
-        image_response = requests.get(image_url, stream=True)  # stream the image directly from the URL (without downloading)
-        
-        if image_response.status_code == 200:
+        with open(file_path, 'rb') as file_to_upload:
             artifactory_upload_url = f"{artifactory_url}/{repo_path}"
 
             headers = {
                 'Authorization': f'Bearer {api_token}',
-                'Content-Type': image_response.headers.get('Content-Type', 'application/octet-stream')  # Use the content type of the image
+                'Content-Type': 'application/octet-stream'  # Set the content type for binary data
             }
 
-            log_to_database(process_id, "The process of uploading image to Artifactory has started.",'RUNNING', image_url, "Artifactory Upload")
-            response = requests.put(
-                artifactory_upload_url, 
-                data=image_response.raw,  
-                headers=headers
-            )
+            log_to_database(process_id, "The process of uploading image to Artifactory has started.", 'RUNNING', file_path, "Artifactory Upload")
+            response = requests.put(artifactory_upload_url, data=file_to_upload, headers=headers)
 
             if response.status_code == 201:
-                # print(f"Image uploaded successfully to the Artifactory {repo_path}.")
-                logging.info(f"Image successfully uploaded to Artifactory {artifactory_upload_url}.")
-                log_to_database(process_id, f"Image successfully uploaded to Artifactory. Repo path: {artifactory_upload_url}.",'SUCCEEDED', image_url, "Artifactory Upload")
+                print(f"Image uploaded successfully to {repo_path}.")
+                logging.info(f"Image uploaded successfully to {repo_path}.")
+                log_to_database(process_id, f"Image uploaded successfully. Repo path: {artifactory_upload_url}.", 'SUCCEEDED', file_path, "Artifactory Upload")
                 add_comment_to_jira_task(task_key, f"Image successfully uploaded to Artifactory. Repo path: {artifactory_upload_url}.")
 
                 body_text = f'Hi {email.split('.')[0].capitalize()},'\
@@ -163,27 +161,37 @@ def upload_image_from_url_to_artifactory(image_url, email, process_id, task_key)
                 msg.attach(part1)
                 try:
                     emailing(msg.as_string(), f'{email}')
-                    log_to_database(process_id, f"The mail with details about new image Artifactory path was successfully sent to: {email}", "INFO", image_url, "Mailing")
+                    log_to_database(process_id, f"The mail with details about new image Artifactory path was successfully sent to: {email}", "INFO", file_path, "Mailing")
                 except Exception as e:
-                    log_to_database(process_id, f"The mail was not successfully sent to the user. Error: {e}", "INFO", image_url, "Mailing")
-                
+                    log_to_database(process_id, f"The mail was not successfully sent to the user. Error: {e}", "INFO", file_path, "Mailing")
+
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        # print(f"{remove_file_path} has been deleted successfully.")
+                        logging.info(f"{file_path} has been deleted successfully.")
+                        log_to_database(process_id, f"Image {os.path.basename(file_path)} removed from server. Path was: {file_path}", "SUCCEEDED", {file_path}, "Processing of the received file")
+                    else:
+                        # print(f"File {remove_file_path} does not exist.")
+                        logging.info(f"File {os.path.basename(file_path)} does not exist.")
+                except Exception as e:
+                    # print(f"Error occurred while deleting file: {e}")
+                    logging.info(f"Error occurred while deleting file: {e}")
+                    log_to_database(process_id, f"Error occurred while deleting image from server: {e}", "FAILED", {file_path}, "Processing of the received file")
+                    
             else:
-                # print(f"Failed to upload image. Status code: {response.status_code}")
+                print(f"Failed to upload image. Status code: {response.status_code}")
                 print(f"Response: {response.text}")
                 logging.error(f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}")
-                log_to_database(process_id, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}",'FAILED', image_url, "Artifactory Upload")
+                log_to_database(process_id, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}", 'FAILED', file_path, "Artifactory Upload")
                 add_comment_to_jira_task(task_key, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}")
-        else:
-            print(f"Failed to download image from URL. Status code: {image_response.status_code}")
-            log_to_database(process_id, f"Failed to download image from URL. Status code: {image_response.status_code}",'FAILED', image_url, "Artifactory Upload")
-            logging.error(f"Failed to download image from URL. Status code: {image_response.status_code}")
     except Exception as e:
         print(f"An error occurred: {e}")
-
+        log_to_database(process_id, f"An error occurred: {str(e)}", 'FAILED', file_path, "Artifactory Upload")
 
 if __name__ == '__main__':
-    image_url = sys.argv[1]
-    email = sys.argv[2]
-    process_id = sys.argv[3]
-    task_key = sys.argv[4]
-    upload_image_from_url_to_artifactory(image_url, email, process_id, task_key)
+    file_path = sys.argv[1]  # Full file path passed as argument
+    email = sys.argv[2]  # User email passed as argument
+    process_id = sys.argv[3]  # Process ID passed as argument
+    task_key = sys.argv[4]  # Jira ticket number passed as argument
+    upload_local_image_to_artifactory(file_path, email, process_id, task_key)
