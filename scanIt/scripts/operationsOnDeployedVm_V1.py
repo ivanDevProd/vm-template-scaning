@@ -131,6 +131,8 @@ def retry_commands_with_winrm(ip, usernames, password):
 
 def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
     usernames = ['nutanix', 'root', 'Administrator']
+    failed_commands = None 
+    
     for username in usernames:
         try:
             ssh = paramiko.SSHClient()
@@ -235,7 +237,6 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 elif "CentOS" in distro and isinstance(version, float) and version >= 7.0:
                     commands = [
                         f"hostnamectl set-hostname {new_hostname}",
-                        "yum install -y http://10.67.21.111/images/artifactory-centos-rocky-1.1-1.el9.noarch.rpm",
                         "yum install -y curl",
                         "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
                         "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",

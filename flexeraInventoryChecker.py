@@ -2,6 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 import mysql.connector
+from mysql.connector import Error
 import logging
 
 # Load the .env file
@@ -21,6 +22,25 @@ mysql_config = {
     'database': 'vm_template_scan',
     'port': '3306'
 }
+
+
+def log_to_database(process_id, description, state, image_url, stage):
+    try:
+        conn = mysql.connector.connect(**mysql_config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO vm_template_scan.workflow_state (process_ID, description, state, image_url, stage) '
+            'VALUES (%s, %s, %s, %s, %s)',
+            (process_id, description, state, image_url, stage)
+        )
+        conn.commit()
+    except Error as err:
+        logging.error(f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 
 # Function to generate a new access token based on the refresh token stored in DB
 def create_new_access_token():
@@ -65,6 +85,57 @@ def create_new_access_token():
         if conn.is_connected():
             cursor.close()
             conn.close()
+
+
+# Function to retrieve the current number_of_checks for a given hostname
+def get_number_of_checks(hostname):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor()
+
+    query = "SELECT number_of_checks FROM vm_template_scan.waitForFlexera WHERE vm_hostname = %s"
+    
+    cursor.execute(query, (hostname,))
+    result = cursor.fetchone()
+    
+    cursor.close()
+    conn.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
+    
+def get_process_ID(hostname):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor()
+
+    query = "SELECT process_ID FROM vm_template_scan.waitForFlexera WHERE vm_hostname = %s"
+    
+    cursor.execute(query, (hostname,))
+    result = cursor.fetchone()
+    
+    cursor.close()
+    conn.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
+
+
+def increment_number_of_checks(hostname):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor()
+
+    # Query to increment the number_of_checks for the given hostname
+    query = "UPDATE vm_template_scan.waitForFlexera SET number_of_checks = number_of_checks + 1 WHERE vm_hostname = %s"
+    
+    cursor.execute(query, (hostname,))
+    conn.commit()
+    
+    # Clean up
+    cursor.close()
+    conn.close()
 
 
 def vmListToCheckOnFlexera():
@@ -128,28 +199,54 @@ def run_flexera_checks():
     access_token = create_new_access_token()
 
     # hostnames = vmListToCheckOnFlexera()
-    hostnames = ['DPRO_AUTOMATION_17284699555', 'DPRO_AUTOMATION_1728468621', 'GRW0MP6649']
+    hostnames = ['DPRO_AUTOMATION_1728469955', 'DPRO_AUTOMATION_1728468621', 'GRW0MP6649']
 
     for hostname in hostnames:
-        print(f"Checking hostname: {hostname}")
+        # Get the current number_of_checks before incrementing
+        current_checks = get_number_of_checks(hostname)
+        print(f"Checking hostname: {hostname}. (Checked {current_checks} times so far.)")
+
+        process_id = get_process_ID(hostname)
+        
         report_data = get_flexera_report(org_id, report_id, hostname, access_token)
 
         # Check if the report data is not empty
         if report_data:
             if "values" in report_data and report_data["values"]:
+                # Total number of applications (all types)
+                total_apps_found = len(report_data["values"])
                 commercial_software_list = check_commercial_software(report_data)
+
+                # total count of applications
+                print(f"Total applications found for {hostname}: {total_apps_found}")
                 
-                # Directly print the results for this hostname
                 if commercial_software_list:
                     print(f"Commercial software found for {hostname}:")
+                    list_of_commercial_apps = []
                     for application_name in commercial_software_list:
+                        list_of_commercial_apps.append(application_name)
                         print(f"- {application_name}")
+                    log_to_database(process_id, f"Commercial software found for {hostname}: {list_of_commercial_apps}. Machine should be removed from Artifactory.", "INFO", "-", "FLEXERA REPORT")
                 else:
                     print(f"No commercial software found for {hostname}.")
+                    if total_apps_found > 5 or current_checks > 3:
+                        print(f"Machine {hostname} can be deleted from cluster.")
+                        log_to_database(process_id, f"No commercial software found for {hostname}. It can be deleted from cluster. (Applications found: {total_apps_found}, Checked: {current_checks} times.)", "INFO", "-", "FLEXERA REPORT")
+                    else:
+                        log_to_database(process_id, f"No commercial software found for {hostname}. Waiting for the next check tomorrow, because the number of applications found is {total_apps_found}, and the number of checks so far is {current_checks}", "INFO", "-", "FLEXERA REPORT")
+                
+                # Increment the number_of_checks in the database
+                increment_number_of_checks(hostname)
+
             else:
                 print(f"Machine not found for hostname: {hostname}.")
+
+                # Increment the number_of_checks in the database
+                increment_number_of_checks(hostname)
+                log_to_database(process_id, f"No matching inventory: {hostname} in Flexera. Waiting for the next check tomorrow. Number of checks: {current_checks}", "INFO", "-", "FLEXERA REPORT")
         else:
             print(f"Error fetching report or no data returned for hostname: {hostname}.")
+            log_to_database(process_id, f"Error fetching report or no data returned for hostname: {hostname}. Check flexeraInventoryChecker.py script or Flexera API issues.", "INFO", "-", "FLEXERA REPORT")
 
 
 if __name__ == '__main__':

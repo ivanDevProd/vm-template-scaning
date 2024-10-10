@@ -1053,3 +1053,61 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-09 10:27:08,662 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
 2024-10-09 10:27:08,664 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/centos74.img
 2024-10-09 10:31:36,245 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/centos74.img
+2024-10-09 17:04:05,829 - WARNING - Not Found: /favicon.ico
+2024-10-09 19:50:56,851 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/acro_images/automation/openstack-automation-vm.img, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_openstack-automation-vm.img_process.log
+2024-10-09 19:51:04,117 - INFO - Initiating image upload to the Artifactory
+2024-10-09 19:58:03,768 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Prism-NGT/AHV/Linux/Centos73_NGT_AHV.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Prism-NGT_AHV_Linux_Centos73_NGT_AHV.tar.gz_process.log
+2024-10-09 19:58:09,629 - INFO - Initiating image upload to the Artifactory
+2024-10-09 19:58:10,260 - INFO - File size: 0.77 GB
+2024-10-09 19:58:12,495 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-09 20:01:58,249 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-09 20:02:00,560 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-09 20:02:51,517 - INFO - Number of files in archive: 1
+2024-10-09 20:02:51,518 - INFO - Total size of files: 4096.00 MB
+2024-10-09 20:02:53,828 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 20:03:33,676 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/Linux/Centos73_NGT_AHV.tar.gz.
+2024-10-09 20:04:01,009 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 20:04:01,010 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos73_NGT_AHV.img
+2024-10-09 20:05:23,900 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos73_NGT_AHV.img
+2024-10-09 20:31:06,288 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/agave/goldimages/kvm/Centos7UVM-1.2.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_agave_goldimages_kvm_Centos7UVM-1.2.tar.gz_process.log
+2024-10-09 20:31:13,866 - INFO - Initiating image upload to the Artifactory
+2024-10-09 20:31:14,504 - INFO - File size: 1.11 GB
+2024-10-09 20:31:17,142 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos7UVM-1.2.tar.gz
+2024-10-09 20:34:42,194 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos7UVM-1.2.tar.gz
+2024-10-09 20:34:44,467 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos7UVM-1.2.tar.gz
+2024-10-09 20:35:40,261 - INFO - Started scanning process for URLhttp://10.46.1.165/FNS-DND/haproxy/haproxy_v7_centos.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.46.1.165_FNS-DND_haproxy_haproxy_v7_centos.qcow2_process.log
+2024-10-09 20:35:46,100 - INFO - Initiating image upload to the Artifactory
+2024-10-09 20:38:35,930 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Centos7UVM-1.2.tar.gz.
+2024-10-09 20:38:38,381 - INFO - Number of files in archive: 1
+2024-10-09 20:38:38,382 - INFO - Total size of files: 20480.00 MB
+2024-10-09 20:38:40,616 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/Centos7UVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 20:43:42,078 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-09 20:43:42,080 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/traffic-gen-iperf3-2.img
+2024-10-09 20:49:55,674 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/traffic-gen-iperf3-2.img
+2024-10-09 22:22:49,796 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/openstack-automation-vm.img.
+2024-10-10 06:45:54,791 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Prism-NGT/AHV/Linux/Centos73_NGT_AHV.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Prism-NGT_AHV_Linux_Centos73_NGT_AHV.tar.gz_process.log
+2024-10-10 06:46:01,282 - INFO - Initiating image upload to the Artifactory
+2024-10-10 06:46:01,899 - INFO - File size: 0.77 GB
+2024-10-10 06:46:04,156 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-10 06:49:05,424 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-10 06:49:07,667 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-10 06:49:59,042 - INFO - Number of files in archive: 1
+2024-10-10 06:49:59,043 - INFO - Total size of files: 4096.00 MB
+2024-10-10 06:50:01,081 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-10 06:50:29,354 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/Linux/Centos73_NGT_AHV.tar.gz.
+2024-10-10 06:51:09,104 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-10 06:51:09,105 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos73_NGT_AHV.img
+2024-10-10 06:52:47,655 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos73_NGT_AHV.img
+2024-10-10 06:57:11,523 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Prism-NGT/AHV/Linux/Centos73_NGT_AHV.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Prism-NGT_AHV_Linux_Centos73_NGT_AHV.tar.gz_process.log
+2024-10-10 06:57:20,424 - INFO - Initiating image upload to the Artifactory
+2024-10-10 06:57:21,030 - INFO - File size: 0.77 GB
+2024-10-10 06:57:23,841 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-10 07:00:02,313 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-10 07:00:04,706 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz
+2024-10-10 07:00:55,496 - INFO - Number of files in archive: 1
+2024-10-10 07:00:55,497 - INFO - Total size of files: 4096.00 MB
+2024-10-10 07:00:57,729 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/Centos73_NGT_AHV.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-10 07:01:33,733 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/Linux/Centos73_NGT_AHV.tar.gz.
+2024-10-10 07:02:05,296 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-10 07:02:05,297 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos73_NGT_AHV.img
+2024-10-10 07:03:28,415 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos73_NGT_AHV.img
