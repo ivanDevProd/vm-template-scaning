@@ -272,8 +272,15 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     ssh.close()
                     return
 
+
+                # Attempt to run either the full command list or the failed commands
+                if failed_commands is None:
+                    commands_to_run = commands
+                else:
+                    commands_to_run = failed_commands
+
                 failed_commands = []
-                for command in commands:
+                for command in commands_to_run:
                     output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
                     if exit_code != 0:
                         print(f"Failed to execute command '{command}', exit code: {exit_code}")
@@ -284,9 +291,12 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
                         insert_workflow_state(process_id, f"Command '{command}' executed successfully", "SUCCEEDED", "Commands execution", source_url)
+                        
+                        # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostnamectl set-hostname {new_hostname}':
                             log_to_database_waitForFlexera(process_id, new_hostname, None, None)
-                    print(output)
+
+                    # print(output)
                     time.sleep(30)
 
                 if failed_commands:
@@ -306,6 +316,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry", "SUCCEEDED", "Commands execution", source_url)
                         print(output)
                         time.sleep(30)
+                        
                     if all_commands_successful:
                         insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
                         return  # Exit the loop if all commands are successful

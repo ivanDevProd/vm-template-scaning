@@ -306,7 +306,7 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url):
                                 log_to_database(process_id, f"VM {vm_ip} can be accessed via ssh/winRM", "SUCCEEDED", source_url, "VM deployment")
 
                                 # Connecting and executing commands on deployed machine (using ssh_to_vm method) passing IP address
-                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V1.py'
+                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V2.py'
                                 command = f"python3 {script_path} {process_id} {vm_ip} {source_url}"
                                 # Run the script asynchronously
                                 subprocess.Popen(command, shell=True)
@@ -478,7 +478,7 @@ def deploy_vm():
                                     add_comment_to_jira_task(new_jira_task, f"VM avialable via ssh/winRM. Continues executing commands on the running machine.")
 
                                 # Connecting and executing commands on deployed machine (using ssh_to_vm method) passing IP address
-                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V1.py'
+                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V2.py'
                                 command = f"python3 {script_path} {process_id} {vm_ip} {source_url}"
                                 # Run the script asynchronously
                                 subprocess.Popen(command, shell=True)
