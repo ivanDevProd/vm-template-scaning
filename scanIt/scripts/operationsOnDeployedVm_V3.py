@@ -83,51 +83,50 @@ def execute_command(ssh, command, use_sudo=False, use_pty=False, sudo_password=N
 
     return output, error, exit_code
 
-def retry_commands_with_winrm(ip, usernames, password):
-    for username in usernames:
-        try:
-            session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
+def retry_commands_with_winrm(ip, username, password):
+    try:
+        session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
 
-            fallback_command = "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\""
-            windows_commands = [
-                    "hostname",
-                    "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
-                    "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
-                    'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                    "powershell -NoProfile -Command \"net start | findstr Flexera*\""
-                ]
+        fallback_command = "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\""
+        windows_commands = [
+                        "hostname",
+                        "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
+                        "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
+                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
+                    ]
 
-            all_commands_successful = True
-            for command in windows_commands:
-                response = session.run_cmd(command)
-                if response.status_code != 0:
-                    print(f"Failed to execute command '{command}', status code: {response.status_code}")
-                    print(f"Error of '{command}': {response.std_err}")
-                    insert_workflow_state(process_id, f"Failed to execute command '{command}: {response.std_err}'", "FAILED", "Commands execution", source_url)
-                    
-                    if "'Expand-Archive' is not recognized" in str(response.std_err):
-                        print("Expand-Archive command not recognized, trying fallback method.")
-                        response = session.run_cmd(fallback_command)
-                        if response.status_code != 0:
-                            print(f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}")
-                            insert_workflow_state(process_id, f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}", "FAILED", "Commands execution", source_url)
-                            all_commands_successful = False
-                        else:
-                            print(f"Fallback command '{fallback_command}' executed successfully with username: {username}")
-                            insert_workflow_state(process_id, f"Fallback command '{fallback_command}' executed successfully with username: {username}", "SUCCEEDED", "Commands execution", source_url)
-                else:
-                    print(f"Command '{command}' executed successfully")
-                    print(f"Output of '{command}': {response.decode()}")
-                    insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username}. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
+        all_commands_successful = True
+        for command in windows_commands:
+            response = session.run_cmd(command)
+            if response.status_code != 0:
+                print(f"Failed to execute command '{command}', status code: {response.status_code}")
+                print(f"Error of '{command}': {response.std_err}")
+                insert_workflow_state(process_id, f"Failed to execute command '{command}: {response.std_err}'", "FAILED", "Commands execution", source_url)
+                
+                if "'Expand-Archive' is not recognized" in str(response.std_err):
+                    print("Expand-Archive command not recognized, trying fallback method.")
+                    response = session.run_cmd(fallback_command)
+                    if response.status_code != 0:
+                        print(f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}")
+                        insert_workflow_state(process_id, f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}", "FAILED", "Commands execution", source_url)
+                        all_commands_successful = False
+                    else:
+                        print(f"Fallback command '{fallback_command}' executed successfully with username: {username}")
+                        insert_workflow_state(process_id, f"Fallback command '{fallback_command}' executed successfully with username: {username}", "SUCCEEDED", "Commands execution", source_url)
+            else:
+                print(f"Command '{command}' executed successfully")
+                print(f"Output of '{command}': {response.decode()}")
+                insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username}. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
 
-            if all_commands_successful:
-                print("All commands executed successfully. Returning.")
-                insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
-                return
+        if all_commands_successful:
+            print("All commands executed successfully. Returning.")
+            insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
+            return
 
-        except Exception as winrm_e:
-            print(f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}")
-            insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}", source_url)
+    except Exception as winrm_e:
+        print(f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}")
+        insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}", source_url)
 
 
 def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
@@ -159,7 +158,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             insert_workflow_state(process_id, f"Detected OS type: {os_type}", "SUCCEEDED", "Commands execution", source_url)
 
             if os_type == "Windows":
-                ps_version_command = 'powershell -Command "$PSVersionTable.PSVersion.Major"'
+                ps_version_command = "powershell -Command \'$PSVersionTable.PSVersion.Major\'"
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
@@ -199,6 +198,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Error of '{command}': {error}")
                         insert_workflow_state(process_id, f"Failed to execute command '{command}> Error: {error}'", "FAILED", "Commands execution", source_url)
                         all_commands_successful = False
+                        retry_commands_with_winrm(username,password)
                         break  # Stop executing commands for this user if one command fails
 
                     else:
@@ -370,7 +370,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 # Check PowerShell version
                 try:
-                    ps_version_command = 'powershell -Command "$PSVersionTable.PSVersion.Major"'
+                    ps_version_command = "powershell -Command \'$PSVersionTable.PSVersion.Major\'"
                     response = session.run_cmd(ps_version_command)
 
                     if response.status_code == 0:
@@ -380,6 +380,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check.")
                         print(f"Error: {response.std_err.decode()}")
                         ps_version = 0  # If version check fails, default to 0
+                        
                 except Exception as version_check_e:
                     print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with fallback as precaution.")
                     ps_version = 0  # Assume old PowerShell version if version check fails
@@ -434,12 +435,6 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             if 'ssh' in locals():
                 ssh.close()
                 print("SSH connection closed")
-
-
-    if os_type == "Windows":
-        print("All users failed to execute the commands on Windows. Retrying with WinRM.")
-        insert_workflow_state(process_id, f"All users failed to execute complete commands on Windows via SSH. Retry with WinRM.", "INFO", "Commands execution", source_url)
-        retry_commands_with_winrm(ip, usernames, password)
 
 
 if __name__ == "__main__":
