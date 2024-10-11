@@ -94,7 +94,7 @@ def retry_commands_with_winrm(ip, usernames, password):
                     "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                     "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
                     'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                    "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                    "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                 ]
 
             all_commands_successful = True
@@ -165,7 +165,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
                     print(f"Failed to check PowerShell version: {ps_error}")
                     insert_workflow_state(process_id, f"Failed to check PowerShell version. Error: {ps_error}", "FAILED", "Commands execution", source_url)
-                    return
+                    ps_version = 0  # If version check fails, default to 0
                 else:
                     ps_version = int(ps_output.strip())
                     print(f"PowerShell version detected: {ps_version}")
@@ -179,7 +179,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         # 'cd C:/flexera_prodagent/prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
                         "powershell -NoProfile -Command \"cd C:\\flexera_prodagent\\prodagent; & msiexec /i 'FlexNet Inventory Agent.msi' /qn\"",
                         # 'net start | findstr Flexera*'
-                        "powershell -NoProfile -Command \"net start | findstr 'Flexera'\""
+                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
                 else:
                     # Fallback commands for older PowerShell versions (below 5.0) (Expand-Archive command is missing)
@@ -188,7 +188,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         'powershell -Command "Start-Process powershell -ArgumentList \'Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile C:\\flexera_prodagent.zip\' -Verb RunAs -Wait"',
                         'powershell -Command "Add-Type -A \'System.IO.Compression.FileSystem\'; [IO.Compression.ZipFile]::ExtractToDirectory(\'C:\\flexera_prodagent.zip\', \'C:\\flexera_prodagent\')"',
                         'powershell -NoProfile -Command "cd C:\\flexera_prodagent\\prodagent; & msiexec /i \'FlexNet Inventory Agent.msi\' /qn"',
-                        "powershell -NoProfile -Command \"net start | findstr 'Flexera'\""
+                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
 
                 all_commands_successful = True
@@ -391,7 +391,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                         "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
                         'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                        "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
                 else:
                     print(f"Using standard commands for PowerShell version >= 5")
@@ -400,7 +400,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                         "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
                         'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                        "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
 
                 all_commands_successful = True

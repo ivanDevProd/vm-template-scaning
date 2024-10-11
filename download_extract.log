@@ -1202,3 +1202,8 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-11 20:22:34,998 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
 2024-10-11 20:22:40,975 - INFO - Initiating image upload to the Artifactory
 2024-10-11 20:47:16,447 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-11 21:02:39,490 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-11 21:02:46,695 - INFO - Initiating image upload to the Artifactory
+2024-10-11 21:27:04,897 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-11 21:34:05,669 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-11 21:34:12,173 - INFO - Initiating image upload to the Artifactory
