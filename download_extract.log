@@ -1137,3 +1137,68 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-10 08:46:33,314 - INFO - Extraction completed to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
 2024-10-10 08:46:33,315 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos73_NGT_AHV.img
 2024-10-10 08:47:56,565 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos73_NGT_AHV.img
+2024-10-10 10:12:40,837 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/acro_images/automation/ahv_guest_os/DSK/windows10_gpu.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_acro_images_automation_ahv_guest_os_DSK_windows10_gpu.qcow2_process.log
+2024-10-10 10:12:48,173 - INFO - Initiating image upload to the Artifactory
+2024-10-10 11:04:11,339 - INFO - Started scanning process for cirros.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/cirros.qcow2_process.log
+2024-10-10 11:04:17,588 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-10 11:04:17,630 - INFO - Initiating image upload to the Artifactory
+2024-10-10 11:04:17,942 - INFO - Image upload initiated successfully
+2024-10-10 11:04:21,237 - INFO - Image upload completed successfully
+2024-10-10 11:04:23,278 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-10 11:04:29,070 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-10 11:04:33,999 - INFO - [Mailing] Process ID: e1499b38-663a-4beb-a7aa-0249ac44f8ec, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-10 11:04:33,999 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-10 13:38:31,353 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
+2024-10-10 13:38:38,653 - INFO - Initiating image upload to the Artifactory
+2024-10-10 14:51:22,368 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/systest_ahv_win10.qcow2.
+2024-10-10 20:53:22,183 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
+2024-10-10 20:53:28,856 - INFO - Initiating image upload to the Artifactory
+2024-10-10 20:57:15,653 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/agave/kvm/AFSWindows11UVM-3.0.tar.gz, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_agave_kvm_AFSWindows11UVM-3.0.tar.gz_process.log
+2024-10-10 20:57:22,325 - INFO - Initiating image upload to the Artifactory
+2024-10-10 20:57:22,935 - INFO - File size: 8.09 GB
+2024-10-10 20:57:25,089 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-3.0.tar.gz
+2024-10-10 21:12:43,335 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/st-aiops/sql_images/centos_based_sql_server.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_st-aiops_sql_images_centos_based_sql_server.qcow2_process.log
+2024-10-10 21:12:50,214 - INFO - Initiating image upload to the Artifactory
+2024-10-10 21:27:49,803 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/sql_images/centos_based_sql_server.qcow2.
+2024-10-10 21:30:02,836 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-3.0.tar.gz
+2024-10-10 21:30:04,745 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-3.0.tar.gz
+2024-10-10 21:48:54,721 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindows11UVM-3.0.tar.gz.
+2024-10-10 21:49:39,222 - INFO - Number of files in archive: 1
+2024-10-10 21:49:39,223 - INFO - Total size of files: 102400.00 MB
+2024-10-10 21:49:41,555 - INFO - Extracting image from /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-3.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-10 21:57:14,671 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
+2024-10-10 21:57:21,562 - INFO - Initiating image upload to the Artifactory
+2024-10-11 11:38:27,664 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
+2024-10-11 11:38:34,297 - INFO - Initiating image upload to the Artifactory
+2024-10-11 12:50:49,793 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
+2024-10-11 12:50:56,206 - INFO - Initiating image upload to the Artifactory
+2024-10-11 14:23:03,475 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/systest_ahv_win10.qcow2.
+2024-10-11 15:55:30,925 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/builds/qa-tools/selenium/windows-selenium.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_builds_qa-tools_selenium_windows-selenium.qcow2_process.log
+2024-10-11 15:55:37,432 - INFO - Initiating image upload to the Artifactory
+2024-10-11 16:20:29,277 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/Win2k16Uefi.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_Win2k16Uefi.qcow2_process.log
+2024-10-11 16:20:35,001 - INFO - Initiating image upload to the Artifactory
+2024-10-11 16:24:56,360 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/selenlium_windows_image/selenium/zalenium_latest.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_selenlium_windows_image_selenium_zalenium_latest.qcow2_process.log
+2024-10-11 16:25:03,036 - INFO - Initiating image upload to the Artifactory
+2024-10-11 16:25:55,585 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/agave/kvm/Windows_2019.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_agave_kvm_Windows_2019.qcow2_process.log
+2024-10-11 16:26:02,364 - INFO - Initiating image upload to the Artifactory
+2024-10-11 16:26:54,661 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-11 16:27:01,171 - INFO - Initiating image upload to the Artifactory
+2024-10-11 16:34:03,696 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/selenium/windows-selenium.qcow2.
+2024-10-11 16:39:16,199 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/Win2k22Uefi.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_Win2k22Uefi.qcow2_process.log
+2024-10-11 16:39:22,821 - INFO - Initiating image upload to the Artifactory
+2024-10-11 16:57:59,738 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/Win2k16Uefi.qcow2.
+2024-10-11 17:01:06,505 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Windows_2019.qcow2.
+2024-10-11 17:04:29,345 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/selenium/zalenium_latest.qcow2.
+2024-10-11 17:04:37,063 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-11 17:18:01,788 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/Win2k22Uefi.qcow2.
+2024-10-11 17:51:20,870 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/Win2k16Uefi.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_Win2k16Uefi.qcow2_process.log
+2024-10-11 17:51:27,162 - INFO - Initiating image upload to the Artifactory
+2024-10-11 18:16:38,448 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/Win2k16Uefi.qcow2.
+2024-10-11 18:23:27,607 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-11 18:23:34,310 - INFO - Initiating image upload to the Artifactory
+2024-10-11 18:48:46,123 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-11 19:00:22,617 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-11 19:00:29,031 - INFO - Initiating image upload to the Artifactory
+2024-10-11 20:22:34,998 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-11 20:22:40,975 - INFO - Initiating image upload to the Artifactory
+2024-10-11 20:47:16,447 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.

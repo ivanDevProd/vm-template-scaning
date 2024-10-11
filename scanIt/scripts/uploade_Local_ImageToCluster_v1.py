@@ -245,9 +245,14 @@ def upload_image_to_nutanix():
     
         body_text = f'Hi {user_email.split('.')[0].capitalize()},'\
                     f'<p>Scanning of the image {file_name} has been successfully initiated.'\
+                    f'<br>Process id: {process_id}'\
+                    f'<p>The speed of the whole process depends on the system and network load, image size, and it may take some time.'\
                     f'<br>You can follow all the details about the progress through the Jira ticket {new_jira_task}.'\
+                    f'<p>If you have any questions or concerns regarding this process, please feel free to contact the EngSAM Team for assistance.'\
+                    f'<p>Email: eng_sam_admins@nutanix.com'\
+                    f'<br>Slack: #ask-eng-sam'\
                     f"<p>Kind regards,"\
-                    '<br>DevProd Team'
+                    '<br>EngSAM Team'
         
         msg = MIMEMultipart('mixed')
         msg['Subject'] = f'VM image scan progress'

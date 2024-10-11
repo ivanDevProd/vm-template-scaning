@@ -118,7 +118,7 @@ def retry_commands_with_winrm(ip, usernames, password):
                 else:
                     print(f"Command '{command}' executed successfully")
                     print(f"Output of '{command}': {response.decode()}")
-                    insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username}. Command output {response.std_out.decode()}", "SUCCEEDED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username}. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
 
             if all_commands_successful:
                 print("All commands executed successfully. Returning.")
@@ -170,7 +170,6 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     ps_version = int(ps_output.strip())
                     print(f"PowerShell version detected: {ps_version}")
 
-
                 if ps_version >= 5:
                     windows_commands = [
                         "hostname",
@@ -180,7 +179,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         # 'cd C:/flexera_prodagent/prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
                         "powershell -NoProfile -Command \"cd C:\\flexera_prodagent\\prodagent; & msiexec /i 'FlexNet Inventory Agent.msi' /qn\"",
                         # 'net start | findstr Flexera*'
-                        "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                        "powershell -NoProfile -Command \"net start | findstr 'Flexera'\""
                     ]
                 else:
                     # Fallback commands for older PowerShell versions (below 5.0) (Expand-Archive command is missing)
@@ -189,7 +188,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         'powershell -Command "Start-Process powershell -ArgumentList \'Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile C:\\flexera_prodagent.zip\' -Verb RunAs -Wait"',
                         'powershell -Command "Add-Type -A \'System.IO.Compression.FileSystem\'; [IO.Compression.ZipFile]::ExtractToDirectory(\'C:\\flexera_prodagent.zip\', \'C:\\flexera_prodagent\')"',
                         'powershell -NoProfile -Command "cd C:\\flexera_prodagent\\prodagent; & msiexec /i \'FlexNet Inventory Agent.msi\' /qn"',
-                        "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                        "powershell -NoProfile -Command \"net start | findstr 'Flexera'\""
                     ]
 
                 all_commands_successful = True
@@ -360,52 +359,71 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
         except Exception as e:
             print(f"SSH connection to {ip} failed with username: {username}. Error: {e}")
             insert_workflow_state(process_id, f"SSH connection to {ip} failed with username: {username}. Error: {e}", "FAILED", "Commands execution", source_url)
-            # Try to connect using WinRM
+            
+            # Close SSH connection if it was established
             if 'ssh' in locals():
                 ssh.close()
+
+            # Try to connect using WinRM
             try:
                 session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
 
-                fallback_command = "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\""
-                windows_commands = [
-                    "hostname",
-                    "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
-                    "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
-                    'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                    "powershell -NoProfile -Command 'net start | findstr Flexera*'"
-                ]
-                
+                # Check PowerShell version
+                try:
+                    ps_version_command = 'powershell -Command "$PSVersionTable.PSVersion.Major"'
+                    response = session.run_cmd(ps_version_command)
+
+                    if response.status_code == 0:
+                        ps_version = int(response.std_out.strip())
+                        print(f"PowerShell version on target: {ps_version}")
+                    else:
+                        print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check.")
+                        print(f"Error: {response.std_err.decode()}")
+                        ps_version = 0  # If version check fails, default to 0
+                except Exception as version_check_e:
+                    print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with fallback as precaution.")
+                    ps_version = 0  # Assume old PowerShell version if version check fails
+
+                if ps_version < 5:
+                    print(f"Using fallback commands due to PowerShell version < 5")
+                    windows_commands = [
+                        "hostname",
+                        "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
+                        "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
+                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                        "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                    ]
+                else:
+                    print(f"Using standard commands for PowerShell version >= 5")
+                    windows_commands = [
+                        "hostname",
+                        "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
+                        "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
+                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                        "powershell -NoProfile -Command 'net start | findstr Flexera*'"
+                    ]
+
                 all_commands_successful = True
                 for command in windows_commands:
                     response = session.run_cmd(command)
+
                     if response.status_code != 0:
                         print(f"Failed to execute command '{command}', status code: {response.status_code}")
-                        print(f"Error of '{command}': {response.std_err}")
-                        insert_workflow_state(process_id, f"Failed to execute command '{command}: {response.std_err}'", "FAILED", "Commands execution", source_url)
-                        if "'Expand-Archive' is not recognized" in str(response.std_err):
-                            print("Expand-Archive command not recognized, trying fallback method.")
-                            response = session.run_cmd(fallback_command)
-                            if response.status_code != 0:
-                                print(f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}")
-                                insert_workflow_state(process_id, f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}", "FAILED", "Commands execution", source_url)
-                                all_commands_successful = False
-                            else:
-                                print(f"Fallback command '{fallback_command}' executed successfully with username: {username}")
-                                insert_workflow_state(process_id, f"Fallback command '{fallback_command}' executed successfully with username: {username}", "FAILED", "Commands execution", source_url)
-                        else:
-                            all_commands_successful = False
+                        print(f"Error of '{command}': {response.std_err.decode()}")
+                        insert_workflow_state(process_id, f"Failed to execute command '{command} via WinRM: {response.std_err.decode()}'", "FAILED", "Commands execution", source_url)
+                        all_commands_successful = False
                     else:
                         print(f"Command '{command}' executed successfully")
-                        print(f"Output of '{command}': {response.std_out.decode()}")
-                        insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username}. Command output {response.std_out.decode()}", "SUCCEEDED", "Commands execution", source_url)
-                        
-                        # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
+                        print(f"Output of '{command}': {response.std_out.decode().strip()}")
+                        insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username} via WinRM. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
+
+                        # Log hostname for future Flexera checks
                         if command == 'hostname':
-                            log_to_database_waitForFlexera(process_id, response.std_out.decode(), None, None)
+                            log_to_database_waitForFlexera(process_id, response.std_out.decode().strip(), None, None)
 
                 if all_commands_successful:
-                    print("All commands executed successfully. Returning.")
-                    insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
+                    print("All commands executed successfully via WinRM. Returning.")
+                    insert_workflow_state(process_id, f"All commands executed successfully via WinRM", "SUCCEEDED", "Commands execution", source_url)
                     return
 
             except Exception as winrm_e:

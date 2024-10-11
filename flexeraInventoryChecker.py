@@ -101,6 +101,7 @@ def get_number_of_checks(hostname):
     conn.close()
 
     if result:
+        print(result[0])
         return result[0]
     else:
         return None
@@ -198,8 +199,9 @@ def run_flexera_checks():
     report_id = "351"  # name of report: "Checking the existence of the machine & apps (VM Image scan ...)"
     access_token = create_new_access_token()
 
-    # hostnames = vmListToCheckOnFlexera()
-    hostnames = ['DPRO_AUTOMATION_1728469955', 'DPRO_AUTOMATION_1728468621', 'GRW0MP6649']
+    hostnames = vmListToCheckOnFlexera()
+    print(hostnames)
+    # hostnames = ['DPRO_AUTOMATION_1728469955', 'DPRO_AUTOMATION_1728468621', 'GRW0MP6649']
 
     for hostname in hostnames:
         # Get the current number_of_checks before incrementing
