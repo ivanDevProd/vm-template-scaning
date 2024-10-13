@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .forms import URLInputForm, FileUploadForm
 import json
-from .scripts import uploadeImageToCluster_v2
 from django.db import connection
 import subprocess
 from django.contrib import messages
@@ -74,7 +73,7 @@ def url_input_view(request):
 
                 for json_data in json_data_list:
                     json_data_str = json.dumps(json_data, indent=4)
-                    script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v2.py'
+                    script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/uploadeImageToCluster_v3.py'
 
                     # Generate unique log file for each process
                     source_url = json_data['spec']['resources']['source_uri']

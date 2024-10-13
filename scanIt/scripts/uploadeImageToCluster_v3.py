@@ -208,30 +208,58 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
             # Log file details
             logging.info(f"Number of files in archive: {num_files}")
             logging.info(f"Total size of files: {total_size / (1024 ** 2):.2f} MB")
-            log_to_database(process_id, f"Number of files in archive: {num_files}, Total size of files: {total_size / (1024 ** 2):.2f} MB", "INFO", source_url, "Download and Extraction")
+            log_to_database(process_id, f"Number of files in archive: {num_files}, Total size of files: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.", "INFO", source_url, "Download and Extraction")
 
             if jira_task_key:
-                add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}, Total size of files: {total_size / (1024 ** 2):.2f} MB")
+                add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}, Total size of files: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.")
 
-            if num_files != 1:
-                error_message = f"Multiple files found in archive. Found {num_files} files. Process aborted."
+            valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk']
+            matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
+            
+            # If no matching files found, log a warning and stop
+            if not matching_files:
+                error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk) found in archive. Process aborted."
                 logging.error(error_message)
                 log_to_database(process_id, error_message, "FAILED", source_url, "Download and Extraction")
+                if jira_task_key:
+                    add_comment_to_jira_task(jira_task_key, error_message)
                 return None
 
-            # Proceed to extract the single file
-            extracted_file_name = file_info[0].name
-            logging.info(f"Extracting image from {download_path} to {extracted_dir}")
-            log_to_database(process_id, f"Extracting image from {download_path} to {extracted_dir}", "INITIATED", source_url, "Download and Extraction")
+             # Check for multiple files with the same extension (for valid extensions only)
+            ext_count = {}
+            for file in matching_files:
+                ext = next((ext for ext in valid_extensions if file.name.endswith(ext)), None)  # Get the specific valid extension
+                ext_count[ext] = ext_count.get(ext, 0) + 1
+
+            # If there are multiple files with the same valid extension, stop the process
+            for ext, count in ext_count.items():
+                if count > 1:
+                    error_message = f"Multiple files with the same extension '{ext}' found: {[file.name for file in matching_files]}.  Process aborted."
+                    logging.error(error_message)
+                    log_to_database(process_id, error_message, "FAILED", source_url, "Download and Extraction")
+                    if jira_task_key:
+                        add_comment_to_jira_task(jira_task_key, error_message)
+                    return None
+            
+            selected_file = matching_files[0]
+            logging.info(f"Proceeding with file: {selected_file.name}")
+            log_to_database(process_id, f"Proceeding with file: {selected_file.name}", "INFO", source_url, "Download and Extraction")
+
+            if jira_task_key:
+                add_comment_to_jira_task(jira_task_key, f"Proceeding with file: {selected_file.name}")
+
+            
+            logging.info(f"Extracting {selected_file.name} from {download_path} to {extracted_dir}")
+            log_to_database(process_id, f"Extracting {selected_file.name} from {download_path} to {extracted_dir}", "INITIATED", source_url, "Download and Extraction")
 
             if jira_task_key:
                 add_comment_to_jira_task(jira_task_key, f"Extracting image initiated.")
 
-            tar.extract(file_info[0], path=extracted_dir)
-            logging.info(f"Extraction completed to {extracted_dir}")
+            tar.extract(selected_file, path=extracted_dir)
+            logging.info(f"Extraction completed for {selected_file.name} to {extracted_dir}")
 
         # Generate URL for the extracted image
-        extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{extracted_file_name}"
+        extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{selected_file.name}"
         logging.info(f"Extracted image URL: {extracted_image_url}")
         log_to_database(process_id, f"Extracted image URL: {extracted_image_url}", "SUCCEEDED", source_url, "Download and Extraction")
 
@@ -336,7 +364,7 @@ def upload_image_to_nutanix():
                     f'<p>Scanning of the image {source_url} has been successfully initiated.'\
                     f'<br>Process id: {process_id}'\
                     f'<p>The speed of the whole process depends on the system and network load, image size, and it may take some time.'\
-                    f'<br>You can follow all the details about the progress through the Jira ticket {new_jira_task}.'\
+                    f'<br>Progress details can be tracked in a Jira ticket: {new_jira_task}.'\
                     f'<p>If you have any questions or concerns regarding this process, please feel free to contact the EngSAM Team for assistance.'\
                     f'<p>Email: eng_sam_admins@nutanix.com'\
                     f'<br>Slack: #ask-eng-sam'\
@@ -354,7 +382,7 @@ def upload_image_to_nutanix():
             log_to_database(process_id, f"The mail was not successfully sent to the user. Error: {e}", "INFO", source_url, "Mailing")
         
     else:
-        log_to_database(process_id, f"Jira ticket not created. There was a problem. The scanning process will continue without recording in the ticket", "FAILED", source_url, "Jira case")
+        log_to_database(process_id, f"Jira ticket not created. There was a problem (lok for Jira iisue, API token ...). The scanning process will continue without recording in the ticket. The initial email was not sent to the user", "FAILED", source_url, "Jira case")
     
     logging.info(f"Initiating image upload to the Artifactory")
     log_to_database(process_id, f"Initiating image upload to the Artifactory", "INITIATED", source_url, "Artifactory Upload")

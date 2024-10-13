@@ -1209,3 +1209,75 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-11 21:34:12,173 - INFO - Initiating image upload to the Artifactory
 2024-10-11 21:55:30,135 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
 2024-10-11 21:55:36,612 - INFO - Initiating image upload to the Artifactory
+2024-10-11 22:46:33,976 - INFO - Started scanning process for URLhttp://10.52.128.2/images/gold_images/systest_ahv_win10.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___10.52.128.2_images_gold_images_systest_ahv_win10.qcow2_process.log
+2024-10-11 22:46:39,381 - INFO - Initiating image upload to the Artifactory
+2024-10-12 00:06:58,471 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/systest_ahv_win10.qcow2.
+2024-10-12 08:36:55,007 - INFO - Started scanning process for URLhttp://endor.dyn.nutanix.com/GoldImages/Windows_ngt/AHV/win19_vg_march.qcow2, logging to /home/noc_admin/image_scanner_project/logs/processes/http___endor.dyn.nutanix.com_GoldImages_Windows_ngt_AHV_win19_vg_march.qcow2_process.log
+2024-10-12 08:37:03,335 - INFO - Initiating image upload to the Artifactory
+2024-10-12 09:01:41,934 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-13 08:05:08,459 - WARNING - Not Found: /favicon.ico
+2024-10-13 17:08:10,299 - INFO - Initiating image upload to the Artifactory
+2024-10-13 17:08:10,912 - INFO - File size: 2.44 GB
+2024-10-13 17:08:12,846 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-13 17:16:14,327 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-13 17:16:16,590 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-13 17:22:03,104 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/UBUNTU18_UEFI.tar.gz.
+2024-10-13 17:22:29,399 - INFO - Number of files in archive: 7
+2024-10-13 17:22:29,400 - INFO - Total size of files: 32768.51 MB
+2024-10-13 17:22:31,830 - INFO - Proceeding with file: Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-13 17:22:34,173 - INFO - Extracting Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 17:30:46,002 - INFO - Extraction completed for Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 17:30:46,003 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-13 17:48:51,026 - INFO - Initiating image upload to the Artifactory
+2024-10-13 17:48:51,637 - INFO - File size: 2.44 GB
+2024-10-13 17:48:53,273 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-13 17:56:08,798 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-13 17:56:11,186 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-13 18:01:28,107 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/UBUNTU18_UEFI.tar.gz.
+2024-10-13 18:02:24,994 - INFO - Number of files in archive: 7
+2024-10-13 18:02:24,995 - INFO - Total size of files: 32768.51 MB
+2024-10-13 18:02:27,328 - INFO - Proceeding with file: Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-13 18:02:28,968 - INFO - Extracting Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 18:09:05,113 - INFO - Initiating image upload to the Artifactory
+2024-10-13 18:09:05,729 - INFO - File size: 1.17 GB
+2024-10-13 18:09:07,393 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 18:10:42,557 - INFO - Extraction completed for Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 18:10:42,559 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-13 18:12:50,583 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 18:12:52,840 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 18:14:31,493 - INFO - Number of files in archive: 1
+2024-10-13 18:14:31,494 - INFO - Total size of files: 8192.00 MB
+2024-10-13 18:14:33,690 - INFO - Proceeding with file: rocky8.img
+2024-10-13 18:14:35,841 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 18:16:48,673 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 18:16:48,674 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-13 18:19:44,021 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-13 18:19:59,455 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-13 18:19:59,508 - INFO - Deleted empty subfolder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Ubuntu18_UEFI_0
+2024-10-13 18:23:24,564 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-13 19:21:24,570 - INFO - Initiating image upload to the Artifactory
+2024-10-13 19:21:25,181 - INFO - File size: 1.17 GB
+2024-10-13 19:21:26,927 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 19:24:34,531 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 19:24:36,994 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 19:26:16,127 - INFO - Number of files in archive: 1
+2024-10-13 19:26:16,128 - INFO - Total size of files: 8192.00 MB
+2024-10-13 19:26:18,012 - INFO - Proceeding with file: rocky8.img
+2024-10-13 19:26:20,313 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 19:28:09,263 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-13 19:28:30,889 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 19:28:30,891 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-13 19:30:54,610 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-13 19:54:28,373 - INFO - Initiating image upload to the Artifactory
+2024-10-13 19:54:28,967 - INFO - File size: 1.17 GB
+2024-10-13 19:54:30,558 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 19:57:47,832 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 19:57:49,569 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-13 19:59:28,523 - INFO - Number of files in archive: 1
+2024-10-13 19:59:28,524 - INFO - Total size of files: 8192.00 MB
+2024-10-13 19:59:30,741 - INFO - Proceeding with file: rocky8.img
+2024-10-13 19:59:32,387 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 20:00:41,029 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-13 20:01:42,121 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 20:01:42,123 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-13 20:04:06,481 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img

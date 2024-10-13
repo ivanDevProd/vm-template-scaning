@@ -69,7 +69,8 @@ def execute_command(ssh, command, use_sudo=False, use_pty=False, sudo_password=N
     if use_sudo:
         if sudo_password is None:
             raise ValueError("sudo_password must be provided when use_sudo is True")
-        command = f"echo {sudo_password} | sudo -S {command}"
+        # command = f"echo {sudo_password} | sudo -S {command}"
+        command = f"sudo -S {command}"
 
     stdin, stdout, stderr = ssh.exec_command(command, get_pty=use_pty)
 
@@ -81,7 +82,13 @@ def execute_command(ssh, command, use_sudo=False, use_pty=False, sudo_password=N
     error = stderr.read().decode().strip()
     exit_code = stdout.channel.recv_exit_status()
 
-    return output, error, exit_code
+    # Handle command success/failure
+    if exit_code != 0:
+        print(f"Command failed with exit code {exit_code}: {error}")
+        return output, error, exit_code
+
+    print(f"Command '{command}' executed successfully.")
+    return output, None, exit_code
 
 def retry_commands_with_winrm(ip, username, password):
     try:
@@ -131,7 +138,7 @@ def retry_commands_with_winrm(ip, username, password):
 
 def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
     usernames = ['nutanix', 'root', 'Administrator']
-    failed_commands = None 
+    failed_commands = []
     
     for username in usernames:
         try:
@@ -204,7 +211,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     else:
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
-                        insert_workflow_state(process_id, f"Command '{command}' executed successfully> Output: {output}", "SUCCEEDED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Command '{command}' executed successfully.", "SUCCEEDED", "Commands execution", source_url)
 
                         # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostname':
@@ -239,7 +246,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 # print(f"Version string: {version}")  # Debug print
 
                 # Fallback to /etc/system-release if /etc/os-release is not available
-                else:
+                elif exit_code != 0:
                     output, error, exit_code = execute_command(ssh, "cat /etc/system-release")
                     if exit_code == 0:
                         distro = output.strip()
@@ -262,7 +269,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "curl https://deb-mirror.corp.nutanix.com/corp/ntnx-corp-keyring-rsa3072.gpg -o /etc/apt/trusted.gpg.d/ntnx-corp-keyring-rsa3072.gpg",
                         "apt update",
                         "apt -y install managesoft-autoconf",
-                        "cat /var/opt/managesoft/log/uploader.log"
+                        # "cat /var/opt/managesoft/log/uploader.log"
                     ]
                 elif "CentOS" in distro and isinstance(version, float) and version >= 7.0:
                     commands = [
@@ -272,7 +279,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
                         "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
                         "yum -y install managesoft-autoconf",
-                        "cat /var/opt/managesoft/log/uploader.log"
+                        # "cat /var/opt/managesoft/log/uploader.log"
                     ]
                 elif ("RHEL" in distro or "Rocky" in distro or "Red Hat Enterprise Linux" in distro) and isinstance(version, float) and version >= 8.0:
                     commands = [
@@ -283,8 +290,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         'mkdir -p /etc/yum.repos.d/',
                         'sudo chmod -R o+rw /etc/yum.repos.d',
                         "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo",
-                        "yum -y install managesoft-autoconf",
-                        "cat /var/opt/managesoft/log/uploader.log"
+                        "yum install -y managesoft-autoconf",
+                        # opt/managesoft/log/uploader.log"
                     ]
                 elif "AHV" in distro:
                     commands = [
@@ -294,7 +301,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
                         "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
                         "yum -y install managesoft-autoconf",
-                        "cat /var/opt/managesoft/log/uploader.log"
+                        # "cat /var/opt/managesoft/log/uploader.log"
                     ]
                 else:
                     print("Unknown or unsupported distribution. Stopping execution.")
@@ -302,16 +309,12 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     ssh.close()
                     return
 
-
                 # Attempt to run either the full command list or the failed commands
-                if failed_commands is None:
-                    commands_to_run = commands
-                else:
-                    commands_to_run = failed_commands
-
-                failed_commands = []
+                commands_to_run = failed_commands if failed_commands else commands
+                    
                 for command in commands_to_run:
                     output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
+
                     if exit_code != 0:
                         print(f"Failed to execute command '{command}', exit code: {exit_code}")
                         print(f"Error of '{command}': {error}")
@@ -320,7 +323,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     else:
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
-                        insert_workflow_state(process_id, f"Command '{command}' executed successfully> Output: {output}", "SUCCEEDED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Command '{command}' executed successfully.", "SUCCEEDED", "Commands execution", source_url)
                         
                         # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostnamectl set-hostname {new_hostname}':
@@ -331,7 +334,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 if failed_commands:
                     insert_workflow_state(process_id, "Retrying failed commands.", "RUNNING", "Commands execution", source_url)
-                    all_commands_successful = True  # Flag to track all commands executed successfully
+                    all_linux_commands_successful = True  # Flag to track all commands executed successfully
                     for command in failed_commands:
                         time.sleep(90)
                         output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
@@ -339,15 +342,15 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             print(f"Failed to execute command '{command}', exit code: {exit_code}")
                             print(f"Error of '{command}': {error}")
                             insert_workflow_state(process_id, f"Failed to execute command again. Please check on device.'{command}: {error}'", "FAILED", "Commands execution", source_url)
-                            all_commands_successful = False  # Set flag to False if any command fails
+                            all_linux_commands_successful = False  # Set flag to False if any command fails
                         else:
                             print(f"Command '{command}' executed successfully")
                             print(f"Output of '{command}': {output}")
-                            insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry> Output: {output}", "SUCCEEDED", "Commands execution", source_url)
+                            insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
                         print(output)
                         time.sleep(30)
                         
-                    if all_commands_successful:
+                    if all_linux_commands_successful:
                         insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
                         return  # Exit the loop if all commands are successful
                     else:
