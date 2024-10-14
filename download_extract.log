@@ -1344,3 +1344,83 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-14 08:54:11,182 - INFO - Proceeding with file: rocky8.img
 2024-10-14 08:54:13,306 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
 2024-10-14 08:54:56,143 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-14 08:56:24,505 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 08:56:24,506 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-14 08:59:04,859 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-14 09:01:46,054 - INFO - Win2k19Uefi.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Win2k19Uefi.tar.gz
+2024-10-14 09:01:46,097 - INFO - Initiating image upload to the Artifactory
+2024-10-14 09:01:46,141 - INFO - The file has been archived. File size: 5831.18 MB. It needs to be extracted before uploading.
+2024-10-14 09:03:55,707 - INFO - Number of files in archive: 4
+2024-10-14 09:03:55,707 - INFO - Total size of files: 40960.00 MB
+2024-10-14 09:03:55,751 - INFO - Proceeding with file: windows19Qbac0win_19/windows19Qbac0win_19-flat.vmdk
+2024-10-14 09:03:57,946 - INFO - Extracting windows19Qbac0win_19/windows19Qbac0win_19-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/Win2k19Uefi.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 09:06:54,376 - INFO - Extraction completed for windows19Qbac0win_19/windows19Qbac0win_19-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 09:06:54,377 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/windows19Qbac0win_19/windows19Qbac0win_19-flat.vmdk
+2024-10-14 09:06:56,762 - INFO - Image upload initiated successfully
+2024-10-14 09:17:52,280 - INFO - Image upload completed successfully
+2024-10-14 09:18:00,488 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/windows19Qbac0win_19/windows19Qbac0win_19-flat.vmdk has been deleted successfully.
+2024-10-14 09:40:47,494 - INFO - Image uploaded successfully to ivan.perkovic/Win2k19Uefi.tar.gz.
+2024-10-14 09:40:52,606 - INFO - [Mailing] Process ID: 17b77765-d968-4365-9ba3-62f119ed30ea, Source: /home/noc_admin/image_scanner_project/downloads/Win2k19Uefi.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-14 09:40:52,606 - INFO - /home/noc_admin/image_scanner_project/downloads/Win2k19Uefi.tar.gz has been deleted successfully.
+2024-10-14 10:37:25,072 - INFO - Initiating image upload to the Artifactory
+2024-10-14 10:41:30,373 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv/centos_nestedahv_fio_boot.qcow2.
+2024-10-14 10:42:40,341 - INFO - Centos73Uefi.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz
+2024-10-14 10:42:40,383 - INFO - Initiating image upload to the Artifactory
+2024-10-14 10:42:40,425 - INFO - The file has been archived. File size: 658.25 MB. It needs to be extracted before uploading.
+2024-10-14 10:43:32,744 - INFO - Number of files in archive: 19
+2024-10-14 10:43:32,744 - INFO - Total size of files: 18543.20 MB
+2024-10-14 10:43:32,788 - INFO - Proceeding with file: Centos73Uefi/Centos73Uefi-flat.vmdk
+2024-10-14 10:43:35,078 - INFO - Extracting Centos73Uefi/Centos73Uefi-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 10:44:40,434 - INFO - Extraction completed for Centos73Uefi/Centos73Uefi-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 10:44:40,434 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos73Uefi/Centos73Uefi-flat.vmdk
+2024-10-14 10:44:42,339 - INFO - Image upload initiated successfully
+2024-10-14 10:49:22,038 - INFO - Image upload completed successfully
+2024-10-14 10:49:26,384 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos73Uefi/Centos73Uefi-flat.vmdk has been deleted successfully.
+2024-10-14 10:50:31,578 - INFO - Image uploaded successfully to ivan.perkovic/Centos73Uefi.tar.gz.
+2024-10-14 10:50:36,602 - INFO - [Mailing] Process ID: fd7a3b75-38f1-4e34-81e3-0552629cf8bf, Source: /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-14 10:50:36,602 - INFO - /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz has been deleted successfully.
+2024-10-14 11:18:26,498 - INFO - Initiating image upload to the Artifactory
+2024-10-14 11:18:26,819 - ERROR - Failed to download image from URL. Status code: 404
+2024-10-14 11:21:53,322 - INFO - Initiating image upload to the Artifactory
+2024-10-14 11:21:53,933 - INFO - File size: 1.17 GB
+2024-10-14 11:21:56,100 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 11:25:31,557 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 11:25:33,387 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 11:27:12,575 - INFO - Number of files in archive: 1
+2024-10-14 11:27:12,576 - INFO - Total size of files: 8192.00 MB
+2024-10-14 11:27:14,872 - INFO - Proceeding with file: rocky8.img
+2024-10-14 11:27:16,991 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 11:27:44,582 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-14 11:29:26,816 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 11:29:26,817 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-14 11:31:50,943 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-14 12:05:37,263 - INFO - Initiating image upload to the Artifactory
+2024-10-14 12:05:37,884 - INFO - File size: 1.17 GB
+2024-10-14 12:05:39,500 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 12:09:23,743 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 12:09:25,569 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 12:11:04,443 - INFO - Number of files in archive: 1
+2024-10-14 12:11:04,444 - INFO - Total size of files: 8192.00 MB
+2024-10-14 12:11:06,709 - INFO - Proceeding with file: rocky8.img
+2024-10-14 12:11:08,398 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 12:12:03,438 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-14 12:13:17,924 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 12:13:18,190 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 12:13:18,350 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-14 12:15:57,628 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-14 12:25:30,171 - INFO - Initiating image upload to the Artifactory
+2024-10-14 12:25:30,796 - INFO - File size: 0.58 GB
+2024-10-14 12:25:32,372 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-14 12:27:07,526 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-14 12:27:09,782 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-14 12:29:17,392 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/centos74.tar.gz.
+2024-10-14 12:30:14,520 - INFO - Number of files in archive: 1
+2024-10-14 12:30:14,521 - INFO - Total size of files: 16384.00 MB
+2024-10-14 12:30:16,368 - INFO - Proceeding with file: centos74.img
+2024-10-14 12:30:18,481 - INFO - Extracting centos74.img from /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 12:34:22,255 - INFO - Extraction completed for centos74.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 12:34:22,551 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/centos74.tar.gz
+2024-10-14 12:34:22,602 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/centos74.img
+2024-10-14 12:39:05,090 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/centos74.img
+2024-10-14 12:43:02,713 - INFO - Initiating image upload to the Artifactory
+2024-10-14 12:46:12,496 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv/centos_nestedahv_fio_boot.qcow2.

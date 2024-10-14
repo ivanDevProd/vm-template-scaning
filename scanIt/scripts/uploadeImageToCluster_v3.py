@@ -255,8 +255,24 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
             if jira_task_key:
                 add_comment_to_jira_task(jira_task_key, f"Extracting image initiated.")
 
-            tar.extract(selected_file, path=extracted_dir)
-            logging.info(f"Extraction completed for {selected_file.name} to {extracted_dir}")
+            try:
+                tar.extract(selected_file, path=extracted_dir)
+                logging.info(f"Extraction completed for {selected_file.name} to {extracted_dir}")
+                log_to_database(process_id, f"Extraction completed for {selected_file.name} to {extracted_dir}", "SUCCEEDED", source_url, "Download and Extraction")
+
+
+            except Exception as e:
+                logging.error(f"Error during extraction: {e}")
+                log_to_database(process_id, f"Extraction failed for {selected_file.name} due to: {str(e)}", "FAILED", source_url, "Download and Extraction")
+                return None
+
+
+        # Remove the tar file from the download path after successful extraction
+        if os.path.exists(download_path):
+            os.remove(download_path)
+            logging.info(f"Deleted tar file from download path: {download_path}")
+            log_to_database(process_id, f"Tar file deleted from download path: {download_path}", "SUCCEEDED", source_url, "Download and Extraction")
+
 
         # Generate URL for the extracted image
         extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{selected_file.name}"
@@ -277,39 +293,70 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
         return None
 
 
+# def cleanup_extracted_file(image_url, extracted_dir, process_id):
+#     # Extract file name from the URL
+#     parsed_url = urlparse(image_url)
+#     file_name_from_url = os.path.basename(unquote(parsed_url.path))
+    
+#     file_path = None
+#     dir_to_remove = None
+    
+#     # Search for the file recursively in extracted_dir
+#     for root, dirs, files in os.walk(extracted_dir):
+#         if file_name_from_url in files:
+#             file_path = os.path.join(root, file_name_from_url)
+#             dir_to_remove = root  # The directory containing the file
+#             break
+
+#     # Delete the specific file if found
+#     if file_path and os.path.isfile(file_path):
+#         os.remove(file_path)
+#         logging.info(f"Deleted file: {file_path}")
+#         log_to_database(process_id, f"Extracted image removed from server. Path was: {file_path}", "SUCCEEDED", image_url, "Download and Extraction")
+
+#         # Remove the parent subfolder if it is empty after file deletion
+#         if dir_to_remove and dir_to_remove != extracted_dir:
+#             # Check if the directory is empty
+#             if not os.listdir(dir_to_remove):
+#                 os.rmdir(dir_to_remove)
+#                 logging.info(f"Deleted empty subfolder: {dir_to_remove}")
+#                 log_to_database(process_id, f"Deleted empty subfolder: {dir_to_remove}", "SUCCEEDED", image_url, "Download and Extraction")
+#             else:
+#                 logging.info(f"Subfolder {dir_to_remove} is not empty, not deleted.")
+#     else:
+#         logging.error(f"File not found for deletion: {file_name_from_url}")
+#         log_to_database(process_id, f"File not found for deletion: {file_name_from_url}", "FAILED", image_url, "Download and Extraction")
+
 def cleanup_extracted_file(image_url, extracted_dir, process_id):
     # Extract file name from the URL
     parsed_url = urlparse(image_url)
     file_name_from_url = os.path.basename(unquote(parsed_url.path))
     
-    file_path = None
-    dir_to_remove = None
+    file_found = False
     
     # Search for the file recursively in extracted_dir
     for root, dirs, files in os.walk(extracted_dir):
         if file_name_from_url in files:
             file_path = os.path.join(root, file_name_from_url)
-            dir_to_remove = root  # The directory containing the file
+            # Remove the file
+            os.remove(file_path)
+            logging.info(f"Deleted file: {file_path}")
+            log_to_database(process_id, f"Extracted image removed from server. Path was: {file_path}", "SUCCEEDED", image_url, "Download and Extraction")
+            file_found = True
             break
 
-    # Delete the specific file if found
-    if file_path and os.path.isfile(file_path):
-        os.remove(file_path)
-        logging.info(f"Deleted file: {file_path}")
-        log_to_database(process_id, f"Extracted image removed from server. Path was: {file_path}", "SUCCEEDED", image_url, "Download and Extraction")
-
-        # Remove the parent subfolder if it is empty after file deletion
-        if dir_to_remove and dir_to_remove != extracted_dir:
-            # Check if the directory is empty
-            if not os.listdir(dir_to_remove):
-                os.rmdir(dir_to_remove)
-                logging.info(f"Deleted empty subfolder: {dir_to_remove}")
-                log_to_database(process_id, f"Deleted empty subfolder: {dir_to_remove}", "SUCCEEDED", image_url, "Download and Extraction")
-            else:
-                logging.info(f"Subfolder {dir_to_remove} is not empty, not deleted.")
-    else:
+    if not file_found:
         logging.error(f"File not found for deletion: {file_name_from_url}")
         log_to_database(process_id, f"File not found for deletion: {file_name_from_url}", "FAILED", image_url, "Download and Extraction")
+        return
+
+    # Remove any empty directories in extracted_dir, working bottom-up
+    for root, dirs, files in os.walk(extracted_dir, topdown=False):
+        if not os.listdir(root):  # If the directory is empty
+            os.rmdir(root)
+            logging.info(f"Deleted empty folder: {root}")
+            log_to_database(process_id, f"Deleted empty folder: {root}", "SUCCEEDED", image_url, "Download and Extraction")
+
 
 
 # Function that adds information to the DB that is displayed on the portal page
