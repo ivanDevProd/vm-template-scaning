@@ -105,7 +105,7 @@ def url_input_view(request):
                 email = request.POST.get('email')  # Get email from the form
 
                 # Run the Python script with the file path
-                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/uploade_Local_ImageToCluster_v1.py'
+                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/uploade_Local_ImageToCluster_v2.py'
                 log_file_for_process = os.path.join(log_directory, f"{file.name}_process.log")
 
                 with open(log_file_for_process, 'w') as log_file:

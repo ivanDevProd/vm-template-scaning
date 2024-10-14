@@ -1281,3 +1281,66 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-13 20:01:42,121 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
 2024-10-13 20:01:42,123 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
 2024-10-13 20:04:06,481 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-13 21:23:11,650 - INFO - CentOS7.5.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/CentOS7.5.tar.gz
+2024-10-13 21:23:11,692 - INFO - Initiating image upload to the Artifactory
+2024-10-13 21:23:11,736 - INFO - The file has been archived. File size: 862.84 MB. It needs to be extracted before uploading.
+2024-10-13 21:23:24,362 - INFO - Number of files in archive: 11
+2024-10-13 21:23:24,362 - INFO - Total size of files: 2420.38 MB
+2024-10-13 21:23:24,406 - ERROR - No valid image files (.qcow, .qcow2, .img, -flat.vmdk) found in archive. Process aborted.
+2024-10-13 21:27:14,695 - INFO - Image uploaded successfully to ivan.perkovic/CentOS7.5.tar.gz.
+2024-10-13 21:27:19,438 - INFO - [Mailing] Process ID: 6f9dc958-8f06-4bdd-9466-44c6eed18b98, Source: /home/noc_admin/image_scanner_project/downloads/CentOS7.5.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-13 21:27:19,439 - INFO - /home/noc_admin/image_scanner_project/downloads/CentOS7.5.tar.gz has been deleted successfully.
+2024-10-13 21:38:59,106 - INFO - Centos73Uefi.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz
+2024-10-13 21:38:59,148 - INFO - Initiating image upload to the Artifactory
+2024-10-13 21:38:59,191 - INFO - The file has been archived. File size: 658.25 MB. It needs to be extracted before uploading.
+2024-10-13 21:39:51,434 - INFO - Number of files in archive: 19
+2024-10-13 21:39:51,435 - INFO - Total size of files: 18543.20 MB
+2024-10-13 21:39:51,479 - INFO - Proceeding with file: Centos73Uefi/Centos73Uefi-flat.vmdk
+2024-10-13 21:39:53,230 - INFO - Extracting Centos73Uefi/Centos73Uefi-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 21:40:58,791 - INFO - Extraction completed for Centos73Uefi/Centos73Uefi-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-13 21:40:58,791 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/{'Centos73Uefi/Centos73Uefi-flat.vmdk'}
+2024-10-13 21:41:00,724 - INFO - Image upload initiated successfully
+2024-10-13 21:41:02,906 - INFO - Image upload failed
+2024-10-13 21:42:13,473 - INFO - Image uploaded successfully to ivan.perkovic/Centos73Uefi.tar.gz.
+2024-10-13 21:42:18,898 - INFO - [Mailing] Process ID: a872f047-b1d9-4e87-8e74-8b58a760add6, Source: /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-13 21:42:18,898 - INFO - /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz has been deleted successfully.
+2024-10-14 07:51:29,860 - INFO - Centos73Uefi.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz
+2024-10-14 07:51:29,902 - INFO - Initiating image upload to the Artifactory
+2024-10-14 07:51:29,946 - INFO - The file has been archived. File size: 658.25 MB. It needs to be extracted before uploading.
+2024-10-14 07:52:22,126 - INFO - Number of files in archive: 19
+2024-10-14 07:52:22,126 - INFO - Total size of files: 18543.20 MB
+2024-10-14 07:52:22,172 - INFO - Proceeding with file: Centos73Uefi/Centos73Uefi-flat.vmdk
+2024-10-14 07:52:23,972 - INFO - Extracting Centos73Uefi/Centos73Uefi-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 07:53:33,613 - INFO - Extraction completed for Centos73Uefi/Centos73Uefi-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 07:53:33,613 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos73Uefi/Centos73Uefi-flat.vmdk
+2024-10-14 07:53:36,000 - INFO - Image upload initiated successfully
+2024-10-14 07:58:21,559 - INFO - Image upload completed successfully
+2024-10-14 07:58:26,404 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos73Uefi/Centos73Uefi-flat.vmdk has been deleted successfully.
+2024-10-14 07:59:46,126 - INFO - Image uploaded successfully to ivan.perkovic/Centos73Uefi.tar.gz.
+2024-10-14 07:59:51,363 - INFO - [Mailing] Process ID: 8a3aff7e-7361-44d1-8827-c023f1e318f9, Source: /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-14 07:59:51,363 - INFO - /home/noc_admin/image_scanner_project/downloads/Centos73Uefi.tar.gz has been deleted successfully.
+2024-10-14 08:29:04,139 - INFO - RHEL80_UEFI.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/RHEL80_UEFI.tar.gz
+2024-10-14 08:29:04,186 - INFO - Initiating image upload to the Artifactory
+2024-10-14 08:29:04,231 - INFO - The file has been archived. File size: 1860.57 MB. It needs to be extracted before uploading.
+2024-10-14 08:30:00,036 - INFO - Number of files in archive: 8
+2024-10-14 08:30:00,037 - INFO - Total size of files: 16384.48 MB
+2024-10-14 08:30:00,083 - INFO - Proceeding with file: RHEL80_UEFI_0/RHEL80_UEFI_0-flat.vmdk
+2024-10-14 08:30:01,810 - INFO - Extracting RHEL80_UEFI_0/RHEL80_UEFI_0-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/RHEL80_UEFI.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 08:31:17,127 - INFO - Extraction completed for RHEL80_UEFI_0/RHEL80_UEFI_0-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 08:31:17,127 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/RHEL80_UEFI_0/RHEL80_UEFI_0-flat.vmdk
+2024-10-14 08:31:19,706 - INFO - Image upload initiated successfully
+2024-10-14 08:35:27,835 - INFO - Image upload completed successfully
+2024-10-14 08:35:32,167 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/RHEL80_UEFI_0/RHEL80_UEFI_0-flat.vmdk has been deleted successfully.
+2024-10-14 08:38:31,139 - INFO - Image uploaded successfully to ivan.perkovic/RHEL80_UEFI.tar.gz.
+2024-10-14 08:38:36,731 - INFO - [Mailing] Process ID: 478870d9-edd1-4a6e-a4fb-b1244f74fbe4, Source: /home/noc_admin/image_scanner_project/downloads/RHEL80_UEFI.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-14 08:38:36,732 - INFO - /home/noc_admin/image_scanner_project/downloads/RHEL80_UEFI.tar.gz has been deleted successfully.
+2024-10-14 08:49:08,217 - INFO - Initiating image upload to the Artifactory
+2024-10-14 08:49:08,829 - INFO - File size: 1.17 GB
+2024-10-14 08:49:10,525 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 08:52:28,756 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 08:52:30,513 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-14 08:54:08,832 - INFO - Number of files in archive: 1
+2024-10-14 08:54:08,833 - INFO - Total size of files: 8192.00 MB
+2024-10-14 08:54:11,182 - INFO - Proceeding with file: rocky8.img
+2024-10-14 08:54:13,306 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-14 08:54:56,143 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.

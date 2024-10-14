@@ -194,36 +194,69 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
             # Log file details
             logging.info(f"Number of files in archive: {num_files}")
             logging.info(f"Total size of files: {total_size / (1024 ** 2):.2f} MB")
+            log_to_database(process_id, f"Number of files in archive: {num_files}. Total size of files: {total_size / (1024 ** 2):.2f} MB.  Files: {[file.name for file in file_info]}.", "INFO", "Local file uploaded - Self-service", "Processing of the received file")
 
-            log_to_database(process_id, f"Number of files in archive: {num_files}. Total size of files: {total_size / (1024 ** 2):.2f} MB.", "INFO", "Local file uploaded - Self-service", "Processing of the received file")
-
-            if num_files != 1:
-                error_message = f"Multiple files found in archive. Found {num_files} files. Process aborted."
+            valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk']
+            matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
+            
+            # If no matching files found, log a warning and stop
+            if not matching_files:
+                error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk) found in archive. Process aborted."
                 logging.error(error_message)
-                log_to_database(process_id, f"Multiple files found in archive. Found {num_files} files. Process aborted.", "FAILED", "Local file uploaded - Self-service", "Processing of the received file")
-
+                log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {download_dir_file} - Self-service", "Processing of the received file")
                 if jira_task_key:
-                    add_comment_to_jira_task(jira_task_key, f"Multiple files found in archive. Found {num_files} files. Process aborted.")
-
+                    add_comment_to_jira_task(jira_task_key, error_message)
                 return None
 
-            # Extract the single file
-            extracted_file_name = file_info[0].name
-            tar.extract(file_info[0], path=extracted_dir)
-            logging.info(f"Extraction completed to {extracted_dir}")
-            log_to_database(process_id, f"Extraction completed to {extracted_dir}", "SUCCEEDED", "Local file uploaded - Self-service", "Processing of the received file")
+             # Check for multiple files with the same extension (for valid extensions only)
+            ext_count = {}
+            for file in matching_files:
+                ext = next((ext for ext in valid_extensions if file.name.endswith(ext)), None)  # Get the specific valid extension
+                ext_count[ext] = ext_count.get(ext, 0) + 1
+
+            # If there are multiple files with the same valid extension, stop the process
+            for ext, count in ext_count.items():
+                if count > 1:
+                    error_message = f"Multiple files with the same extension '{ext}' found: {[file.name for file in matching_files]}.  Process aborted."
+                    logging.error(error_message)
+                    log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
+                    if jira_task_key:
+                        add_comment_to_jira_task(jira_task_key, error_message)
+                    return None
+            
+            selected_file = matching_files[0]
+            logging.info(f"Proceeding with file: {selected_file.name}")
+            log_to_database(process_id, f"Proceeding with file: {selected_file.name}", "INFO", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
 
             if jira_task_key:
-                    add_comment_to_jira_task(jira_task_key, f"Extraction completed. ")
+                add_comment_to_jira_task(jira_task_key, f"Proceeding with file: {selected_file.name}")
+
+            
+            logging.info(f"Extracting {selected_file.name} from {download_dir_file} to {extracted_dir}")
+            log_to_database(process_id, f"Extracting {selected_file.name} from {download_dir_file} to {extracted_dir}", "INITIATED", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
+
+            if jira_task_key:
+                add_comment_to_jira_task(jira_task_key, f"Extracting image initiated.")
+
+            tar.extract(selected_file, path=extracted_dir)
+            logging.info(f"Extraction completed for {selected_file.name} to {extracted_dir}")
+            
 
         # Generate URL for the extracted image
+        extracted_file_name = selected_file.name
         extracted_image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{extracted_file_name}"
         logging.info(f"Extracted image URL: {extracted_image_url}")
         log_to_database(process_id, f"Extracted image URL: {extracted_image_url}", "SUCCEEDED", extracted_image_url, "Processing of the received file")
+        
+        if jira_task_key:
+                add_comment_to_jira_task(jira_task_key, f"Extraction completed.")
+        
         return extracted_image_url, extracted_file_name
-
+    
+    
     except Exception as e:
         logging.error(f"Error during extraction: {e}")
+        log_to_database(process_id, f"Error during extraction: {e}", "FAILED", download_dir_file, "Processing of the received file")
 
         if jira_task_key:
             add_comment_to_jira_task(jira_task_key, f"Error during extraction: {e}")
@@ -247,7 +280,7 @@ def upload_image_to_nutanix():
                     f'<p>Scanning of the image {file_name} has been successfully initiated.'\
                     f'<br>Process id: {process_id}'\
                     f'<p>The speed of the whole process depends on the system and network load, image size, and it may take some time.'\
-                    f'<br>You can follow all the details about the progress through the Jira ticket {new_jira_task}.'\
+                    f'<br>Progress details can be tracked in a Jira ticket: {new_jira_task}.'\
                     f'<p>If you have any questions or concerns regarding this process, please feel free to contact the EngSAM Team for assistance.'\
                     f'<p>Email: eng_sam_admins@nutanix.com'\
                     f'<br>Slack: #ask-eng-sam'\
@@ -307,7 +340,7 @@ def upload_image_to_nutanix():
             log_to_database(process_id, f"Error during extraction: {e}. Aborting process.", "FAILED", "Local file uploaded - Self-service", "Processing of the received file")
             return
         
-    elif file_path.endswith(('.qcow', '.qcow2', '.img')):
+    elif file_path.endswith(('.qcow', '.qcow2', '.img', '-flat.vmdk')):
         # move file to extracted_dir using shutil function
         remove_file_path = shutil.copy(file_path, extracted_dir)
         image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{file_name}"
