@@ -293,40 +293,6 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
         return None
 
 
-# def cleanup_extracted_file(image_url, extracted_dir, process_id):
-#     # Extract file name from the URL
-#     parsed_url = urlparse(image_url)
-#     file_name_from_url = os.path.basename(unquote(parsed_url.path))
-    
-#     file_path = None
-#     dir_to_remove = None
-    
-#     # Search for the file recursively in extracted_dir
-#     for root, dirs, files in os.walk(extracted_dir):
-#         if file_name_from_url in files:
-#             file_path = os.path.join(root, file_name_from_url)
-#             dir_to_remove = root  # The directory containing the file
-#             break
-
-#     # Delete the specific file if found
-#     if file_path and os.path.isfile(file_path):
-#         os.remove(file_path)
-#         logging.info(f"Deleted file: {file_path}")
-#         log_to_database(process_id, f"Extracted image removed from server. Path was: {file_path}", "SUCCEEDED", image_url, "Download and Extraction")
-
-#         # Remove the parent subfolder if it is empty after file deletion
-#         if dir_to_remove and dir_to_remove != extracted_dir:
-#             # Check if the directory is empty
-#             if not os.listdir(dir_to_remove):
-#                 os.rmdir(dir_to_remove)
-#                 logging.info(f"Deleted empty subfolder: {dir_to_remove}")
-#                 log_to_database(process_id, f"Deleted empty subfolder: {dir_to_remove}", "SUCCEEDED", image_url, "Download and Extraction")
-#             else:
-#                 logging.info(f"Subfolder {dir_to_remove} is not empty, not deleted.")
-#     else:
-#         logging.error(f"File not found for deletion: {file_name_from_url}")
-#         log_to_database(process_id, f"File not found for deletion: {file_name_from_url}", "FAILED", image_url, "Download and Extraction")
-
 def cleanup_extracted_file(image_url, extracted_dir, process_id):
     # Extract file name from the URL
     parsed_url = urlparse(image_url)
