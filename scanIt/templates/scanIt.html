@@ -508,7 +508,7 @@
 <div id="fileForm" class="form-container">
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="file" name="file" accept=".img,.tar.gz, .qcow,.qcow2, application/gzip">
+        <input type="file" name="file" accept=".img, .tar.gz, .qcow, .qcow2, .iso, application/gzip">
         <hr>
         <input type="email" id="emailFieldFile" name="email" placeholder="Enter your email" required style="width: 40%">
         <hr>

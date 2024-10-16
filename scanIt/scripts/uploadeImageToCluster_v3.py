@@ -419,6 +419,9 @@ def upload_image_to_nutanix():
         else:
             print("Failed to download and extract image.")
             return
+    
+    elif source_url.endswith('.iso'):   
+        payload['spec']['resources']['image_type'] = 'ISO_IMAGE'  # Set image type to ISO
 
     # URL for image upload
     upload_url = f"https://{cluster_ip}:9440/api/nutanix/v3/images"

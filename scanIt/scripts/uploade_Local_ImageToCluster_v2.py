@@ -196,7 +196,7 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
             logging.info(f"Total size of files: {total_size / (1024 ** 2):.2f} MB")
             log_to_database(process_id, f"Number of files in archive: {num_files}. Total size of files: {total_size / (1024 ** 2):.2f} MB.  Files: {[file.name for file in file_info]}.", "INFO", "Local file uploaded - Self-service", "Processing of the received file")
 
-            valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk']
+            valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk', '.iso']
             matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
             
             # If no matching files found, log a warning and stop
@@ -351,6 +351,18 @@ def upload_image_to_nutanix():
         payload['spec']['name'] = image_name
         payload['spec']['resources']['source_uri'] = image_url
 
+    elif file_path.endswith(('.iso')):
+        # move file to extracted_dir using shutil function
+        remove_file_path = shutil.copy(file_path, extracted_dir)
+        image_url = f"http://10.67.22.100/static/scanIt/extracted_images/{file_name}"
+
+        log_to_database(process_id, f"File copied to Apache folder. Image URL: {image_url}", "SUCCEEDED", f"Local file uploaded {file_name} - Self-service", "Processing of the received file")
+        
+        image_name = "DPRO-AUTOMATION-LOCAL_FILE-" + f"{file_name}"
+        payload['spec']['name'] = image_name
+        payload['spec']['resources']['image_type'] = 'ISO_IMAGE'  # Set image type to ISO
+        payload['spec']['resources']['source_uri'] = image_url
+
 
     upload_url = f"https://{cluster_ip}:9440/api/nutanix/v3/images"
     try:
@@ -410,6 +422,16 @@ def upload_image_to_nutanix():
                         else:
                             # print(f"File {remove_file_path} does not exist.")
                             logging.info(f"File {remove_file_path} does not exist.")
+
+                        # Remove the parent folder if it's empty
+                        parent_folder = os.path.dirname(remove_file_path)
+                        if os.path.exists(parent_folder) and not os.listdir(parent_folder):
+                            os.rmdir(parent_folder)
+                            logging.info(f"Parent folder {parent_folder} has been deleted successfully.")
+                        else:
+                            # If the folder is not empty, log this information
+                            logging.info(f"Parent folder {parent_folder} is not empty, so it was not deleted.")
+                            
                     except Exception as e:
                         # print(f"Error occurred while deleting file: {e}")
                         logging.info(f"Error occurred while deleting file: {e}")
