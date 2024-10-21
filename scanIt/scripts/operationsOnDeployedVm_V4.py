@@ -61,6 +61,31 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip):
             conn.close()
 
 
+def log_to_database_rawInstallations(process_id, packages):
+    try:
+        conn = mysql.connector.connect(**mysql_config)
+        cursor = conn.cursor()
+
+        # Insert new record or update the existing record if process_ID already exists
+        cursor.execute(
+            '''
+            INSERT INTO vm_template_scan.raw_Installations (process_ID, packages) 
+            VALUES (%s, %s) 
+            ON DUPLICATE KEY UPDATE
+            packages = COALESCE(VALUES(packages), packages)
+            ''',
+            (process_id, packages)
+        )
+        
+        conn.commit()
+    except mysql.connector.Error as err:
+        logging.error(f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
 def execute_command(ssh, command, use_sudo=False, use_pty=False, sudo_password=None):
     # Get the username used for SSH connection
     ssh_username = ssh.get_transport().get_username()
@@ -94,8 +119,12 @@ def retry_commands_with_winrm(ip, username, password):
     try:
         session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
 
+        new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
         fallback_command = "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\""
         windows_commands = [
+                        "hostname",
+                        f'powershell Rename-Computer -NewName "{new_hostname}" -Force',
+                        "powershell Shutdown /r /t 900",
                         "hostname",
                         "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                         "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
@@ -165,16 +194,63 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             insert_workflow_state(process_id, f"Detected OS type: {os_type}", "SUCCEEDED", "Commands execution", source_url)
 
             if os_type == "Windows":
+                new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
+                time.sleep(10)
                 ps_version_command = "powershell -Command \'$PSVersionTable.PSVersion.Major\'"
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
                     print(f"Failed to check PowerShell version: {ps_error}")
-                    insert_workflow_state(process_id, f"Failed to check PowerShell version. Error: {ps_error}", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Failed to check PowerShell version. Older PS commands will be used by default. Error: {ps_error}", "FAILED", "Commands execution", source_url)
                     ps_version = 0  # If version check fails, default to 0
                 else:
                     ps_version = int(ps_output.strip())
                     print(f"PowerShell version detected: {ps_version}")
+
+                # Commands for changing hostname and rebooting
+                rename_command = f'powershell Rename-Computer -NewName "{new_hostname}" -Force'
+                time.sleep(5)
+                shutdown_command = "powershell Shutdown /r /t 0"
+
+                # Execute the rename command
+                output, error, exit_code = execute_command(ssh, rename_command)
+                if exit_code != 0:
+                    print(f"Failed to change hostname: {error}")
+                    insert_workflow_state(process_id, f"Failed to change hostname. Error: {error}", "FAILED", "Commands execution", source_url)
+                    continue  # Skip to the next username if hostname change fails
+
+                print(f"Hostname changed successfully. Output: {output}")
+                insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname}.", "SUCCEEDED", "Commands execution", source_url)
+
+                # Reboot the machine
+                output, error, exit_code = execute_command(ssh, shutdown_command)
+                if exit_code != 0:
+                    print(f"Failed to initiate reboot: {error}")
+                    insert_workflow_state(process_id, f"Failed to initiate reboot. Error: {error}", "FAILED", "Commands execution", source_url)
+
+                print("Reboot initiated successfully.")
+                insert_workflow_state(process_id, f"Reboot initiated successfully. Waiting for the machine to become available...", "INFO", "Commands execution", source_url)
+
+                # Wait for the machine to become available
+                print("Waiting for the machine to become available...")
+                time.sleep(30)  # Adjust the sleep duration as needed
+                
+                # Check availability
+                for _ in range(5):  # Retry for a 5 attempts
+                    try:
+                        ssh.connect(ip, username=username, password=password)
+                        print("Machine is back online. Executing remaining commands.")
+                        insert_workflow_state(process_id, f"Machine is back online. Executing remaining commands.", "INFO", "Commands execution", source_url)
+                        break  # Break if successfully reconnected
+                    except Exception as e:
+                        print(f"Machine not yet available. Retrying... {e}")
+                        insert_workflow_state(process_id, f"Machine not yet available. Retrying... {e}", "INFO", "Commands execution", source_url)
+                        time.sleep(10)  # Wait before retrying
+
+                else:
+                    print("Machine did not come back online in expected time.")
+                    insert_workflow_state(process_id, f"Machine did not come back online in expected time.", "FAILED", "Commands execution", source_url)
+                    return  # Skip to the next username if the machine is still not available
 
                 if ps_version >= 5:
                     windows_commands = [
@@ -218,7 +294,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             log_to_database_waitForFlexera(process_id, output, None, None)
 
                     # print(output)
-                    time.sleep(5)
+                    time.sleep(25)
 
                 if all_commands_successful:
                     print("All commands executed successfully. Returning.")
@@ -258,41 +334,90 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 print(f"Detected distribution: {distro} \nVersion: {version}")
                 insert_workflow_state(process_id, f"Detected distribution: {distro}, Version: {version}", "SUCCEEDED", "Commands execution", source_url)
 
+                # Flag to identify if older version on which Flexera agent can't be installed. 
+                is_old_version = False
+
                 new_hostname = 'DPRO_AUTOMATION_' + str(int(time.time()))
-                if "Ubuntu" in distro and isinstance(version, float) and version >= 20.0:
+                if "Ubuntu" in distro and isinstance(version, float):
+                    if version >= 20.0:
+                        commands = [
+                            f"hostnamectl set-hostname {new_hostname}",
+                            "apt install -y curl",
+                            "curl -s -m 10 https://deb-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
+                            "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
+                            "curl https://deb-mirror.corp.nutanix.com/corp/flexera/flexera.list -o /etc/apt/sources.list.d/flexera.list",
+                            "curl https://deb-mirror.corp.nutanix.com/corp/ntnx-corp-keyring-rsa3072.gpg -o /etc/apt/trusted.gpg.d/ntnx-corp-keyring-rsa3072.gpg",
+                            "apt update",
+                            "apt -y install managesoft-autoconf",
+                            'apt list --installed',
+                            # "cat /var/opt/managesoft/log/uploader.log"
+                        ]
+                    else:
+                        is_old_version = True
+                        commands = [
+                            'dpkg --get-selections'  # Get list of installed packages for older versions
+                        ]
+
+                elif "CentOS" in distro and isinstance(version, float):
+                    if version >= 7.0:
+                        commands = [
+                            f"hostnamectl set-hostname {new_hostname}",
+                            "yum install -y curl",
+                            "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
+                            "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
+                            "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
+                            "yum -y install managesoft-autoconf",
+                            "yum list installed",
+                            # "cat /var/opt/managesoft/log/uploader.log"
+                        ]
+                    else:
+                        is_old_version = True
+                        commands = [
+                            'yum list installed'  # Get list of installed packages for older versions
+                        ]
+
+                elif ("RHEL" in distro or "Rocky" in distro or "Red Hat Enterprise Linux" in distro) and isinstance(version, float):
+                    if version >= 8.0:
+                        commands = [
+                            f"hostnamectl set-hostname {new_hostname}",
+                            "yum install -y curl",
+                            "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
+                            "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
+                            'mkdir -p /etc/yum.repos.d/',
+                            'sudo chmod -R o+rw /etc/yum.repos.d',
+                            "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo",
+                            "yum install -y managesoft-autoconf",
+                            "yum list installed",
+                            # opt/managesoft/log/uploader.log"
+                        ]
+                    else:
+                        is_old_version = True
+                        commands = [
+                            'yum list installed'  # Get list of installed packages for older versions
+                        ]
+                elif "Debian" in distro and isinstance(version, float):
+                    # Debian (all versions) just need to get installed packages list
                     commands = [
-                        f"hostnamectl set-hostname {new_hostname}",
-                        "apt install -y curl",
-                        "curl -s -m 10 https://deb-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
-                        "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
-                        "curl https://deb-mirror.corp.nutanix.com/corp/flexera/flexera.list -o /etc/apt/sources.list.d/flexera.list",
-                        "curl https://deb-mirror.corp.nutanix.com/corp/ntnx-corp-keyring-rsa3072.gpg -o /etc/apt/trusted.gpg.d/ntnx-corp-keyring-rsa3072.gpg",
-                        "apt update",
-                        "apt -y install managesoft-autoconf",
-                        # "cat /var/opt/managesoft/log/uploader.log"
+                        'dpkg --get-selections'
                     ]
-                elif "CentOS" in distro and isinstance(version, float) and version >= 7.0:
-                    commands = [
-                        f"hostnamectl set-hostname {new_hostname}",
-                        "yum install -y curl",
-                        "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
-                        "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
-                        "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
-                        "yum -y install managesoft-autoconf",
-                        # "cat /var/opt/managesoft/log/uploader.log"
-                    ]
-                elif ("RHEL" in distro or "Rocky" in distro or "Red Hat Enterprise Linux" in distro) and isinstance(version, float) and version >= 8.0:
-                    commands = [
-                        f"hostnamectl set-hostname {new_hostname}",
-                        "yum install -y curl",
-                        "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
-                        "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
-                        'mkdir -p /etc/yum.repos.d/',
-                        'sudo chmod -R o+rw /etc/yum.repos.d',
-                        "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo",
-                        "yum install -y managesoft-autoconf",
-                        # opt/managesoft/log/uploader.log"
-                    ]
+
+                elif "Fedora" in distro and isinstance(version, float):
+                    if version >= 22.0:
+                        commands = [
+                            f"hostnamectl set-hostname {new_hostname}",
+                            "dnf install -y curl",
+                            "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
+                            "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
+                            "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo",
+                            "dnf -y install managesoft-autoconf",
+                            "dnf list installed"
+                        ]
+                    else:
+                        is_old_version = True
+                        commands = [
+                            'yum list installed'  
+                        ]
+                                        
                 elif "AHV" in distro:
                     commands = [
                         f"hostnamectl set-hostname {new_hostname}",
@@ -301,6 +426,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
                         "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
                         "yum -y install managesoft-autoconf",
+                        "yum list installed",
                         # "cat /var/opt/managesoft/log/uploader.log"
                     ]
                 else:
@@ -329,7 +455,19 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         if command == f'hostnamectl set-hostname {new_hostname}':
                             log_to_database_waitForFlexera(process_id, new_hostname, None, None)
 
+                        elif command == 'apt list --installed' or command == 'dpkg --get-selections':
+                            # Ubuntu/Debian systems (newer and older versions)
+                            log_to_database_rawInstallations(process_id, output)
+                        
+                        elif command == 'yum list installed' or command == 'dnf list installed':
+                            # CentOS/RHEL/Fedora/Rocky/AHV systems
+                            log_to_database_rawInstallations(process_id, output)
+
+                        if is_old_version:
+                            insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", "Commands execution", source_url)
+                            return
                     # print(output)
+
                     time.sleep(30)
 
                 if failed_commands:
@@ -357,7 +495,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         insert_workflow_state(process_id, "The problem with some commands still exists. Retrying with different account.", "FAILED", "Commands execution", source_url)
                 else:
                     insert_workflow_state(process_id, "All commands executed successfully.", "SUCCEEDED", "Commands execution", source_url)
-                    return  # Exit the loop after retry even tehere are still some failed commands
+                    return  
 
         except Exception as e:
             print(f"SSH connection to {ip} failed with username: {username}. Error: {e}")
@@ -366,6 +504,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             # Close SSH connection if it was established
             if 'ssh' in locals():
                 ssh.close()
+
+            new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
 
             # Try to connect using WinRM
             try:
@@ -390,7 +530,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 if ps_version < 5:
                     print(f"Using fallback commands due to PowerShell version < 5")
-                    windows_commands = [
+                    remaining_commands = [
                         "hostname",
                         "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                         "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
@@ -399,7 +539,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     ]
                 else:
                     print(f"Using standard commands for PowerShell version >= 5")
-                    windows_commands = [
+                    remaining_commands = [
                         "hostname",
                         "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                         "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
@@ -407,8 +547,58 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
 
+                # Change the hostname and reboot with error handling
+                try:
+                    print(f"Changing hostname to {new_hostname}...")
+                    response = session.run_cmd(f'powershell Rename-Computer -NewName "{new_hostname}" -Force')
+                    if response.status_code != 0:
+                        raise Exception(f"Failed to change hostname. Status code: {response.status_code}. Error: {response.std_err.decode()}")
+
+                    # Reboot immediately
+                    print("Rebooting the machine...")
+                    response = session.run_cmd("powershell Shutdown /r /t 0")
+                    if response.status_code != 0:
+                        raise Exception(f"Failed to initiate reboot. Status code: {response.status_code}. Error: {response.std_err.decode()}")
+
+                    insert_workflow_state(process_id, f"Hostname changed to {new_hostname} and reboot initiated successfully.", "SUCCEEDED", "Commands execution", source_url)
+
+                except Exception as hostname_reboot_error:
+                    print(f"Error during hostname change or reboot: {hostname_reboot_error}")
+                    insert_workflow_state(process_id, f"Error during hostname change or reboot: {hostname_reboot_error}", "FAILED", "Commands execution", source_url)
+                    continue  # Proceed to the next username in the list
+
+                # Wait for the VM to become accessible again
+                print(f"Waiting for the machine to become accessible...")
+                insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
+                time.sleep(30)  # Wait a bit before retrying
+                accessible = False
+                for _ in range(5):  # Retry 5 times
+                    try:
+                        # Attempt to reconnect using WinRM
+                        session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
+                        # Check if the session is alive by running a simple command
+                        test_command = "powershell Get-Process"  # Just an example command
+                        response = session.run_cmd(test_command)
+                        
+                        if response.status_code == 0:
+                            accessible = True
+                            print("Machine is accessible again.")
+                            insert_workflow_state(process_id, f"Machine is accessible again. Execution of the remaining commands continues", "INFO", "Commands execution", source_url)
+                            break
+                    except Exception:
+                        print("Machine not accessible yet. Retrying...")
+                        insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", "Commands execution", source_url)
+                        time.sleep(15)  # Wait before retrying
+
+                if not accessible:
+                    print("Machine did not become accessible in the expected time.")
+                    insert_workflow_state(process_id, "Machine did not become accessible after reboot.", "FAILED", "Commands execution", source_url)
+                    return
+
+                 # Execute remaining commands after reboot
+                print("Executing remaining commands...")
                 all_commands_successful = True
-                for command in windows_commands:
+                for command in remaining_commands:
                     response = session.run_cmd(command)
 
                     if response.status_code != 0:

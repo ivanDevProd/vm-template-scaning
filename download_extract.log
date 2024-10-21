@@ -1565,3 +1565,167 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-16 13:02:53,230 - INFO - [Mailing] Process ID: f6b19df8-8087-499a-a07b-41def9febab9, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
 2024-10-16 13:02:53,230 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
 2024-10-16 13:37:41,783 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/redhat/rhel9.4/x86/64/server/legacy/rc1.iso.
+2024-10-18 20:44:37,638 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 20:44:37,681 - INFO - Initiating image upload to the Artifactory
+2024-10-18 20:44:37,995 - INFO - Image upload initiated successfully
+2024-10-18 20:44:41,952 - INFO - Image upload completed successfully
+2024-10-18 20:44:42,003 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:44:42,049 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 20:44:55,733 - ERROR - Failed to upload image. Status code: 401. Response: {
+  "errors" : [ {
+    "status" : 401,
+    "message" : "Props Authentication Token not found"
+  } ]
+}
+2024-10-18 20:51:33,231 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 20:51:33,274 - INFO - Initiating image upload to the Artifactory
+2024-10-18 20:51:33,619 - INFO - Image upload initiated successfully
+2024-10-18 20:51:37,353 - INFO - Image upload completed successfully
+2024-10-18 20:51:37,404 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:51:37,447 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 20:51:50,175 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 20:52:23,272 - INFO - [Mailing] Process ID: 8d0dca32-8bd0-44c1-add4-d916535194d0, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 20:52:23,272 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:53:18,644 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 20:53:18,688 - INFO - Initiating image upload to the Artifactory
+2024-10-18 20:53:19,008 - INFO - Image upload initiated successfully
+2024-10-18 20:53:27,663 - INFO - Image upload completed successfully
+2024-10-18 20:53:27,713 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:53:27,756 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 20:53:41,681 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 20:54:15,305 - INFO - [Mailing] Process ID: 65fccc11-ffc4-40c6-974d-53f24d14f35a, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 20:54:15,305 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:58:00,890 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 20:58:00,933 - INFO - Initiating image upload to the Artifactory
+2024-10-18 20:58:01,263 - INFO - Image upload initiated successfully
+2024-10-18 20:58:05,201 - INFO - Image upload completed successfully
+2024-10-18 20:58:05,250 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:58:05,304 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 20:58:20,344 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 20:59:06,292 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 20:59:06,334 - INFO - Initiating image upload to the Artifactory
+2024-10-18 20:59:06,657 - INFO - Image upload initiated successfully
+2024-10-18 20:59:09,968 - INFO - Image upload completed successfully
+2024-10-18 20:59:10,016 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 20:59:10,060 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 20:59:21,654 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 20:59:54,718 - INFO - [Mailing] Process ID: c23f35b9-c3d2-4de0-bcdc-98f5f955f3f2, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 20:59:54,718 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:05:36,854 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 21:05:36,896 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:05:37,208 - INFO - Image upload initiated successfully
+2024-10-18 21:05:40,289 - INFO - Image upload completed successfully
+2024-10-18 21:05:40,343 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:05:40,385 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 21:05:55,456 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 21:06:28,909 - INFO - [Mailing] Process ID: dd5fce63-471d-440a-9bd9-8b39e92b065a, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 21:06:28,909 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:15:54,985 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 21:15:55,029 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:15:55,354 - INFO - Image upload initiated successfully
+2024-10-18 21:15:59,045 - INFO - Image upload completed successfully
+2024-10-18 21:16:00,042 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:16:00,088 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 21:16:12,203 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 21:16:46,526 - INFO - [Mailing] Process ID: 85cb983e-01b3-431d-ad8a-db5f3e1c3acb, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 21:16:46,527 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:19:22,663 - INFO - cirros.qcow2 recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2
+2024-10-18 21:19:22,706 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:19:23,036 - INFO - Image upload initiated successfully
+2024-10-18 21:19:28,240 - INFO - Image upload completed successfully
+2024-10-18 21:19:29,581 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:19:29,625 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images is not empty, so it was not deleted.
+2024-10-18 21:19:41,782 - INFO - Image uploaded successfully to ivan.perkovic/cirros.qcow2.
+2024-10-18 21:20:15,032 - INFO - [Mailing] Process ID: b7360a2c-6f4f-49e0-85e9-b1ff72f172f0, Source: /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 21:20:15,032 - INFO - /home/noc_admin/image_scanner_project/downloads/cirros.qcow2 has been deleted successfully.
+2024-10-18 21:39:28,865 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:40:00,629 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:43:34,216 - INFO - Centos66UVM-1.2.tar.gz recived to be scaned. It is stored at: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-18 21:43:34,259 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:43:34,305 - INFO - The file has been archived. File size: 553.58 MB. It needs to be extracted before uploading.
+2024-10-18 21:43:50,223 - INFO - Number of files in archive: 1
+2024-10-18 21:43:50,223 - INFO - Total size of files: 4096.00 MB
+2024-10-18 21:43:50,270 - INFO - Proceeding with file: Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-18 21:43:51,436 - INFO - Extracting Centos66UVM-1.2/Centos66UVM-1.2.img from /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-18 21:44:12,158 - INFO - Extraction completed for Centos66UVM-1.2/Centos66UVM-1.2.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-18 21:44:12,158 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-18 21:44:13,797 - INFO - Image upload initiated successfully
+2024-10-18 21:44:25,906 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:44:26,238 - INFO - Initiating image upload to the Artifactory
+2024-10-18 21:44:26,860 - INFO - File size: 1.51 GB
+2024-10-18 21:44:28,089 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.2.tar.gz
+2024-10-18 21:45:28,312 - INFO - Image upload completed successfully
+2024-10-18 21:45:30,445 - INFO - /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img has been deleted successfully.
+2024-10-18 21:45:30,491 - INFO - Parent folder /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2 has been deleted successfully.
+2024-10-18 21:48:18,075 - INFO - Image uploaded successfully to ivan.perkovic/Centos66UVM-1.2.tar.gz.
+2024-10-18 21:48:51,217 - INFO - [Mailing] Process ID: 0a1e9887-86b7-4ce9-aca3-2ba3d10ba092, Source: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
+2024-10-18 21:48:51,217 - INFO - /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz has been deleted successfully.
+2024-10-18 21:55:23,352 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/systest_ahv_centos7uefi.qcow2.
+2024-10-18 21:56:44,288 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky9.2.tar.gz
+2024-10-18 21:56:45,873 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky9.2.tar.gz
+2024-10-18 21:57:57,138 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/Rocky9.2.tar.gz.
+2024-10-18 22:06:57,627 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/AUTO/RHEL64_auto.iso.
+2024-10-18 22:11:10,088 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/AUTO/CentOS511_32bit_min_auto.iso.
+2024-10-18 22:25:18,205 - INFO - Number of files in archive: 4
+2024-10-18 22:25:18,206 - INFO - Total size of files: 153600.01 MB
+2024-10-18 22:25:20,822 - INFO - Proceeding with file: ./NuTest_UVM_0_1715753640-flat.vmdk
+2024-10-18 22:25:22,209 - INFO - Extracting ./NuTest_UVM_0_1715753640-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/Rocky9.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-18 23:03:07,140 - INFO - Extraction completed for ./NuTest_UVM_0_1715753640-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-18 23:03:07,248 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky9.2.tar.gz
+2024-10-18 23:03:07,296 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/./NuTest_UVM_0_1715753640-flat.vmdk
+2024-10-18 23:39:35,885 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/NuTest_UVM_0_1715753640-flat.vmdk
+2024-10-19 11:15:58,864 - INFO - Initiating image upload to the Artifactory
+2024-10-19 11:27:54,210 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu2004_svr_vdisk.qcow2.
+2024-10-19 11:54:18,225 - INFO - Initiating image upload to the Artifactory
+2024-10-19 12:07:42,785 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu2004_svr_vdisk.qcow2.
+2024-10-19 12:15:19,834 - INFO - Initiating image upload to the Artifactory
+2024-10-19 12:28:31,340 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu2004_svr_vdisk.qcow2.
+2024-10-19 12:43:22,220 - INFO - Initiating image upload to the Artifactory
+2024-10-19 12:57:37,876 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu2004_svr_vdisk.qcow2.
+2024-10-19 19:27:47,975 - INFO - Initiating image upload to the Artifactory
+2024-10-19 19:27:48,594 - INFO - File size: 2.44 GB
+2024-10-19 19:27:50,002 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-19 19:34:41,697 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-19 19:34:44,322 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-19 19:40:58,745 - INFO - Number of files in archive: 7
+2024-10-19 19:40:58,746 - INFO - Total size of files: 32768.51 MB
+2024-10-19 19:41:00,127 - INFO - Proceeding with file: Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-19 19:41:01,514 - INFO - Extracting Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-19 19:42:03,066 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/UBUNTU18_UEFI.tar.gz.
+2024-10-19 19:49:12,627 - INFO - Extraction completed for Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-19 19:49:13,225 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/UBUNTU18_UEFI.tar.gz
+2024-10-19 19:49:13,277 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-19 19:59:14,375 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Ubuntu18_UEFI_0/Ubuntu18_UEFI_0-flat.vmdk
+2024-10-19 19:59:14,429 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Ubuntu18_UEFI_0
+2024-10-19 20:37:40,548 - INFO - Initiating image upload to the Artifactory
+2024-10-19 20:42:56,597 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu160401_svr_uefi_legacy_vdisk.qcow2.
+2024-10-19 21:36:52,529 - INFO - Initiating image upload to the Artifactory
+2024-10-19 21:42:09,057 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu160401_svr_uefi_legacy_vdisk.qcow2.
+2024-10-19 21:45:59,059 - INFO - Initiating image upload to the Artifactory
+2024-10-19 21:59:27,499 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/ubuntu2004_svr_vdisk.qcow2.
+2024-10-20 10:11:58,135 - INFO - Initiating image upload to the Artifactory
+2024-10-20 10:39:01,312 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-20 10:46:37,543 - INFO - Initiating image upload to the Artifactory
+2024-10-20 11:08:47,729 - INFO - Initiating image upload to the Artifactory
+2024-10-20 11:34:28,532 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-20 19:03:49,083 - INFO - Initiating image upload to the Artifactory
+2024-10-20 19:26:52,982 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-20 19:36:13,066 - INFO - Initiating image upload to the Artifactory
+2024-10-20 19:36:25,203 - INFO - Initiating image upload to the Artifactory
+2024-10-20 20:03:07,041 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-20 20:45:37,080 - INFO - Initiating image upload to the Artifactory
+2024-10-20 21:48:14,718 - INFO - Initiating image upload to the Artifactory
+2024-10-20 21:48:15,334 - INFO - File size: 10.22 GB
+2024-10-20 21:48:17,799 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-20 22:18:24,329 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-20 22:18:25,972 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-20 22:31:18,764 - INFO - Number of files in archive: 1
+2024-10-20 22:31:18,765 - INFO - Total size of files: 61440.00 MB
+2024-10-20 22:31:20,210 - INFO - Proceeding with file: AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
+2024-10-20 22:31:21,458 - INFO - Extracting AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img from /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-20 22:37:53,755 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindowsSrv16UVM-0424.tar.gz.
+2024-10-20 22:47:53,589 - INFO - Extraction completed for AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-20 22:47:53,911 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-20 22:47:53,963 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
+2024-10-20 23:04:06,928 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
+2024-10-20 23:04:06,993 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424
