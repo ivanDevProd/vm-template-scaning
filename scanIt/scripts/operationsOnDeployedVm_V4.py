@@ -6,6 +6,8 @@ import sys
 import os
 from dotenv import load_dotenv
 import logging
+import requests
+import json
 
 
 # Load the .env file
@@ -21,6 +23,42 @@ mysql_config = {
     'database': 'vm_template_scan',
     'port': '3306'
 }
+
+# Jira parameters 
+JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
+jira_base_url = "https://jira.nutanix.com/"
+jira_email = "ivan.perkovic@nutanix.com"
+
+
+# Function for adding comment in Jira case
+def add_comment_to_jira_task(task_key, comment):
+    try:
+        jira_headers = {
+            "Authorization": f"Bearer {JIRA_BEARER_TOKEN}",
+            "Content-Type": "application/json"
+        }
+
+        comment_payload = {
+            "body": comment
+        }
+
+        comment_url = f"{jira_base_url}/rest/api/2/issue/{task_key}/comment"
+        response = requests.post(comment_url, headers=jira_headers, data=json.dumps(comment_payload), timeout=15)
+
+        if response.status_code == 201:
+            print("Comment added successfully!")
+        else:
+            print(f"Failed to add comment: {response.status_code}, {response.text}")
+
+    except requests.Timeout:
+        print("The request timed out!")
+
+    except requests.ConnectionError:
+        print("A connection error occurred!")
+
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+
 
 def insert_workflow_state(process_id, description, state, stage, source_url):
     conn = mysql.connector.connect(**mysql_config)
@@ -158,6 +196,9 @@ def retry_commands_with_winrm(ip, username, password):
         if all_commands_successful:
             print("All commands executed successfully. Returning.")
             insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+            if new_jira_task:
+                add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
             return
 
     except Exception as winrm_e:
@@ -177,6 +218,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             print(f"SSH connection to {ip} established successfully with username: {username}")
             insert_workflow_state(process_id, f"SSH connection to {ip} established successfully with username: {username}.", "SUCCEEDED", "Commands execution", source_url)
 
+            if new_jira_task:
+                add_comment_to_jira_task(new_jira_task, f"SSH connection established successfully with username: {username}.")
+
             # Check if the VM is a Windows or Linux machine
             output, error, exit_code = execute_command(ssh, "uname -s")
             if "Linux" in output:
@@ -192,6 +236,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
             print(f"Detected OS type: {os_type}")
             insert_workflow_state(process_id, f"Detected OS type: {os_type}", "SUCCEEDED", "Commands execution", source_url)
+            if new_jira_task:
+                add_comment_to_jira_task(new_jira_task, f"Detected OS type: {os_type}")
+
 
             if os_type == "Windows":
                 new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
@@ -299,6 +346,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 if all_commands_successful:
                     print("All commands executed successfully. Returning.")
                     insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                    if new_jira_task:
+                        add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                     return
 
             else:  # Linux
@@ -333,6 +383,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 print(f"Detected distribution: {distro} \nVersion: {version}")
                 insert_workflow_state(process_id, f"Detected distribution: {distro}, Version: {version}", "SUCCEEDED", "Commands execution", source_url)
+                if new_jira_task:
+                    add_comment_to_jira_task(new_jira_task, f"Detected distribution: {distro} \nVersion: {version}")
 
                 # Flag to identify if older version on which Flexera agent can't be installed. 
                 is_old_version = False
@@ -465,6 +517,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                         if is_old_version:
                             insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", "Commands execution", source_url)
+                            if new_jira_task:
+                                add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.")
                             return
                     # print(output)
 
@@ -490,11 +544,17 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         
                     if all_linux_commands_successful:
                         insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                        if new_jira_task:
+                            add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                         return  # Exit the loop if all commands are successful
                     else:
                         insert_workflow_state(process_id, "The problem with some commands still exists. Retrying with different account.", "FAILED", "Commands execution", source_url)
                 else:
                     insert_workflow_state(process_id, "All commands executed successfully.", "SUCCEEDED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                    if new_jira_task:
+                        add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                     return  
 
         except Exception as e:
@@ -618,6 +678,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 if all_commands_successful:
                     print("All commands executed successfully via WinRM. Returning.")
                     insert_workflow_state(process_id, f"All commands executed successfully via WinRM", "SUCCEEDED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                    if new_jira_task:
+                        add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                     return
 
             except Exception as winrm_e:
@@ -634,6 +697,7 @@ if __name__ == "__main__":
     process_id = sys.argv[1]
     ip = sys.argv[2]
     source_url = sys.argv[3]
+    new_jira_task = sys.argv[4]
 
     # username = 'nutanix'
     password = 'nutanix/4u'

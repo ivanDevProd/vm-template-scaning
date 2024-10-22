@@ -210,13 +210,15 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
             logging.info(f"Number of files in archive: {num_files}")
             logging.info(f"Total size of files: {total_size / (1024 ** 2):.2f} MB")
             log_to_database(process_id, f"Number of files in archive: {num_files}. Total size of files: {total_size / (1024 ** 2):.2f} MB.  Files: {[file.name for file in file_info]}.", "INFO", "Local file uploaded - Self-service", "Processing of the received file")
+            if jira_task_key:
+                    add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}. The total size of the extracted archive: {total_size / (1024 ** 2):.2f} MB.  Files: {[file.name for file in file_info]}.")
 
             valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk', '.iso']
             matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
             
             # If no matching files found, log a warning and stop
             if not matching_files:
-                error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk) found in archive. Process aborted."
+                error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk, iso) found in archive. Process aborted."
                 logging.error(error_message)
                 log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {download_dir_file} - Self-service", "Processing of the received file")
                 if jira_task_key:
@@ -251,7 +253,7 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
             log_to_database(process_id, f"Extracting {selected_file.name} from {download_dir_file} to {extracted_dir}", "INITIATED", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
 
             if jira_task_key:
-                add_comment_to_jira_task(jira_task_key, f"Extracting image initiated.")
+                add_comment_to_jira_task(jira_task_key, f"The archived file must be unpacked before uploading the image to the cluster. Extracting initiated.")
 
             tar.extract(selected_file, path=extracted_dir)
             logging.info(f"Extraction completed for {selected_file.name} to {extracted_dir}")
@@ -403,7 +405,7 @@ def upload_image_to_nutanix():
 
         task_url = f"https://{cluster_ip}:9440/api/nutanix/v3/tasks/{task_uuid}"
         if new_jira_task:
-            add_comment_to_jira_task(new_jira_task, f"Image upload initiated successfully.")
+            add_comment_to_jira_task(new_jira_task, f"Image upload to cluster started.")
 
         while True:
             try:
@@ -421,7 +423,7 @@ def upload_image_to_nutanix():
                     print(f"Image UUID on cluster: {uuid}")
                     log_to_database(process_id, f"Image <{image_name}> successfully uploaded. Image UUID: {uuid}", "SUCCEEDED", image_url, "Cluster Image Upload")
                     if new_jira_task:
-                        add_comment_to_jira_task(new_jira_task, f"Image successfully uploaded.")
+                        add_comment_to_jira_task(new_jira_task, f"Image successfully uploaded to the cluster.")
 
                     script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
                     command = f"python3 {script_path} {process_id} {uuid} {image_name} {image_url} {new_jira_task}"

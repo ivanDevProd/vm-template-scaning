@@ -1729,3 +1729,31 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-20 22:47:53,963 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
 2024-10-20 23:04:06,928 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
 2024-10-20 23:04:06,993 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424
+2024-10-21 18:46:43,464 - INFO - Initiating image upload to the Artifactory
+2024-10-21 18:46:44,081 - INFO - File size: 1.17 GB
+2024-10-21 18:46:45,951 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 18:50:04,068 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 18:50:06,732 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 18:51:45,648 - INFO - Number of files in archive: 1
+2024-10-21 18:51:45,649 - INFO - Total size of files: 8192.00 MB
+2024-10-21 18:51:47,470 - INFO - Proceeding with file: rocky8.img
+2024-10-21 18:51:48,903 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-21 18:53:12,475 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-21 18:53:58,083 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-21 18:53:58,446 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 18:53:58,497 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-21 18:56:21,512 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-21 19:05:51,782 - INFO - Initiating image upload to the Artifactory
+2024-10-21 19:05:52,396 - INFO - File size: 1.17 GB
+2024-10-21 19:05:53,770 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 19:09:29,341 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 19:09:30,904 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 19:11:09,634 - INFO - Number of files in archive: 1
+2024-10-21 19:11:09,635 - INFO - Total size of files: 8192.00 MB
+2024-10-21 19:11:11,108 - INFO - Proceeding with file: rocky8.img
+2024-10-21 19:11:12,493 - INFO - Extracting rocky8.img from /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-21 19:12:22,680 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky8_510-1.0.tar.gz.
+2024-10-21 19:13:23,156 - INFO - Extraction completed for rocky8.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-21 19:13:23,422 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
+2024-10-21 19:13:23,507 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
+2024-10-21 19:15:46,114 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img

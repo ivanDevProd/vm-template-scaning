@@ -140,6 +140,8 @@ def upload_local_image_to_artifactory(file_path, email, process_id, task_key):
             }
 
             log_to_database(process_id, "The process of uploading image to Artifactory has started.", 'RUNNING', file_path, "Artifactory Upload")
+            add_comment_to_jira_task(task_key, f"The process of uploading image to Artifactory has started.")
+            
             response = requests.put(artifactory_upload_url, data=file_to_upload, headers=headers)
 
             if response.status_code == 201:
@@ -180,11 +182,11 @@ def upload_local_image_to_artifactory(file_path, email, process_id, task_key):
                     log_to_database(process_id, f"Error occurred while deleting image from server: {e}", "FAILED", {file_path}, "Processing of the received file")
                     
             else:
-                print(f"Failed to upload image. Status code: {response.status_code}")
+                print(f"Failed to upload image to the Artifactory. Status code: {response.status_code}")
                 print(f"Response: {response.text}")
                 logging.error(f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}")
-                log_to_database(process_id, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}", 'FAILED', file_path, "Artifactory Upload")
-                add_comment_to_jira_task(task_key, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}")
+                log_to_database(process_id, f"Failed to upload image to the Artifactory. Status code: {response.status_code}. Response: {response.text}", 'FAILED', file_path, "Artifactory Upload")
+                add_comment_to_jira_task(task_key, f"Failed to upload image to the Artifactory. Status code: {response.status_code}. Response: {response.text}")
     except Exception as e:
         print(f"An error occurred: {e}")
         log_to_database(process_id, f"An error occurred: {str(e)}", 'FAILED', file_path, "Artifactory Upload")

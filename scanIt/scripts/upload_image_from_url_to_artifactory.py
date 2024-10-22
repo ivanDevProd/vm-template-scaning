@@ -138,6 +138,8 @@ def upload_image_from_url_to_artifactory(image_url, email, process_id, task_key)
             }
 
             log_to_database(process_id, "The process of uploading image to Artifactory has started.",'RUNNING', image_url, "Artifactory Upload")
+            add_comment_to_jira_task(task_key, f"The process of uploading image to Artifactory has started.")
+            
             response = requests.put(
                 artifactory_upload_url, 
                 data=image_response.raw,  

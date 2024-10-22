@@ -177,7 +177,7 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
         log_to_database(process_id, f"Download started: {source_url}. File size: {file_size_gb:.2f} GB", "INITIATED", source_url, "Download and Extraction")
 
         if jira_task_key:
-            add_comment_to_jira_task(jira_task_key, f"Starting download of {source_url}. File size: {file_size_gb:.2f} GB")
+            add_comment_to_jira_task(jira_task_key, f"The archived file must be unpacked before uploading the image to the cluster. Starting download of {source_url} to the mounting point. File size: {file_size_gb:.2f} GB")
             
     except Exception as e:
         logging.error(f"Error retrieving file size: {e}")
@@ -223,17 +223,17 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
             # Log file details
             logging.info(f"Number of files in archive: {num_files}")
             logging.info(f"Total size of files: {total_size / (1024 ** 2):.2f} MB")
-            log_to_database(process_id, f"Number of files in archive: {num_files}, Total size of files: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.", "INFO", source_url, "Download and Extraction")
+            log_to_database(process_id, f"Number of files in archive: {num_files}, The total size of the extracted archive: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.", "INFO", source_url, "Download and Extraction")
 
             if jira_task_key:
-                add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}, Total size of files: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.")
+                add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}, The total size of the extracted archive: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.")
 
             valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk']
             matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
             
             # If no matching files found, log a warning and stop
             if not matching_files:
-                error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk) found in archive. Process aborted."
+                error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk, iso) found in archive. Process aborted."
                 logging.error(error_message)
                 log_to_database(process_id, error_message, "FAILED", source_url, "Download and Extraction")
                 if jira_task_key:
@@ -267,9 +267,6 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
             logging.info(f"Extracting {selected_file.name} from {download_path} to {extracted_dir}")
             log_to_database(process_id, f"Extracting {selected_file.name} from {download_path} to {extracted_dir}", "INITIATED", source_url, "Download and Extraction")
 
-            if jira_task_key:
-                add_comment_to_jira_task(jira_task_key, f"Extracting image initiated.")
-
             try:
                 tar.extract(selected_file, path=extracted_dir)
                 logging.info(f"Extraction completed for {selected_file.name} to {extracted_dir}")
@@ -294,17 +291,12 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
         logging.info(f"Extracted image URL: {extracted_image_url}")
         log_to_database(process_id, f"Extracted image URL: {extracted_image_url}", "SUCCEEDED", source_url, "Download and Extraction")
 
-        if jira_task_key:
-            add_comment_to_jira_task(jira_task_key, f"Extraction completed.")
-
         return extracted_image_url
 
     except Exception as e:
         logging.error(f"Error during extraction: {e}")
         log_to_database(process_id, f"Error during extraction: {e}", "FAILED", source_url, "Download and Extraction")
 
-        if jira_task_key:
-            add_comment_to_jira_task(jira_task_key, f"Error during extraction: {e}")
         return None
 
 
@@ -383,10 +375,10 @@ def upload_image_to_nutanix():
     source_url = payload['spec']['resources']['source_uri']
     
     # Create Jira case
-    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}", f"A ticket created based on a request received through the self-selfice portal. System Image Scan request. URL: {source_url}. The scan was initiated by: {user_email}.")
+    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}", f"A system image scan ticket is created based on a request received through the self-service portal. Process ID: {process_id}. URL: {source_url}. The scan was initiated by: {user_email}.")
     if new_jira_task:
         log_to_database(process_id, f"Jira ticket: {new_jira_task}", "INFO", source_url, "Jira case")
-        log_to_database(process_id, f"Scan triggered by: {user_email}", "INFO", source_url, "Jira case")
+        log_to_database(process_id, f"Scan triggered by: {user_email}, for image: {source_url}", "INFO", source_url, "Jira case")
 
         body_text = f'Hi {user_email.split('.')[0].capitalize()},'\
                     f'<p>Scanning of the image {source_url} has been successfully initiated.'\
@@ -419,7 +411,9 @@ def upload_image_to_nutanix():
     try:
         subprocess.Popen(command, shell=True)
     except Exception as e:
-        log_to_database(process_id, f"An error occurred while initiating the upload: {str(e)}", "ERROR", source_url, "Artifactory Upload")
+        log_to_database(process_id, f"An error occurred while initiating image the upload to the Artifactory: {str(e)}", "ERROR", source_url, "Artifactory Upload")
+        if new_jira_task:
+            add_comment_to_jira_task(new_jira_task, f"An error occurred while initiating image the upload to the Artifactory: {str(e)}")
 
     
     # Define directories
@@ -465,7 +459,7 @@ def upload_image_to_nutanix():
         log_to_database(process_id, f"Image upload to cluster initiated successfully. Task UUID: {task_uuid}", "INITIATED", source_url, "Cluster Image Upload")
 
         if new_jira_task:
-            add_comment_to_jira_task(new_jira_task, f"Image upload to cluster initiated successfully.")
+            add_comment_to_jira_task(new_jira_task, f"Uploading the image to the cluster has started.")
 
         while True:
             try:
@@ -482,7 +476,7 @@ def upload_image_to_nutanix():
                     print(f"Image UUID on cluster: {uuid}")
                     log_to_database(process_id, f"Image <{image_name}> successfully uploaded. Image UUID: {uuid}", "SUCCEEDED", source_url, "Cluster Image Upload")
                     if new_jira_task:
-                        add_comment_to_jira_task(new_jira_task, f"Image successfully uploaded.")
+                        add_comment_to_jira_task(new_jira_task, f"Image successfully uploaded to the cluster.")
 
                     # log_to_database(process_id, f"NEXT STEPS STOPPED. Uncoment subprocess in uploadeImageToCluster_v2.py", "INFO", source_url, "Cluster Image Upload")
                     script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/deployVm_v1.py'
