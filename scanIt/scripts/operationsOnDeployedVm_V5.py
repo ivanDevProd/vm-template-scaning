@@ -26,7 +26,8 @@ mysql_config = {
 
 # Jira parameters 
 JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
-jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jira.nutanix.com/"
+jira_base_url = "https://jiradev.nutanix.com/"
 jira_email = "ivan.perkovic@nutanix.com"
 
 
@@ -72,7 +73,7 @@ def insert_workflow_state(process_id, description, state, stage, source_url):
 
 
 # Function that adds information to the DB (waitForFlexera table)
-def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip):
+def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task):
     try:
         conn = mysql.connector.connect(**mysql_config)
         cursor = conn.cursor()
@@ -80,14 +81,17 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip):
         # Insert new record or update the existing record if process_ID already exists
         cursor.execute(
             '''
-            INSERT INTO vm_template_scan.waitForFlexera (process_ID, vm_hostname, vm_uuid, vm_ip) 
-            VALUES (%s, %s, %s, %s) 
+            INSERT INTO vm_template_scan.waitForFlexera (process_ID, vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task) 
+            VALUES (%s, %s, %s, %s, %s, %s) 
             ON DUPLICATE KEY UPDATE
             vm_hostname = COALESCE(%s, vm_hostname),
             vm_uuid = COALESCE(%s, vm_uuid),
-            vm_ip = COALESCE(%s, vm_ip)
+            vm_ip = COALESCE(%s, vm_ip),
+            source_url = COALESCE(%s, source_url),
+            new_jira_task = COALESCE(%s, new_jira_task)
             ''',
-            (process_id, vm_hostname, vm_uuid, vm_ip, vm_hostname, vm_uuid, vm_ip)
+            (process_id, vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task, 
+             vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task)
         )
         
         conn.commit()
@@ -153,63 +157,161 @@ def execute_command(ssh, command, use_sudo=False, use_pty=False, sudo_password=N
     print(f"Command '{command}' executed successfully.")
     return output, None, exit_code
 
-def retry_commands_with_winrm(ip, username, password):
+
+def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task):
     try:
         session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
 
-        new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
-        fallback_command = "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\""
-        windows_commands = [
-                        "hostname",
-                        f'powershell Rename-Computer -NewName "{new_hostname}" -Force',
-                        "powershell Shutdown /r /t 900",
-                        "hostname",
-                        "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
-                        "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
-                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
-                    ]
+        connection_result = session.run_cmd('whoami')
+        # Check if WinRM connection succeeded
+        if connection_result.status_code == 0:
+            print(f"WinRM connection to {ip} established successfully with username: {username}.")
+            print(f"Logged in as: {connection_result.std_out.decode().strip()}")
+            insert_workflow_state(process_id, f"WinRM connection to {ip} established successfully with username: {username}.", "SUCCEEDED", "Commands execution", source_url)
+            
+            # Check PowerShell version
+            try:
+                ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
+                response = session.run_cmd(ps_version_command)
 
-        all_commands_successful = True
-        for command in windows_commands:
-            response = session.run_cmd(command)
-            if response.status_code != 0:
-                print(f"Failed to execute command '{command}', status code: {response.status_code}")
-                print(f"Error of '{command}': {response.std_err}")
-                insert_workflow_state(process_id, f"Failed to execute command '{command}: {response.std_err}'", "FAILED", "Commands execution", source_url)
+                if response.status_code == 0:
+                    ps_version = int(response.std_out.strip())
+                    print(f"PowerShell version on target: {ps_version}")
+                    
+                else:
+                    print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check. Commands for older PS version will be executed.")
+                    print(f"Error: {response.std_err.decode()}")
+                    ps_version = 0  # If version check fails, default to 0
+            except Exception as version_check_e:
+                    print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with fallback as precaution.")
+                    ps_version = 0  # Assume old PowerShell version if version check fails
+
                 
-                if "'Expand-Archive' is not recognized" in str(response.std_err):
-                    print("Expand-Archive command not recognized, trying fallback method.")
-                    response = session.run_cmd(fallback_command)
-                    if response.status_code != 0:
-                        print(f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}")
-                        insert_workflow_state(process_id, f"Failed to execute fallback command '{fallback_command}', status code: {response.status_code}", "FAILED", "Commands execution", source_url)
-                        all_commands_successful = False
-                    else:
-                        print(f"Fallback command '{fallback_command}' executed successfully with username: {username}")
-                        insert_workflow_state(process_id, f"Fallback command '{fallback_command}' executed successfully with username: {username}", "SUCCEEDED", "Commands execution", source_url)
+            if ps_version < 5:
+                print(f"Using fallback commands due to PowerShell version < 5")
+                remaining_commands = [
+                    "hostname",
+                    "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
+                    "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
+                    'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                    # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
+                ]
             else:
-                print(f"Command '{command}' executed successfully")
-                print(f"Output of '{command}': {response.decode()}")
-                insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username}. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
+                print(f"Using standard commands for PowerShell version >= 5")
+                remaining_commands = [
+                    "hostname",
+                    "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
+                    "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
+                    'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                    # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
+                ]
 
-        if all_commands_successful:
-            print("All commands executed successfully. Returning.")
-            insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
-            insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
-            if new_jira_task:
-                add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
-            return
+            # Change the hostname and reboot with error handling
+            try:
+                print(f"Changing hostname to {new_hostname}...")
+                response = session.run_cmd(f'powershell Rename-Computer -NewName "{new_hostname}" -Force')
+                if response.status_code != 0:
+                    raise Exception(f"Failed to change hostname. Status code: {response.status_code}. Error: {response.std_err.decode()}")
 
-    except Exception as winrm_e:
-        print(f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}")
-        insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}", source_url)
+                # Reboot immediately
+                print("Rebooting the machine...")
+                response = session.run_cmd("powershell Shutdown /r /t 0")
+                if response.status_code != 0:
+                    raise Exception(f"Failed to initiate reboot. Status code: {response.status_code}. Error: {response.std_err.decode()}")
+
+                insert_workflow_state(process_id, f"Hostname changed to {new_hostname} and reboot initiated successfully.", "SUCCEEDED", "Commands execution", source_url)
+
+            except Exception as hostname_reboot_error:
+                print(f"Error during hostname change or reboot: {hostname_reboot_error}")
+                insert_workflow_state(process_id, f"Error during hostname change or reboot: {hostname_reboot_error}", "FAILED", "Commands execution", source_url)
+
+            # Wait for the VM to become accessible again
+            print(f"Waiting for the machine to become accessible...")
+            insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
+            time.sleep(30)  # Wait a bit before retrying
+            accessible = False
+            for _ in range(5):  # Retry 5 times
+                try:
+                    # Attempt to reconnect using WinRM
+                    session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
+                    # Check if the session is alive by running a simple command
+                    test_command = "powershell Get-Process"  # Just an example command
+                    response = session.run_cmd(test_command)
+                    
+                    if response.status_code == 0:
+                        accessible = True
+                        print("Machine is accessible again.")
+                        insert_workflow_state(process_id, f"Machine is accessible again. Execution of the remaining commands continues", "INFO", "Commands execution", source_url)
+                        break
+                except Exception:
+                    print("Machine not accessible yet. Retrying...")
+                    insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", "Commands execution", source_url)
+                    time.sleep(15)  # Wait before retrying
+
+            if not accessible:
+                print("Machine did not become accessible in the expected time.")
+                insert_workflow_state(process_id, "Machine did not become accessible after reboot. Unable to continue installing Flexera agent.Terminating proces. ", "FAILED", "Commands execution", source_url)
+                return
+
+            # Execute remaining commands after reboot
+            print("Executing remaining commands...")
+            all_commands_successful = True
+            for command in remaining_commands:
+                response = session.run_cmd(command)
+
+                if response.status_code != 0:
+                    print(f"Failed to execute command '{command}', status code: {response.status_code}")
+                    print(f"Error of '{command}': {response.std_err.decode()}")
+                    insert_workflow_state(process_id, f"Failed to execute command '{command} via WinRM: {response.std_err.decode()}'", "FAILED", "Commands execution", source_url)
+                    all_commands_successful = False
+                else:
+                    print(f"Command '{command}' executed successfully")
+                    print(f"Output of '{command}': {response.std_out.decode().strip()}")
+                    insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username} via WinRM. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
+
+                    # Log hostname for future Flexera checks
+                    if command == 'hostname':
+                        try:
+                            # Attempt to log the data
+                            log_to_database_waitForFlexera(process_id, response.std_out.decode().strip(), None, None, None, None)
+                        except Exception as e:
+                            # Handle the exception and continue
+                            print(f"An error occurred while logging to the database: {e}")
+                            insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
+                
+                time.sleep(45)
+
+            if all_commands_successful:
+                print("All commands executed successfully via WinRM. Returning.")
+                insert_workflow_state(process_id, f"All commands executed successfully via WinRM", "SUCCEEDED", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                if new_jira_task:
+                    add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
+                return
+            else:
+                add_comment_to_jira_task(new_jira_task, f"Not all commands were executed completely via WinRM. Check the status and services on VM.")
+        else:
+            print(f"Failed to establish WinRM connection to {ip} with username: {username}. Error: {connection_result.std_err.decode()}")
+            insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {connection_result.std_err.decode()}", "FAILED", "Commands execution", source_url)
+
+    except winrm.exceptions.WinRMTransportError as transport_err:
+        logging.error(f"Transport error occurred with username: {username}. Error: {transport_err}")
+        insert_workflow_state(process_id, f"Transport error occurred with username: {username}. Error: {transport_err}", "FAILED", "Commands execution", source_url)
+    except winrm.exceptions.InvalidCredentialsError:
+        logging.error(f"Invalid credentials for {ip} with username: {username}.")
+        insert_workflow_state(process_id, f"Invalid credentials for {ip} with username: {username}.", "FAILED", "Commands execution", source_url)
+    except Exception as err:
+        logging.error(f"An error occurred with username: {username}. Error: {err}")
+        insert_workflow_state(process_id, f"An error occurred with username: {username}. Error: {err}", "FAILED", "Commands execution", source_url)
+
 
 
 def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
     usernames = ['nutanix', 'root', 'Administrator']
     failed_commands = []
-    
+
+    new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
+
     for username in usernames:
         try:
             ssh = paramiko.SSHClient()
@@ -241,9 +343,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
 
             if os_type == "Windows":
-                new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
-                time.sleep(10)
-                ps_version_command = "powershell -Command \'$PSVersionTable.PSVersion.Major\'"
+                time.sleep(60)
+                ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
@@ -296,7 +397,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 else:
                     print("Machine did not come back online in expected time.")
-                    insert_workflow_state(process_id, f"Machine did not come back online in expected time.", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Machine did not come back online in expected time. Unable to continue installing Flexera agent. Terminating proces.", "FAILED", "Commands execution", source_url)
                     return  # Skip to the next username if the machine is still not available
 
                 if ps_version >= 5:
@@ -308,7 +409,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         # 'cd C:/flexera_prodagent/prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
                         "powershell -NoProfile -Command \"cd C:\\flexera_prodagent\\prodagent; & msiexec /i 'FlexNet Inventory Agent.msi' /qn\"",
                         # 'net start | findstr Flexera*'
-                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
+                        # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
                 else:
                     # Fallback commands for older PowerShell versions (below 5.0) (Expand-Archive command is missing)
@@ -317,7 +418,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         'powershell -Command "Start-Process powershell -ArgumentList \'Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile C:\\flexera_prodagent.zip\' -Verb RunAs -Wait"',
                         'powershell -Command "Add-Type -A \'System.IO.Compression.FileSystem\'; [IO.Compression.ZipFile]::ExtractToDirectory(\'C:\\flexera_prodagent.zip\', \'C:\\flexera_prodagent\')"',
                         'powershell -NoProfile -Command "cd C:\\flexera_prodagent\\prodagent; & msiexec /i \'FlexNet Inventory Agent.msi\' /qn"',
-                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
+                        # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
 
                 all_commands_successful = True
@@ -328,7 +429,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Error of '{command}': {error}")
                         insert_workflow_state(process_id, f"Failed to execute command '{command}> Error: {error}'", "FAILED", "Commands execution", source_url)
                         all_commands_successful = False
-                        retry_commands_with_winrm(username,password)
+                        retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
                         break  # Stop executing commands for this user if one command fails
 
                     else:
@@ -338,10 +439,16 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                         # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostname':
-                            log_to_database_waitForFlexera(process_id, output, None, None)
+                            try:
+                                # Attempt to log the data
+                                log_to_database_waitForFlexera(process_id, output, None, None, None, None)
+                            except Exception as e:
+                                # Handle the exception and continue
+                                print(f"An error occurred while logging to the database: {e}")
+                                insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
 
                     # print(output)
-                    time.sleep(25)
+                    time.sleep(45)
 
                 if all_commands_successful:
                     print("All commands executed successfully. Returning.")
@@ -389,7 +496,6 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 # Flag to identify if older version on which Flexera agent can't be installed. 
                 is_old_version = False
 
-                new_hostname = 'DPRO_AUTOMATION_' + str(int(time.time()))
                 if "Ubuntu" in distro and isinstance(version, float):
                     if version >= 20.0:
                         commands = [
@@ -505,7 +611,13 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         
                         # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostnamectl set-hostname {new_hostname}':
-                            log_to_database_waitForFlexera(process_id, new_hostname, None, None)
+                            try:
+                                # Attempt to log the data
+                                log_to_database_waitForFlexera(process_id, new_hostname, None, None, None, None)
+                            except Exception as e:
+                                # Handle the exception and continue
+                                print(f"An error occurred while logging to the database: {e}")
+                                insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
 
                         elif command == 'apt list --installed' or command == 'dpkg --get-selections':
                             # Ubuntu/Debian systems (newer and older versions)
@@ -564,133 +676,12 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             # Close SSH connection if it was established
             if 'ssh' in locals():
                 ssh.close()
-
-            new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
-
-            # Try to connect using WinRM
-            try:
-                session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
-
-                # Check PowerShell version
-                try:
-                    ps_version_command = "powershell -Command \'$PSVersionTable.PSVersion.Major\'"
-                    response = session.run_cmd(ps_version_command)
-
-                    if response.status_code == 0:
-                        ps_version = int(response.std_out.strip())
-                        print(f"PowerShell version on target: {ps_version}")
-                    else:
-                        print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check.")
-                        print(f"Error: {response.std_err.decode()}")
-                        ps_version = 0  # If version check fails, default to 0
-                        
-                except Exception as version_check_e:
-                    print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with fallback as precaution.")
-                    ps_version = 0  # Assume old PowerShell version if version check fails
-
-                if ps_version < 5:
-                    print(f"Using fallback commands due to PowerShell version < 5")
-                    remaining_commands = [
-                        "hostname",
-                        "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
-                        "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
-                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
-                    ]
-                else:
-                    print(f"Using standard commands for PowerShell version >= 5")
-                    remaining_commands = [
-                        "hostname",
-                        "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
-                        "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
-                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                        "powershell -NoProfile -Command \"net start | findstr Flexera*\""
-                    ]
-
-                # Change the hostname and reboot with error handling
-                try:
-                    print(f"Changing hostname to {new_hostname}...")
-                    response = session.run_cmd(f'powershell Rename-Computer -NewName "{new_hostname}" -Force')
-                    if response.status_code != 0:
-                        raise Exception(f"Failed to change hostname. Status code: {response.status_code}. Error: {response.std_err.decode()}")
-
-                    # Reboot immediately
-                    print("Rebooting the machine...")
-                    response = session.run_cmd("powershell Shutdown /r /t 0")
-                    if response.status_code != 0:
-                        raise Exception(f"Failed to initiate reboot. Status code: {response.status_code}. Error: {response.std_err.decode()}")
-
-                    insert_workflow_state(process_id, f"Hostname changed to {new_hostname} and reboot initiated successfully.", "SUCCEEDED", "Commands execution", source_url)
-
-                except Exception as hostname_reboot_error:
-                    print(f"Error during hostname change or reboot: {hostname_reboot_error}")
-                    insert_workflow_state(process_id, f"Error during hostname change or reboot: {hostname_reboot_error}", "FAILED", "Commands execution", source_url)
-                    continue  # Proceed to the next username in the list
-
-                # Wait for the VM to become accessible again
-                print(f"Waiting for the machine to become accessible...")
-                insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
-                time.sleep(30)  # Wait a bit before retrying
-                accessible = False
-                for _ in range(5):  # Retry 5 times
-                    try:
-                        # Attempt to reconnect using WinRM
-                        session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
-                        # Check if the session is alive by running a simple command
-                        test_command = "powershell Get-Process"  # Just an example command
-                        response = session.run_cmd(test_command)
-                        
-                        if response.status_code == 0:
-                            accessible = True
-                            print("Machine is accessible again.")
-                            insert_workflow_state(process_id, f"Machine is accessible again. Execution of the remaining commands continues", "INFO", "Commands execution", source_url)
-                            break
-                    except Exception:
-                        print("Machine not accessible yet. Retrying...")
-                        insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", "Commands execution", source_url)
-                        time.sleep(15)  # Wait before retrying
-
-                if not accessible:
-                    print("Machine did not become accessible in the expected time.")
-                    insert_workflow_state(process_id, "Machine did not become accessible after reboot.", "FAILED", "Commands execution", source_url)
-                    return
-
-                 # Execute remaining commands after reboot
-                print("Executing remaining commands...")
-                all_commands_successful = True
-                for command in remaining_commands:
-                    response = session.run_cmd(command)
-
-                    if response.status_code != 0:
-                        print(f"Failed to execute command '{command}', status code: {response.status_code}")
-                        print(f"Error of '{command}': {response.std_err.decode()}")
-                        insert_workflow_state(process_id, f"Failed to execute command '{command} via WinRM: {response.std_err.decode()}'", "FAILED", "Commands execution", source_url)
-                        all_commands_successful = False
-                    else:
-                        print(f"Command '{command}' executed successfully")
-                        print(f"Output of '{command}': {response.std_out.decode().strip()}")
-                        insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username} via WinRM. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
-
-                        # Log hostname for future Flexera checks
-                        if command == 'hostname':
-                            log_to_database_waitForFlexera(process_id, response.std_out.decode().strip(), None, None)
-
-                if all_commands_successful:
-                    print("All commands executed successfully via WinRM. Returning.")
-                    insert_workflow_state(process_id, f"All commands executed successfully via WinRM", "SUCCEEDED", "Commands execution", source_url)
-                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
-                    if new_jira_task:
-                        add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
-                    return
-
-            except Exception as winrm_e:
-                print(f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}")
-                insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {winrm_e}", "FAILED", "Commands execution", source_url)
-
-        finally:
-            if 'ssh' in locals():
-                ssh.close()
                 print("SSH connection closed")
+
+            
+            # Try to connect using WinRM
+            retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
+
 
 
 if __name__ == "__main__":
@@ -703,4 +694,4 @@ if __name__ == "__main__":
     password = 'nutanix/4u'
     # sudo_username = 'root'
     sudo_password = 'nutanix/4u'
-    ssh_to_vm(process_id, ip, source_url, password, sudo_password)
+    ssh_to_vm(process_id, ip, source_url, password, sudo_password)  

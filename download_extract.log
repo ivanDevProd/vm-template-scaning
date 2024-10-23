@@ -1757,3 +1757,247 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-21 19:13:23,422 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky8_510-1.0.tar.gz
 2024-10-21 19:13:23,507 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/rocky8.img
 2024-10-21 19:15:46,114 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/rocky8.img
+2024-10-22 11:51:17,511 - INFO - Initiating image upload to the Artifactory
+2024-10-22 11:51:18,126 - INFO - File size: 3.91 GB
+2024-10-22 11:51:19,584 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 12:02:28,787 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 12:02:31,859 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 12:05:36,127 - INFO - Number of files in archive: 1
+2024-10-22 12:05:36,128 - INFO - Total size of files: 15360.00 MB
+2024-10-22 12:05:37,819 - INFO - Proceeding with file: Rocky9.4.img
+2024-10-22 12:05:39,045 - INFO - Extracting Rocky9.4.img from /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 12:09:38,735 - INFO - Extraction completed for Rocky9.4.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 12:09:39,420 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 12:09:39,583 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Rocky9.4.img
+2024-10-22 12:14:03,866 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky9.4.img
+2024-10-22 12:16:23,809 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky9.4.tar.gz.
+2024-10-22 12:55:42,677 - INFO - Initiating image upload to the Artifactory
+2024-10-22 12:55:43,297 - INFO - File size: 3.64 GB
+2024-10-22 12:55:50,222 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:06:40,659 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:06:42,084 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:08:16,046 - INFO - Number of files in archive: 6
+2024-10-22 13:08:16,047 - INFO - Total size of files: 7216.32 MB
+2024-10-22 13:08:17,530 - ERROR - No valid image files (.qcow, .qcow2, .img, -flat.vmdk, iso) found in archive. Process aborted.
+2024-10-22 13:13:59,128 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/Rocky9.4.tar.gz.
+2024-10-22 13:17:04,470 - INFO - Initiating image upload to the Artifactory
+2024-10-22 13:17:05,087 - INFO - File size: 3.64 GB
+2024-10-22 13:17:06,303 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:27:29,471 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:27:30,890 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:29:04,841 - INFO - Number of files in archive: 6
+2024-10-22 13:29:04,842 - INFO - Total size of files: 7216.32 MB
+2024-10-22 13:29:06,398 - INFO - Proceeding with file: ./Rocky9.4.vmdk
+2024-10-22 13:29:07,652 - INFO - Extracting ./Rocky9.4.vmdk from /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 13:31:08,205 - INFO - Extraction completed for ./Rocky9.4.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 13:31:08,988 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 13:31:09,039 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/./Rocky9.4.vmdk
+2024-10-22 13:35:16,501 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky9.4.vmdk
+2024-10-22 13:36:20,313 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/Rocky9.4.tar.gz.
+2024-10-22 14:16:41,128 - INFO - Initiating image upload to the Artifactory
+2024-10-22 14:16:42,021 - INFO - File size: 3.64 GB
+2024-10-22 14:16:43,554 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 14:27:45,696 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 14:27:47,137 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 14:29:21,131 - INFO - Number of files in archive: 6
+2024-10-22 14:29:21,132 - INFO - Total size of files: 7216.32 MB
+2024-10-22 14:29:22,596 - INFO - Proceeding with file: ./Rocky9.4.vmdk
+2024-10-22 14:29:24,001 - INFO - Extracting ./Rocky9.4.vmdk from /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 14:31:24,137 - INFO - Extraction completed for ./Rocky9.4.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 14:31:24,943 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 14:31:24,994 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/./Rocky9.4.vmdk
+2024-10-22 14:35:32,545 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky9.4.vmdk
+2024-10-22 14:36:54,290 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/Rocky9.4.tar.gz.
+2024-10-22 14:46:06,009 - INFO - Initiating image upload to the Artifactory
+2024-10-22 14:46:06,624 - INFO - File size: 3.64 GB
+2024-10-22 14:46:08,106 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 14:58:32,179 - INFO - Initiating image upload to the Artifactory
+2024-10-22 14:58:32,791 - INFO - File size: 3.64 GB
+2024-10-22 14:58:34,348 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 15:10:27,012 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 15:10:28,472 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 15:12:02,620 - INFO - Number of files in archive: 6
+2024-10-22 15:12:02,732 - INFO - Total size of files: 7216.32 MB
+2024-10-22 15:12:04,328 - INFO - Proceeding with file: ./Rocky9.4.vmdk
+2024-10-22 15:12:05,625 - INFO - Extracting ./Rocky9.4.vmdk from /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 15:14:05,803 - INFO - Extraction completed for ./Rocky9.4.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 15:14:06,583 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky9.4.tar.gz
+2024-10-22 15:14:06,634 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/./Rocky9.4.vmdk
+2024-10-22 15:18:36,503 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky9.4.vmdk
+2024-10-22 15:21:33,884 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/Rocky9.4.tar.gz.
+2024-10-22 15:54:06,945 - INFO - Initiating image upload to the Artifactory
+2024-10-22 15:54:07,560 - INFO - File size: 19.40 GB
+2024-10-22 15:54:08,838 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-22 16:52:09,500 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-22 16:52:12,237 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-22 17:04:34,946 - INFO - Number of files in archive: 1
+2024-10-22 17:04:34,947 - INFO - Total size of files: 61440.00 MB
+2024-10-22 17:04:37,556 - INFO - Proceeding with file: AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img
+2024-10-22 17:04:38,831 - INFO - Extracting AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img from /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 17:20:54,252 - INFO - Extraction completed for AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 17:20:54,947 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-22 17:20:55,002 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img
+2024-10-22 17:36:19,688 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindowsUVM-2.01.tar.gz.
+2024-10-22 17:37:44,929 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img
+2024-10-22 17:37:44,993 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsUVM-2.01
+2024-10-22 21:09:35,806 - INFO - Initiating image upload to the Artifactory
+2024-10-22 21:33:42,744 - INFO - Initiating image upload to the Artifactory
+2024-10-22 22:00:37,547 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-22 22:06:48,136 - INFO - Initiating image upload to the Artifactory
+2024-10-22 22:40:34,104 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:20:51,858 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:21:49,202 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:21:49,633 - INFO - File size: 19.40 GB
+2024-10-22 23:21:50,948 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-22 23:22:23,954 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:22:24,549 - INFO - File size: 1.70 GB
+2024-10-22 23:22:25,942 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos8.0.tar.gz
+2024-10-22 23:22:39,619 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:22:40,055 - INFO - File size: 13.24 GB
+2024-10-22 23:22:41,507 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-0424.tar.gz
+2024-10-22 23:22:49,311 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:22:49,743 - INFO - File size: 10.22 GB
+2024-10-22 23:22:51,003 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-22 23:22:59,005 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:22:59,435 - INFO - File size: 7.32 GB
+2024-10-22 23:23:00,844 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSCentos77UVM-1.1.tar.gz
+2024-10-22 23:23:05,248 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:23:05,684 - INFO - File size: 2.62 GB
+2024-10-22 23:23:07,052 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky810UVM-08.24.tar.gz
+2024-10-22 23:23:15,016 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:23:15,449 - INFO - File size: 3.60 GB
+2024-10-22 23:23:16,869 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Rocky94UVM-08.24.tar.gz
+2024-10-22 23:23:22,385 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:23:22,816 - INFO - File size: 10.94 GB
+2024-10-22 23:23:24,227 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-16.0.tar.gz
+2024-10-22 23:23:27,616 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:23:28,049 - INFO - File size: 0.54 GB
+2024-10-22 23:23:29,284 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-22 23:23:35,206 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:23:35,635 - INFO - File size: 4.73 GB
+2024-10-22 23:23:37,169 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-22 23:23:50,768 - INFO - Initiating image upload to the Artifactory
+2024-10-22 23:23:51,200 - INFO - File size: 4.81 GB
+2024-10-22 23:23:52,780 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-22 23:34:10,927 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-22 23:34:12,355 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-22 23:34:28,395 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Centos66UVM-1.2.tar.gz.
+2024-10-22 23:35:02,865 - INFO - Number of files in archive: 1
+2024-10-22 23:35:02,866 - INFO - Total size of files: 4096.00 MB
+2024-10-22 23:35:04,476 - INFO - Proceeding with file: Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-22 23:35:05,771 - INFO - Extracting Centos66UVM-1.2/Centos66UVM-1.2.img from /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 23:36:10,968 - INFO - Extraction completed for Centos66UVM-1.2/Centos66UVM-1.2.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-22 23:36:11,172 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-22 23:36:11,224 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-22 23:37:32,390 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-22 23:37:32,441 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2
+2024-10-22 23:53:49,151 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos8.0.tar.gz
+2024-10-22 23:53:50,681 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos8.0.tar.gz
+2024-10-22 23:54:17,456 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/Centos8.0.tar.gz.
+2024-10-23 00:03:39,955 - INFO - Number of files in archive: 7
+2024-10-23 00:03:39,956 - INFO - Total size of files: 51200.15 MB
+2024-10-23 00:03:44,825 - INFO - Proceeding with file: Centos8.0-flat.vmdk
+2024-10-23 00:03:46,417 - INFO - Extracting Centos8.0-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/Centos8.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:09:06,763 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky810UVM-08.24.tar.gz
+2024-10-23 00:09:22,664 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky810UVM-08.24.tar.gz
+2024-10-23 00:16:05,970 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky810UVM-08.24.tar.gz.
+2024-10-23 00:16:44,047 - INFO - Extraction completed for Centos8.0-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:16:44,161 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Centos8.0.tar.gz
+2024-10-23 00:16:44,215 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos8.0-flat.vmdk
+2024-10-23 00:24:51,070 - INFO - Number of files in archive: 1
+2024-10-23 00:24:51,071 - INFO - Total size of files: 81920.00 MB
+2024-10-23 00:24:52,517 - INFO - Proceeding with file: Rocky810UVM-08.24/Rocky810UVM-08.24.img
+2024-10-23 00:24:54,019 - INFO - Extracting Rocky810UVM-08.24/Rocky810UVM-08.24.img from /home/noc_admin/image_scanner_project/downloads/Rocky810UVM-08.24.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:29:51,870 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Rocky94UVM-08.24.tar.gz
+2024-10-23 00:29:53,196 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Rocky94UVM-08.24.tar.gz
+2024-10-23 00:30:30,104 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos8.0-flat.vmdk
+2024-10-23 00:33:01,129 - INFO - Number of files in archive: 1
+2024-10-23 00:33:01,130 - INFO - Total size of files: 15360.00 MB
+2024-10-23 00:33:02,713 - INFO - Proceeding with file: Rocky94UVM-08.24/Rocky94UVM-08.24.img
+2024-10-23 00:33:04,029 - INFO - Extracting Rocky94UVM-08.24/Rocky94UVM-08.24.img from /home/noc_admin/image_scanner_project/downloads/Rocky94UVM-08.24.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:36:37,623 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 00:36:46,107 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 00:37:05,733 - INFO - Extraction completed for Rocky94UVM-08.24/Rocky94UVM-08.24.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:37:06,216 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky94UVM-08.24.tar.gz
+2024-10-23 00:37:06,270 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Rocky94UVM-08.24/Rocky94UVM-08.24.img
+2024-10-23 00:39:05,909 - ERROR - Error during extraction: Error -3 while decompressing data: invalid block type
+2024-10-23 00:42:00,367 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky94UVM-08.24/Rocky94UVM-08.24.img
+2024-10-23 00:42:00,421 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky94UVM-08.24
+2024-10-23 00:45:18,990 - INFO - Extraction completed for Rocky810UVM-08.24/Rocky810UVM-08.24.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:45:19,209 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Rocky810UVM-08.24.tar.gz
+2024-10-23 00:45:19,262 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Rocky810UVM-08.24/Rocky810UVM-08.24.img
+2024-10-23 00:46:35,121 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 00:46:36,602 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 00:54:42,136 - INFO - Number of files in archive: 7
+2024-10-23 00:54:42,139 - INFO - Total size of files: 40960.25 MB
+2024-10-23 00:54:43,980 - INFO - Proceeding with file: WindowsUVM-1.2/WindowsUVM-1.2_0.vmdk
+2024-10-23 00:54:45,427 - INFO - Extracting WindowsUVM-1.2/WindowsUVM-1.2_0.vmdk from /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:54:45,487 - INFO - Extraction completed for WindowsUVM-1.2/WindowsUVM-1.2_0.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 00:54:45,829 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 00:54:45,884 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/WindowsUVM-1.2/WindowsUVM-1.2_0.vmdk
+2024-10-23 00:57:38,150 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/AHV/win19_vg_march.qcow2.
+2024-10-23 01:01:49,172 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/WindowsUVM-1.2.tar.gz.
+2024-10-23 01:06:09,752 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Rocky94UVM-08.24.tar.gz.
+2024-10-23 01:07:13,367 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky810UVM-08.24/Rocky810UVM-08.24.img
+2024-10-23 01:07:13,447 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Rocky810UVM-08.24
+2024-10-23 01:12:49,965 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSCentos77UVM-1.1.tar.gz
+2024-10-23 01:12:51,610 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSCentos77UVM-1.1.tar.gz
+2024-10-23 01:22:47,648 - INFO - Number of files in archive: 1
+2024-10-23 01:22:47,649 - INFO - Total size of files: 51200.00 MB
+2024-10-23 01:22:49,089 - INFO - Proceeding with file: AFSCentos77/AFSCentos77UVM-1.1.img
+2024-10-23 01:22:50,522 - INFO - Extracting AFSCentos77/AFSCentos77UVM-1.1.img from /home/noc_admin/image_scanner_project/downloads/AFSCentos77UVM-1.1.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 01:25:41,870 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/WindowsUVM-1.2.tar.gz.
+2024-10-23 01:32:12,173 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-23 01:32:13,635 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-23 01:35:05,906 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-16.0.tar.gz
+2024-10-23 01:35:07,481 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-16.0.tar.gz
+2024-10-23 01:35:54,792 - INFO - Extraction completed for AFSCentos77/AFSCentos77UVM-1.1.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 01:35:55,068 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSCentos77UVM-1.1.tar.gz
+2024-10-23 01:35:55,122 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSCentos77/AFSCentos77UVM-1.1.img
+2024-10-23 01:36:09,757 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSCentos77UVM-1.1.tar.gz.
+2024-10-23 01:45:18,564 - INFO - Number of files in archive: 1
+2024-10-23 01:45:18,566 - INFO - Total size of files: 61440.00 MB
+2024-10-23 01:45:21,180 - INFO - Proceeding with file: AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
+2024-10-23 01:45:23,645 - INFO - Extracting AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img from /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 01:45:24,844 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-0424.tar.gz
+2024-10-23 01:45:26,109 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-0424.tar.gz
+2024-10-23 01:48:15,707 - INFO - Number of files in archive: 1
+2024-10-23 01:48:15,708 - INFO - Total size of files: 61440.00 MB
+2024-10-23 01:48:17,298 - INFO - Proceeding with file: AFSWindowsUVM-16.0/win16_fslogix.img
+2024-10-23 01:48:18,722 - INFO - Extracting AFSWindowsUVM-16.0/win16_fslogix.img from /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-16.0.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 01:51:11,931 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSCentos77/AFSCentos77UVM-1.1.img
+2024-10-23 01:51:11,993 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSCentos77
+2024-10-23 02:02:18,059 - INFO - Extraction completed for AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 02:02:18,512 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSWindowsSrv16UVM-0424.tar.gz
+2024-10-23 02:02:18,568 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
+2024-10-23 02:05:06,877 - INFO - Extraction completed for AFSWindowsUVM-16.0/win16_fslogix.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 02:05:07,404 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-16.0.tar.gz
+2024-10-23 02:05:07,459 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindowsUVM-16.0/win16_fslogix.img
+2024-10-23 02:06:01,432 - INFO - Number of files in archive: 1
+2024-10-23 02:06:01,433 - INFO - Total size of files: 102400.00 MB
+2024-10-23 02:06:02,884 - INFO - Proceeding with file: AFSWindows11UVM-04.24/AFSWindows11UVM_0424.img
+2024-10-23 02:06:04,344 - INFO - Extracting AFSWindows11UVM-04.24/AFSWindows11UVM_0424.img from /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-0424.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 02:12:30,902 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-23 02:12:32,390 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-23 02:22:11,554 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindowsSrv16UVM-0424.tar.gz.
+2024-10-23 02:22:54,740 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424/AFSWindowsSrv16UVM_0424.img
+2024-10-23 02:22:54,807 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsSrv16UVM-0424
+2024-10-23 02:25:15,109 - INFO - Number of files in archive: 1
+2024-10-23 02:25:15,110 - INFO - Total size of files: 61440.00 MB
+2024-10-23 02:25:16,688 - INFO - Proceeding with file: AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img
+2024-10-23 02:25:18,106 - INFO - Extracting AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img from /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 02:25:59,072 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsUVM-16.0/win16_fslogix.img
+2024-10-23 02:25:59,140 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsUVM-16.0
+2024-10-23 02:27:51,610 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindowsUVM-16.0.tar.gz.
+2024-10-23 02:32:50,653 - INFO - Extraction completed for AFSWindows11UVM-04.24/AFSWindows11UVM_0424.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 02:32:51,236 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSWindows11UVM-0424.tar.gz
+2024-10-23 02:32:51,301 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindows11UVM-04.24/AFSWindows11UVM_0424.img
+2024-10-23 02:41:38,290 - INFO - Extraction completed for AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 02:41:38,959 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/AFSWindowsUVM-2.01.tar.gz
+2024-10-23 02:41:39,027 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img
+2024-10-23 02:46:29,708 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindows11UVM-0424.tar.gz.
+2024-10-23 03:03:18,073 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsUVM-2.01/AFSWindowsUVM-2.01.img
+2024-10-23 03:03:18,139 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindowsUVM-2.01
+2024-10-23 03:06:39,089 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindows11UVM-04.24/AFSWindows11UVM_0424.img
+2024-10-23 03:06:39,198 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindows11UVM-04.24
+2024-10-23 03:16:19,299 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindowsUVM-2.01.tar.gz.

@@ -41,7 +41,8 @@ username = CLUSTER_USERNAME
 password = CLUSTER_PASSWORD
 
 # Jira parameters 
-jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jira.nutanix.com/"
+jira_base_url = "https://jiradev.nutanix.com/"
 jira_email = "ivan.perkovic@nutanix.com"
 jira_bearer_token = JIRA_BEARER_TOKEN
 
@@ -111,9 +112,10 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip, sour
             vm_uuid = COALESCE(%s, vm_uuid),
             vm_ip = COALESCE(%s, vm_ip),
             source_url = COALESCE(%s, source_url),
-            new_jira_task = COALESCE(%s, new_jira_task),
+            new_jira_task = COALESCE(%s, new_jira_task)
             ''',
-            (process_id, vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task,  vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task)
+            (process_id, vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task, 
+             vm_hostname, vm_uuid, vm_ip, source_url, new_jira_task)
         )
         
         conn.commit()
@@ -123,8 +125,6 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip, sour
         if conn.is_connected():
             cursor.close()
             conn.close()
-
-
 
 
 def get_image_size(image_uuid):
@@ -316,7 +316,7 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url, new_jira_ta
                                     add_comment_to_jira_task(new_jira_task, f"VM accessible via ssh/winRM. Continues executing commands on the running machine.")
 
                                 # Connecting and executing commands on deployed machine (using ssh_to_vm method) passing IP address
-                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V4.py'
+                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V5.py'
                                 command = f"python3 {script_path} {process_id} {vm_ip} {source_url} {new_jira_task}"
                                 # Run the script asynchronously
                                 subprocess.Popen(command, shell=True)
@@ -492,7 +492,7 @@ def deploy_vm():
                                     add_comment_to_jira_task(new_jira_task, f"VM accessible via ssh/winRM. Continues executing commands on the running machine.")
 
                                 # Connecting and executing commands on deployed machine (using ssh_to_vm method) passing IP address
-                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V4.py'
+                                script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V5.py'
                                 command = f"python3 {script_path} {process_id} {vm_ip} {source_url} {new_jira_task}"
                                 # Run the script asynchronously
                                 subprocess.Popen(command, shell=True)

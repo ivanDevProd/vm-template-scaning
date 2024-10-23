@@ -54,7 +54,8 @@ mysql_config = {
 
 
 # Jira parameters 
-jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jira.nutanix.com/"
+jira_base_url = "https://jiradev.nutanix.com/"
 jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN")
 
 
@@ -174,7 +175,7 @@ def upload_image_from_url_to_artifactory(image_url, email, process_id, task_key)
                 print(f"Response: {response.text}")
                 logging.error(f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}")
                 log_to_database(process_id, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}",'FAILED', image_url, "Artifactory Upload")
-                add_comment_to_jira_task(task_key, f"Failed to upload image. Status code: {response.status_code}. Response: {response.text}")
+                add_comment_to_jira_task(task_key, f"Failed to upload image to the Artifactory. Status code: {response.status_code}. Response: {response.text}")
         else:
             print(f"Failed to download image from URL. Status code: {image_response.status_code}")
             log_to_database(process_id, f"Failed to download image from URL. Status code: {image_response.status_code}",'FAILED', image_url, "Artifactory Upload")

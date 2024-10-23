@@ -213,7 +213,7 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
             if jira_task_key:
                     add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}. The total size of the extracted archive: {total_size / (1024 ** 2):.2f} MB.  Files: {[file.name for file in file_info]}.")
 
-            valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk', '.iso']
+            valid_extensions = ['.qcow', '.qcow2', '.img', '.vmdk', '.iso', '-flat.vmdk']
             matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
             
             # If no matching files found, log a warning and stop

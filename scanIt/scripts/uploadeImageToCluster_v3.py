@@ -228,7 +228,7 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
             if jira_task_key:
                 add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}, The total size of the extracted archive: {total_size / (1024 ** 2):.2f} MB. Files: {[file.name for file in file_info]}.")
 
-            valid_extensions = ['.qcow', '.qcow2', '.img', '-flat.vmdk']
+            valid_extensions = ['.qcow', '.qcow2', '.img', '.vmdk', '-flat.vmdk','iso']
             matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
             
             # If no matching files found, log a warning and stop
@@ -240,7 +240,7 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
                     add_comment_to_jira_task(jira_task_key, error_message)
                 return None
 
-             # Check for multiple files with the same extension (for valid extensions only)
+            # Check for multiple files with the same extension (for valid extensions only)
             ext_count = {}
             for file in matching_files:
                 ext = next((ext for ext in valid_extensions if file.name.endswith(ext)), None)  # Get the specific valid extension
