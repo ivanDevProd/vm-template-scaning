@@ -2001,3 +2001,69 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-23 03:06:39,089 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindows11UVM-04.24/AFSWindows11UVM_0424.img
 2024-10-23 03:06:39,198 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/AFSWindows11UVM-04.24
 2024-10-23 03:16:19,299 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/AFSWindowsUVM-2.01.tar.gz.
+2024-10-23 08:23:05,172 - INFO - Initiating image upload to the Artifactory
+2024-10-23 08:23:05,790 - INFO - File size: 4.81 GB
+2024-10-23 08:23:14,486 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 08:37:29,003 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 08:37:30,512 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 08:45:33,189 - INFO - Number of files in archive: 7
+2024-10-23 08:45:33,190 - INFO - Total size of files: 40960.25 MB
+2024-10-23 08:45:34,952 - ERROR - Multiple files with the same extension '.vmdk' found: ['WindowsUVM-1.2/WindowsUVM-1.2_0.vmdk', 'WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk'].  Process aborted.
+2024-10-23 08:51:44,348 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/WindowsUVM-1.2.tar.gz.
+2024-10-23 09:00:03,547 - INFO - Initiating image upload to the Artifactory
+2024-10-23 09:00:04,164 - INFO - File size: 4.81 GB
+2024-10-23 09:00:05,471 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 09:09:03,154 - INFO - Initiating image upload to the Artifactory
+2024-10-23 09:09:03,772 - INFO - File size: 4.81 GB
+2024-10-23 09:09:05,214 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 09:09:13,145 - INFO - Initiating image upload to the Artifactory
+2024-10-23 09:09:13,575 - INFO - File size: 0.54 GB
+2024-10-23 09:09:14,832 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 09:11:39,062 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 09:11:40,497 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 09:12:30,676 - INFO - Number of files in archive: 1
+2024-10-23 09:12:30,677 - INFO - Total size of files: 4096.00 MB
+2024-10-23 09:12:32,281 - INFO - Proceeding with file: Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-23 09:12:33,743 - INFO - Extracting Centos66UVM-1.2/Centos66UVM-1.2.img from /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 09:12:57,657 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Centos66UVM-1.2.tar.gz.
+2024-10-23 09:13:38,540 - INFO - Extraction completed for Centos66UVM-1.2/Centos66UVM-1.2.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 09:13:38,705 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 09:13:38,756 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-23 09:14:58,671 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-23 09:14:58,722 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2
+2024-10-23 09:26:21,359 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 09:26:29,775 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 09:34:31,309 - INFO - Number of files in archive: 7
+2024-10-23 09:34:31,310 - INFO - Total size of files: 40960.25 MB
+2024-10-23 09:34:32,923 - ERROR - Multiple files with the same extension '.vmdk' found: ['WindowsUVM-1.2/WindowsUVM-1.2_0.vmdk', 'WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk'].  Process aborted.
+2024-10-23 09:37:18,068 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/WindowsUVM-1.2.tar.gz.
+2024-10-23 09:58:06,792 - INFO - Initiating image upload to the Artifactory
+2024-10-23 09:58:07,385 - INFO - File size: 0.54 GB
+2024-10-23 09:58:08,683 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 09:58:15,782 - INFO - Initiating image upload to the Artifactory
+2024-10-23 09:58:16,215 - INFO - File size: 4.81 GB
+2024-10-23 09:58:17,511 - INFO - Downloading file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 10:00:42,334 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 10:00:43,953 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 10:01:02,201 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/kvm/Centos66UVM-1.2.tar.gz.
+2024-10-23 10:01:33,965 - INFO - Number of files in archive: 1
+2024-10-23 10:01:33,966 - INFO - Total size of files: 4096.00 MB
+2024-10-23 10:01:35,254 - INFO - Proceeding with file: Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-23 10:01:36,710 - INFO - Extracting Centos66UVM-1.2/Centos66UVM-1.2.img from /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 10:02:41,651 - INFO - Extraction completed for Centos66UVM-1.2/Centos66UVM-1.2.img to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 10:02:41,815 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/Centos66UVM-1.2.tar.gz
+2024-10-23 10:02:41,865 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-23 10:04:01,825 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2/Centos66UVM-1.2.img
+2024-10-23 10:04:01,876 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/Centos66UVM-1.2
+2024-10-23 10:12:20,473 - INFO - Downloaded file to /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 10:12:21,973 - INFO - Attempting to analyze tar file: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 10:20:21,321 - INFO - Number of files in archive: 7
+2024-10-23 10:20:21,322 - INFO - Total size of files: 40960.25 MB
+2024-10-23 10:20:22,937 - INFO - Proceeding with file: WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk
+2024-10-23 10:20:24,366 - INFO - Extracting WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk from /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 10:25:16,128 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/vsphere/WindowsUVM-1.2.tar.gz.
+2024-10-23 10:30:48,298 - INFO - Extraction completed for WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk to /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/
+2024-10-23 10:30:49,267 - INFO - Deleted tar file from download path: /home/noc_admin/image_scanner_project/downloads/WindowsUVM-1.2.tar.gz
+2024-10-23 10:30:49,317 - INFO - Extracted image URL: http://10.67.22.100/static/scanIt/extracted_images/WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk
+2024-10-23 10:42:38,987 - INFO - Deleted file: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/WindowsUVM-1.2/WindowsUVM-1.2_0-flat.vmdk
+2024-10-23 10:42:39,041 - INFO - Deleted empty folder: /home/noc_admin/image_scanner_project/static/scanIt/extracted_images/WindowsUVM-1.2

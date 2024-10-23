@@ -213,9 +213,39 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
             if jira_task_key:
                     add_comment_to_jira_task(jira_task_key, f"Number of files in archive: {num_files}. The total size of the extracted archive: {total_size / (1024 ** 2):.2f} MB.  Files: {[file.name for file in file_info]}.")
 
+            # valid_extensions = ['.qcow', '.qcow2', '.img', '.vmdk', '.iso', '-flat.vmdk']
+            # matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
+            
+            # # If no matching files found, log a warning and stop
+            # if not matching_files:
+            #     error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk, iso) found in archive. Process aborted."
+            #     logging.error(error_message)
+            #     log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {download_dir_file} - Self-service", "Processing of the received file")
+            #     if jira_task_key:
+            #         add_comment_to_jira_task(jira_task_key, error_message)
+            #     return None
+
+            #  # Check for multiple files with the same extension (for valid extensions only)
+            # ext_count = {}
+            # for file in matching_files:
+            #     ext = next((ext for ext in valid_extensions if file.name.endswith(ext)), None)  # Get the specific valid extension
+            #     ext_count[ext] = ext_count.get(ext, 0) + 1
+
+            # # If there are multiple files with the same valid extension, stop the process
+            # for ext, count in ext_count.items():
+            #     if count > 1:
+            #         error_message = f"Multiple files with the same extension '{ext}' found: {[file.name for file in matching_files]}.  Process aborted."
+            #         logging.error(error_message)
+            #         log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
+            #         if jira_task_key:
+            #             add_comment_to_jira_task(jira_task_key, error_message)
+            #         return None
+            
+            # selected_file = matching_files[0]
+
             valid_extensions = ['.qcow', '.qcow2', '.img', '.vmdk', '.iso', '-flat.vmdk']
             matching_files = [file for file in file_info if any(file.name.endswith(ext) for ext in valid_extensions)]
-            
+
             # If no matching files found, log a warning and stop
             if not matching_files:
                 error_message = f"No valid image files (.qcow, .qcow2, .img, -flat.vmdk, iso) found in archive. Process aborted."
@@ -225,24 +255,33 @@ def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=No
                     add_comment_to_jira_task(jira_task_key, error_message)
                 return None
 
-             # Check for multiple files with the same extension (for valid extensions only)
-            ext_count = {}
-            for file in matching_files:
-                ext = next((ext for ext in valid_extensions if file.name.endswith(ext)), None)  # Get the specific valid extension
-                ext_count[ext] = ext_count.get(ext, 0) + 1
+            # Initialize a list to hold vmdk files
+            vmdk_files = [file for file in matching_files if file.name.endswith('.vmdk')]
+            flat_vmdk_files = [file for file in matching_files if file.name.endswith('-flat.vmdk')]
 
-            # If there are multiple files with the same valid extension, stop the process
-            for ext, count in ext_count.items():
-                if count > 1:
-                    error_message = f"Multiple files with the same extension '{ext}' found: {[file.name for file in matching_files]}.  Process aborted."
+            # Handle prioritization and error logging
+            if flat_vmdk_files:
+                # If '-flat.vmdk' files are found, select the first one
+                selected_file = flat_vmdk_files[0]
+            else:
+                # If no '-flat.vmdk', check for multiple '.vmdk' files
+                if len(vmdk_files) > 1:
+                    error_message = f"Multiple files with the same extension '.vmdk' found: {[file.name for file in vmdk_files]}. Process aborted."
                     logging.error(error_message)
-                    log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
+                    log_to_database(process_id, error_message, "FAILED", f"Local file uploaded {download_dir_file} - Self-service", "Processing of the received file")
                     if jira_task_key:
                         add_comment_to_jira_task(jira_task_key, error_message)
                     return None
-            
-            selected_file = matching_files[0]
+                elif len(vmdk_files) == 1:
+                    # If only one '.vmdk' file, select it
+                    selected_file = vmdk_files[0]
+                else:
+                    # If no '.vmdk' files, select the first file from matching_files
+                    selected_file = matching_files[0]
+
+            print(f"Selected image file: {selected_file.name}")
             logging.info(f"Proceeding with file: {selected_file.name}")
+
             log_to_database(process_id, f"Proceeding with file: {selected_file.name}", "INFO", f"Local file uploaded {selected_file.name} - Self-service", "Processing of the received file")
 
             if jira_task_key:

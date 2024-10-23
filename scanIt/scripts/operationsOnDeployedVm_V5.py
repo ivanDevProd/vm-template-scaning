@@ -1,5 +1,6 @@
 import paramiko
 import mysql.connector
+from mysql.connector import Error
 import winrm
 import time
 import sys
@@ -590,6 +591,48 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 else:
                     print("Unknown or unsupported distribution. Stopping execution.")
                     insert_workflow_state(process_id, "Unknown or unsupported distribution. Stopping execution.", "FAILED", "Commands execution", source_url)
+
+                    commands_for_unsupported = [
+                                                "dpkg --get-selections",        # Debian-based systems
+                                                "apt list --installed",         # Ubuntu-based systems
+                                                "yum list installed",           # RedHat/CentOS 7 and older
+                                                "dnf list installed",           # Fedora/CentOS 8+
+                                                "zypper search --installed-only" # SUSE/openSUSE systems
+                                            ]
+                    for command in commands_for_unsupported:
+                        try:
+                            output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
+                            if exit_code == 0:
+                                print(f"Successfully retrieved installed applications using command: {command}")
+                                print(output)
+                                log_to_database_rawInstallations(process_id, output)
+                                insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", "Commands execution", source_url)
+                                
+                                # removing VM record from the raw_installations DB table since Flexera agent can't be installed
+                                try:
+                                    conn = mysql.connector.connect(**mysql_config)
+                                    cursor = conn.cursor()
+                                    cursor.execute(
+                                        '''
+                                        DELETE FROM vm_template_scan.waitForFlexera 
+                                        WHERE process_ID = %s
+                                        ''',
+                                        (process_id,)  # The provided UUID to match
+                                    )
+                                    conn.commit()
+                                    insert_workflow_state(process_id, f"VM record from the <raw_installations> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", "Commands execution", source_url)
+                                except Error as err:
+                                    logging.error(f"Database error: {err}")
+                                    insert_workflow_state(process_id, f"Problem with the removing VM record from the <raw_installations> DB table. Check record for this process at DB directly.", "FAILED", "Commands execution", source_url)
+
+                                return
+                            else:
+                                print(f"Command '{command}' failed with exit code {exit_code}. Error: {error}")
+                        
+                        except Exception as e:
+                            print(f"An error occurred while executing the command '{command}': {e}")
+                            continue
+                                            
                     ssh.close()
                     return
 
@@ -629,6 +672,22 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                         if is_old_version:
                             insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", "Commands execution", source_url)
+                            # removing VM record from the raw_installations DB table since Flexera agent can't be installed
+                            try:
+                                conn = mysql.connector.connect(**mysql_config)
+                                cursor = conn.cursor()
+                                cursor.execute(
+                                    '''
+                                    DELETE FROM vm_template_scan.waitForFlexera 
+                                    WHERE process_ID = %s
+                                    ''',
+                                    (process_id,)  # The provided UUID to match
+                                )
+                                conn.commit()
+                                insert_workflow_state(process_id, f"VM record from the <raw_installations> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", "Commands execution", source_url)
+                            except Error as err:
+                                logging.error(f"Database error: {err}")
+                                
                             if new_jira_task:
                                 add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.")
                             return
