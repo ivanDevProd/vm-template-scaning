@@ -96,7 +96,6 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip, sour
         )
         
         conn.commit()
-        insert_workflow_state(process_id, f"A new record for {vm_hostname} has been added to the <waitForFlexera> database table for future verification on the Flexera side..", "SUCCEEDED", "Commands execution", source_url)
 
     except mysql.connector.Error as err:
         logging.error(f"Database error: {err}")
@@ -610,10 +609,10 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 print(f"Successfully retrieved installed applications using command: {command}")
                                 print(output)
                                 log_to_database_rawInstallations(process_id, output, source_url)
-                                insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED",  "Commands execution", source_url)
+                                insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive", "SUCCEEDED",  "Commands execution", source_url)
 
                                 if new_jira_task:
-                                    add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. Terminating proces.")
+                                    add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive. Terminating proces.")
                                 
                                 # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
                                 try:
@@ -678,7 +677,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             log_to_database_rawInstallations(process_id, output, source_url)
 
                         if is_old_version:
-                            insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. Terminationg proces.", "SUCCEEDED", "Commands execution", source_url)
+                            insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive. Terminationg proces.", "SUCCEEDED", "Commands execution", source_url)
                             
                             # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
                             try:

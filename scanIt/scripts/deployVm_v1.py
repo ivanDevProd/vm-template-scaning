@@ -119,6 +119,8 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip, sour
         )
         
         conn.commit()
+        log_to_database(process_id, f"A new record for this VM has been added to the <waitForFlexera> database table for future verification on the Flexera side.", "SUCCEEDED", source_url, "VM deployment")
+    
     except mysql.connector.Error as err:
         logging.error(f"Database error: {err}")
     finally:
@@ -472,7 +474,7 @@ def deploy_vm():
                         # print(task_status['entity_reference_list'][0]['uuid'])
                         vm_uuid = task_status['entity_reference_list'][0]['uuid']
 
-                        log_to_database(process_id, f"VM <{vm_name}>creation completed successfully. VM UUID on cluster: {vm_uuid}", "SUCCEEDED", source_url, "VM deployment")
+                        log_to_database(process_id, f"VM <{vm_name}> creation completed successfully. VM UUID on cluster: {vm_uuid}", "SUCCEEDED", source_url, "VM deployment")
                         log_to_database_waitForFlexera(process_id, '-', vm_uuid, '-', source_url, new_jira_task)
 
                         if new_jira_task:
@@ -520,6 +522,23 @@ def deploy_vm():
                                     add_comment_to_jira_task(new_jira_task, f"Failed to establish connection via SSH or WinRM. Creating New VM with UEFI enabled.")
 
                                 delete_vm(vm_uuid)
+                                
+                                # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
+                                try:
+                                    conn = mysql.connector.connect(**mysql_config)
+                                    cursor = conn.cursor()
+                                    cursor.execute(
+                                        '''
+                                        DELETE FROM vm_template_scan.waitForFlexera 
+                                        WHERE process_ID = %s
+                                        ''',
+                                        (process_id,)  # The provided UUID to match
+                                    )
+                                    conn.commit()
+                                    log_to_database(process_id, f"VM record from the <waitForFlexera> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", source_url, "Commands execution")
+                                
+                                except Error as err:
+                                    logging.error(f"Database error: {err}")
 
                                 log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully.", "SUCCEEDED", source_url, "VM deployment")
 

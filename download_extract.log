@@ -2130,3 +2130,9 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-24 15:16:10,790 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/sysprep_windows2012_server.qcow2.
 2024-10-24 21:25:13,771 - INFO - Initiating image upload to the Artifactory
 2024-10-24 21:28:15,924 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/freebsd11_32bit_vdisk.qcow2.
+2024-10-24 21:41:45,654 - INFO - Initiating image upload to the Artifactory
+2024-10-24 21:44:25,691 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/freebsd11_32bit_vdisk.qcow2.
+2024-10-24 21:54:26,670 - INFO - Initiating image upload to the Artifactory
+2024-10-24 21:57:51,270 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/freebsd11_32bit_vdisk.qcow2.
+2024-10-24 22:18:52,585 - INFO - Initiating image upload to the Artifactory
+2024-10-24 22:22:10,790 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/freebsd11_32bit_vdisk.qcow2.
