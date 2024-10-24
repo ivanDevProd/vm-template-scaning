@@ -104,7 +104,7 @@ def log_to_database_waitForFlexera(process_id, vm_hostname, vm_uuid, vm_ip, sour
             conn.close()
 
 
-def log_to_database_rawInstallations(process_id, packages):
+def log_to_database_rawInstallations(process_id, packages, source_url):
     try:
         conn = mysql.connector.connect(**mysql_config)
         cursor = conn.cursor()
@@ -112,12 +112,13 @@ def log_to_database_rawInstallations(process_id, packages):
         # Insert new record or update the existing record if process_ID already exists
         cursor.execute(
             '''
-            INSERT INTO vm_template_scan.raw_Installations (process_ID, packages) 
-            VALUES (%s, %s) 
+            INSERT INTO vm_template_scan.raw_Installations (process_ID, packages, source_url) 
+            VALUES (%s, %s, %s) 
             ON DUPLICATE KEY UPDATE
-            packages = COALESCE(VALUES(packages), packages)
+            packages = COALESCE(VALUES(packages), packages),
+            source_url = COALESCE(VALUES(source_url), source_url)
             ''',
-            (process_id, packages)
+            (process_id, packages, source_url)
         )
         
         conn.commit()
@@ -168,7 +169,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
         if connection_result.status_code == 0:
             print(f"WinRM connection to {ip} established successfully with username: {username}.")
             print(f"Logged in as: {connection_result.std_out.decode().strip()}")
-            insert_workflow_state(process_id, f"WinRM connection to {ip} established successfully with username: {username}.", "SUCCEEDED", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"WinRM connection to {ip} established successfully with username: {username}.", "SUCCEEDED", source_url, "Commands execution")
             
             # Check PowerShell version
             try:
@@ -220,15 +221,15 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 if response.status_code != 0:
                     raise Exception(f"Failed to initiate reboot. Status code: {response.status_code}. Error: {response.std_err.decode()}")
 
-                insert_workflow_state(process_id, f"Hostname changed to {new_hostname} and reboot initiated successfully.", "SUCCEEDED", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Hostname changed to {new_hostname} and reboot initiated successfully.", "SUCCEEDED", source_url, "Commands execution")
 
             except Exception as hostname_reboot_error:
                 print(f"Error during hostname change or reboot: {hostname_reboot_error}")
-                insert_workflow_state(process_id, f"Error during hostname change or reboot: {hostname_reboot_error}", "FAILED", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Error during hostname change or reboot: {hostname_reboot_error}", "FAILED", source_url, "Commands execution")
 
             # Wait for the VM to become accessible again
             print(f"Waiting for the machine to become accessible...")
-            insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", source_url, "Commands execution")
             time.sleep(30)  # Wait a bit before retrying
             accessible = False
             for _ in range(5):  # Retry 5 times
@@ -242,16 +243,16 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                     if response.status_code == 0:
                         accessible = True
                         print("Machine is accessible again.")
-                        insert_workflow_state(process_id, f"Machine is accessible again. Execution of the remaining commands continues", "INFO", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Machine is accessible again. Execution of the remaining commands continues", "INFO", source_url, "Commands execution")
                         break
                 except Exception:
                     print("Machine not accessible yet. Retrying...")
-                    insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", source_url, "Commands execution")
                     time.sleep(15)  # Wait before retrying
 
             if not accessible:
                 print("Machine did not become accessible in the expected time.")
-                insert_workflow_state(process_id, "Machine did not become accessible after reboot. Unable to continue installing Flexera agent.Terminating proces. ", "FAILED", "Commands execution", source_url)
+                insert_workflow_state(process_id, "Machine did not become accessible after reboot. Unable to continue installing Flexera agent.Terminating proces. ", "FAILED", source_url, "Commands execution")
                 return
 
             # Execute remaining commands after reboot
@@ -263,12 +264,12 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 if response.status_code != 0:
                     print(f"Failed to execute command '{command}', status code: {response.status_code}")
                     print(f"Error of '{command}': {response.std_err.decode()}")
-                    insert_workflow_state(process_id, f"Failed to execute command '{command} via WinRM: {response.std_err.decode()}'", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Failed to execute command '{command} via WinRM: {response.std_err.decode()}'", "FAILED", source_url, "Commands execution")
                     all_commands_successful = False
                 else:
                     print(f"Command '{command}' executed successfully")
                     print(f"Output of '{command}': {response.std_out.decode().strip()}")
-                    insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username} via WinRM. Command output {response.std_out.decode().strip()}", "SUCCEEDED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Command '{command}' executed successfully with username: {username} via WinRM. Command output {response.std_out.decode().strip()}", "SUCCEEDED", source_url, "Commands execution")
 
                     # Log hostname for future Flexera checks
                     if command == 'hostname':
@@ -278,14 +279,14 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                         except Exception as e:
                             # Handle the exception and continue
                             print(f"An error occurred while logging to the database: {e}")
-                            insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
+                            insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", source_url, "Commands execution")
                 
                 time.sleep(45)
 
             if all_commands_successful:
                 print("All commands executed successfully via WinRM. Returning.")
-                insert_workflow_state(process_id, f"All commands executed successfully via WinRM", "SUCCEEDED", "Commands execution", source_url)
-                insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"All commands executed successfully via WinRM", "SUCCEEDED", source_url, "Commands execution")
+                insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", source_url, "Commands execution")
                 if new_jira_task:
                     add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                 return
@@ -293,17 +294,17 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 add_comment_to_jira_task(new_jira_task, f"Not all commands were executed completely via WinRM. Check the status and services on VM.")
         else:
             print(f"Failed to establish WinRM connection to {ip} with username: {username}. Error: {connection_result.std_err.decode()}")
-            insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {connection_result.std_err.decode()}", "FAILED", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"WinRM connection to {ip} failed with username: {username}. Error: {connection_result.std_err.decode()}", "FAILED", source_url, "Commands execution")
 
     except winrm.exceptions.WinRMTransportError as transport_err:
         logging.error(f"Transport error occurred with username: {username}. Error: {transport_err}")
-        insert_workflow_state(process_id, f"Transport error occurred with username: {username}. Error: {transport_err}", "FAILED", "Commands execution", source_url)
+        insert_workflow_state(process_id, f"Transport error occurred with username: {username}. Error: {transport_err}", "FAILED", source_url, "Commands execution")
     except winrm.exceptions.InvalidCredentialsError:
         logging.error(f"Invalid credentials for {ip} with username: {username}.")
-        insert_workflow_state(process_id, f"Invalid credentials for {ip} with username: {username}.", "FAILED", "Commands execution", source_url)
+        insert_workflow_state(process_id, f"Invalid credentials for {ip} with username: {username}.", "FAILED", source_url, "Commands execution")
     except Exception as err:
         logging.error(f"An error occurred with username: {username}. Error: {err}")
-        insert_workflow_state(process_id, f"An error occurred with username: {username}. Error: {err}", "FAILED", "Commands execution", source_url)
+        insert_workflow_state(process_id, f"An error occurred with username: {username}. Error: {err}", "FAILED", source_url, "Commands execution")
 
 
 
@@ -319,7 +320,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(ip, username=username, password=password)
             print(f"SSH connection to {ip} established successfully with username: {username}")
-            insert_workflow_state(process_id, f"SSH connection to {ip} established successfully with username: {username}.", "SUCCEEDED", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"SSH connection to {ip} established successfully with username: {username}.", "SUCCEEDED", source_url, "Commands execution")
 
             if new_jira_task:
                 add_comment_to_jira_task(new_jira_task, f"SSH connection established successfully with username: {username}.")
@@ -338,7 +339,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     return
 
             print(f"Detected OS type: {os_type}")
-            insert_workflow_state(process_id, f"Detected OS type: {os_type}", "SUCCEEDED", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"Detected OS type: {os_type}", "SUCCEEDED", source_url, "Commands execution")
             if new_jira_task:
                 add_comment_to_jira_task(new_jira_task, f"Detected OS type: {os_type}")
 
@@ -350,7 +351,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
                     print(f"Failed to check PowerShell version: {ps_error}")
-                    insert_workflow_state(process_id, f"Failed to check PowerShell version. Older PS commands will be used by default. Error: {ps_error}", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Failed to check PowerShell version. Older PS commands will be used by default. Error: {ps_error}", "FAILED", source_url, "Commands execution")
                     ps_version = 0  # If version check fails, default to 0
                 else:
                     ps_version = int(ps_output.strip())
@@ -365,20 +366,20 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                 output, error, exit_code = execute_command(ssh, rename_command)
                 if exit_code != 0:
                     print(f"Failed to change hostname: {error}")
-                    insert_workflow_state(process_id, f"Failed to change hostname. Error: {error}", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Failed to change hostname. Error: {error}", "FAILED", source_url, "Commands execution")
                     continue  # Skip to the next username if hostname change fails
 
                 print(f"Hostname changed successfully. Output: {output}")
-                insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname}.", "SUCCEEDED", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname}.", "SUCCEEDED", source_url, "Commands execution")
 
                 # Reboot the machine
                 output, error, exit_code = execute_command(ssh, shutdown_command)
                 if exit_code != 0:
                     print(f"Failed to initiate reboot: {error}")
-                    insert_workflow_state(process_id, f"Failed to initiate reboot. Error: {error}", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"Failed to initiate reboot. Error: {error}", "FAILED", source_url, "Commands execution")
 
                 print("Reboot initiated successfully.")
-                insert_workflow_state(process_id, f"Reboot initiated successfully. Waiting for the machine to become available...", "INFO", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Reboot initiated successfully. Waiting for the machine to become available...", "INFO", source_url, "Commands execution")
 
                 # Wait for the machine to become available
                 print("Waiting for the machine to become available...")
@@ -389,11 +390,11 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     try:
                         ssh.connect(ip, username=username, password=password)
                         print("Machine is back online. Executing remaining commands.")
-                        insert_workflow_state(process_id, f"Machine is back online. Executing remaining commands.", "INFO", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Machine is back online. Executing remaining commands.", "INFO",source_url, "Commands execution")
                         break  # Break if successfully reconnected
                     except Exception as e:
                         print(f"Machine not yet available. Retrying... {e}")
-                        insert_workflow_state(process_id, f"Machine not yet available. Retrying... {e}", "INFO", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Machine not yet available. Retrying... {e}", "INFO", source_url, "Commands execution")
                         time.sleep(10)  # Wait before retrying
 
                 else:
@@ -428,7 +429,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     if exit_code != 0:
                         print(f"Failed to execute command '{command}', exit code: {exit_code}")
                         print(f"Error of '{command}': {error}")
-                        insert_workflow_state(process_id, f"Failed to execute command '{command}> Error: {error}'", "FAILED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Failed to execute command '{command}> Error: {error}'", "FAILED", source_url, "Commands execution")
                         all_commands_successful = False
                         retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
                         break  # Stop executing commands for this user if one command fails
@@ -436,7 +437,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     else:
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
-                        insert_workflow_state(process_id, f"Command '{command}' executed successfully.", "SUCCEEDED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Command '{command}' executed successfully.", "SUCCEEDED", source_url, "Commands execution")
 
                         # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostname':
@@ -446,15 +447,15 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             except Exception as e:
                                 # Handle the exception and continue
                                 print(f"An error occurred while logging to the database: {e}")
-                                insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
+                                insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", source_url, "Commands execution")
 
                     # print(output)
                     time.sleep(45)
 
                 if all_commands_successful:
                     print("All commands executed successfully. Returning.")
-                    insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", "Commands execution", source_url)
-                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                    insert_workflow_state(process_id, f"All commands executed successfully", "SUCCEEDED", source_url, "Commands execution")
+                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", source_url, "Commands execution")
                     if new_jira_task:
                         add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                     return
@@ -490,7 +491,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             version = version_parts[-1]  # Assume version is the last word in the line
 
                 print(f"Detected distribution: {distro} \nVersion: {version}")
-                insert_workflow_state(process_id, f"Detected distribution: {distro}, Version: {version}", "SUCCEEDED", "Commands execution", source_url)
+                insert_workflow_state(process_id, f"Detected distribution: {distro}, Version: {version}", "SUCCEEDED", source_url, "Commands execution")
                 if new_jira_task:
                     add_comment_to_jira_task(new_jira_task, f"Detected distribution: {distro} \nVersion: {version}")
 
@@ -590,7 +591,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     ]
                 else:
                     print("Unknown or unsupported distribution. Stopping execution.")
-                    insert_workflow_state(process_id, "Unknown or unsupported distribution. Stopping execution.", "FAILED", "Commands execution", source_url)
+                    insert_workflow_state(process_id, "Unknown or unsupported distribution. Stopping execution.", "FAILED", source_url, "Commands execution")
 
                     commands_for_unsupported = [
                                                 "dpkg --get-selections",        # Debian-based systems
@@ -605,10 +606,13 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             if exit_code == 0:
                                 print(f"Successfully retrieved installed applications using command: {command}")
                                 print(output)
-                                log_to_database_rawInstallations(process_id, output)
-                                insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", "Commands execution", source_url)
+                                log_to_database_rawInstallations(process_id, output, source_url)
+                                insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", source_url, "Commands execution")
+
+                                if new_jira_task:
+                                    add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. Terminating proces.")
                                 
-                                # removing VM record from the raw_installations DB table since Flexera agent can't be installed
+                                # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
                                 try:
                                     conn = mysql.connector.connect(**mysql_config)
                                     cursor = conn.cursor()
@@ -620,12 +624,12 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                         (process_id,)  # The provided UUID to match
                                     )
                                     conn.commit()
-                                    insert_workflow_state(process_id, f"VM record from the <raw_installations> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", "Commands execution", source_url)
+                                    insert_workflow_state(process_id, f"VM record from the <waitForFlexera> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", source_url, "Commands execution", )
                                 except Error as err:
                                     logging.error(f"Database error: {err}")
-                                    insert_workflow_state(process_id, f"Problem with the removing VM record from the <raw_installations> DB table. Check record for this process at DB directly.", "FAILED", "Commands execution", source_url)
-
+                                    insert_workflow_state(process_id, f"Problem with the removing VM record from the <waitForFlexera> DB table. Check record for this process at DB directly.", "FAILED", source_url, "Commands execution")
                                 return
+                            
                             else:
                                 print(f"Command '{command}' failed with exit code {exit_code}. Error: {error}")
                         
@@ -646,11 +650,11 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Failed to execute command '{command}', exit code: {exit_code}")
                         print(f"Error of '{command}': {error}")
                         failed_commands.append(command)
-                        insert_workflow_state(process_id, f"Failed to execute command '{command}: {error}'", "FAILED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Failed to execute command '{command}: {error}'", "FAILED", source_url, "Commands execution")
                     else:
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
-                        insert_workflow_state(process_id, f"Command '{command}' executed successfully.", "SUCCEEDED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, f"Command '{command}' executed successfully.", "SUCCEEDED", source_url, "Commands execution")
                         
                         # adding hostname in waitForFlexera DB table, for future checks on Flexera side by cron job script
                         if command == f'hostnamectl set-hostname {new_hostname}':
@@ -660,19 +664,20 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             except Exception as e:
                                 # Handle the exception and continue
                                 print(f"An error occurred while logging to the database: {e}")
-                                insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
+                                insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", source_url, "Commands execution")
 
                         elif command == 'apt list --installed' or command == 'dpkg --get-selections':
                             # Ubuntu/Debian systems (newer and older versions)
-                            log_to_database_rawInstallations(process_id, output)
+                            log_to_database_rawInstallations(process_id, output, source_url)
                         
                         elif command == 'yum list installed' or command == 'dnf list installed':
                             # CentOS/RHEL/Fedora/Rocky/AHV systems
-                            log_to_database_rawInstallations(process_id, output)
+                            log_to_database_rawInstallations(process_id, output, source_url)
 
                         if is_old_version:
-                            insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.", "SUCCEEDED", "Commands execution", source_url)
-                            # removing VM record from the raw_installations DB table since Flexera agent can't be installed
+                            insert_workflow_state(process_id, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. Terminationg proces.", "SUCCEEDED", source_url, "Commands execution")
+                            
+                            # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
                             try:
                                 conn = mysql.connector.connect(**mysql_config)
                                 cursor = conn.cursor()
@@ -684,19 +689,18 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                     (process_id,)  # The provided UUID to match
                                 )
                                 conn.commit()
-                                insert_workflow_state(process_id, f"VM record from the <raw_installations> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", "Commands execution", source_url)
+                                insert_workflow_state(process_id, f"VM record from the <waitForFlexera> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", source_url,  "Commands execution")
                             except Error as err:
                                 logging.error(f"Database error: {err}")
                                 
                             if new_jira_task:
                                 add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system.")
                             return
-                    # print(output)
 
                     time.sleep(30)
 
                 if failed_commands:
-                    insert_workflow_state(process_id, "Retrying failed commands.", "RUNNING", "Commands execution", source_url)
+                    insert_workflow_state(process_id, "Retrying failed commands.", "RUNNING", source_url, "Commands execution")
                     all_linux_commands_successful = True  # Flag to track all commands executed successfully
                     for command in failed_commands:
                         time.sleep(90)
@@ -704,33 +708,34 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         if exit_code != 0:
                             print(f"Failed to execute command '{command}', exit code: {exit_code}")
                             print(f"Error of '{command}': {error}")
-                            insert_workflow_state(process_id, f"Failed to execute command again. Please check on device.'{command}: {error}'", "FAILED", "Commands execution", source_url)
+                            insert_workflow_state(process_id, f"Failed to execute command again. Please check on device.'{command}: {error}'", "FAILED", source_url, "Commands execution")
                             all_linux_commands_successful = False  # Set flag to False if any command fails
                         else:
                             print(f"Command '{command}' executed successfully")
                             print(f"Output of '{command}': {output}")
-                            insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
+                            insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry.", "SUCCEEDED", source_url, "Commands execution")
                         print(output)
                         time.sleep(30)
                         
                     if all_linux_commands_successful:
-                        insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
-                        insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                        insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", source_url, "Commands execution")
+                        insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", source_url, "Commands execution")
                         if new_jira_task:
                             add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                         return  # Exit the loop if all commands are successful
                     else:
-                        insert_workflow_state(process_id, "The problem with some commands still exists. Retrying with different account.", "FAILED", "Commands execution", source_url)
+                        insert_workflow_state(process_id, "The problem with some commands still exists. Retrying with different account.", "FAILED", source_url, "Commands execution")
+                
                 else:
-                    insert_workflow_state(process_id, "All commands executed successfully.", "SUCCEEDED", "Commands execution", source_url)
-                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
+                    insert_workflow_state(process_id, "All commands executed successfully.", "SUCCEEDED", source_url, "Commands execution")
+                    insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", source_url, "Commands execution")
                     if new_jira_task:
                         add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                     return  
 
         except Exception as e:
             print(f"SSH connection to {ip} failed with username: {username}. Error: {e}")
-            insert_workflow_state(process_id, f"SSH connection to {ip} failed with username: {username}. Error: {e}", "FAILED", "Commands execution", source_url)
+            insert_workflow_state(process_id, f"SSH connection to {ip} failed with username: {username}. Error: {e}", "FAILED", source_url, "Commands execution")
             
             # Close SSH connection if it was established
             if 'ssh' in locals():

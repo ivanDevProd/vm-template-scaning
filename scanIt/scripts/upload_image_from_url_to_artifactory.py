@@ -154,9 +154,9 @@ def upload_image_from_url_to_artifactory(image_url, email, process_id, task_key)
                 add_comment_to_jira_task(task_key, f"Image successfully uploaded to Artifactory. Repo path: {artifactory_upload_url}.")
 
                 body_text = f'Hi {email.split('.')[0].capitalize()},'\
-                    f'<p>Image successfully uploaded to Artifactory. Repo path: {artifactory_upload_url}.'\
-                    f'<p>You can use it. The scanning process continues and if non-compliant software is detected, the image will be removed from the Artifactory.'\
-                    f'<p>You can follow all the details about the progress through the Jira ticket {task_key}.'\
+                    f'<p>The image has been successfully uploaded to Artifactory. The repository path is: {artifactory_upload_url}.</p>'\
+                    f'<p>The image is now available for use. Please note that the scanning process is ongoing, and if any non-compliant software is detected, the image will be removed from Artifactory.</p>'\
+                    f'<p>You can track the progress and further details via the Jira ticket: {task_key}.</p>'\
                     f"<p>Kind regards,"\
                     '<br>DevProd Team'
         

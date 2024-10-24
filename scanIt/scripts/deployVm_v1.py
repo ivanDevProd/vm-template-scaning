@@ -332,6 +332,23 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url, new_jira_ta
                                 time.sleep(1)
 
                                 log_to_database(process_id, f"Stage completed with errors. Boot the machine manually using the uploaded image and check the status. Possible reasons for the problem are the machine not booting, booting with error, unable to log in with root, nutanix, administrator user, static network settings of the machine itself, winRM config does not allow Basic auth or Unencrypted traffic, etc", "FAILED", source_url, "VM deployment")
+
+                                # removing VM record from the raw_installations DB table since Flexera agent can't be installed
+                                try:
+                                    conn = mysql.connector.connect(**mysql_config)
+                                    cursor = conn.cursor()
+                                    cursor.execute(
+                                        '''
+                                        DELETE FROM vm_template_scan.waitForFlexera 
+                                        WHERE process_ID = %s
+                                        ''',
+                                        (process_id,)  # The provided UUID to match
+                                    )
+                                    conn.commit()
+                                    log_to_database(process_id, f"VM record from the <raw_installations> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", "Commands execution", source_url)
+                                
+                                except Error as err:
+                                    logging.error(f"Database error: {err}")
                                 
                                 if new_jira_task:
                                     add_comment_to_jira_task(new_jira_task, f"Failed to establish connection via SSH or WinRM to UEFI enabled VM. Terminating Process. Possible reasons for the problem are the machine not booting, booting with error, unable to log in with root, nutanix, administrator user, winRM config does not allow Basic auth or Unencrypted traffic, static network settings of the machine itself, etc")

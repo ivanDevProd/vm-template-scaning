@@ -82,6 +82,8 @@ def delete_vm(vm_uuid, process_id, source_url, jira_task_key):
         if delete_response.status_code == 202:
             print(f"VM with ID {vm_uuid} deleted successfully.")
             log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully.", "SUCCEEDED", source_url, "VM Termination")
+
+            # removing VM record from the waitForFlexera DB table
             conn = mysql.connector.connect(**mysql_config)
             cursor = conn.cursor()
             cursor.execute(
@@ -92,9 +94,14 @@ def delete_vm(vm_uuid, process_id, source_url, jira_task_key):
                 (vm_uuid,)  # The provided UUID to match
             )
             conn.commit()
+
             print(f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.")
-            log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.", source_url, "VM Terminatio")
+            log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.", source_url, "VM Termination")
             log_to_database(process_id, f"SCANNING PROCESS COMPLETED SUCCESSFULY", "SUCCEEDED", source_url, "END")
+
+            add_comment_to_jira_task(jira_task_key, "VM deleted successfully from the cluster.")
+            add_comment_to_jira_task(jira_task_key, "SCANNING PROCESS COMPLETED SUCCESSFULY.")
+            
         else:
             print(f"Failed to delete VM with ID {vm_uuid}: {delete_response.status_code}")
             log_to_database(process_id, f"Failed to delete VM with ID {vm_uuid}: {delete_response.status_code}", "FAILED", source_url, "VM Termination")
@@ -335,7 +342,7 @@ def run_flexera_checks():
                             log_to_database(process_id, f"Removing VM: {hostname[0]}, UUID: {hostname[2]} initiated", "INITIATED", f"{hostname[4]}", "VM Termination")
                             add_comment_to_jira_task(jira_task_key, f"Commercial software found for {hostname[0]}: {list_of_commercial_apps}. Expected commercial apps: {expected_commercial_apps}. There are no unauthorized commercial applications to be aware of. Scanning process completed succesfuly.")
                             
-                            delete_vm(hostname[2], process_id, hostname[4])
+                            delete_vm(hostname[2], process_id, hostname[4], hostname[5])
 
                         else:
                             log_to_database(process_id, f"Unauthorized commercial applications: {attention_list}", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
@@ -370,7 +377,7 @@ def run_flexera_checks():
                         log_to_database(process_id, f"No commercial software found for {hostname[0]}. It can be deleted from cluster. (Applications found: {total_apps_found}, Checked: {current_checks} times.)", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
                         log_to_database(process_id, f"Removing VM: {hostname[0]}, UUID: {hostname[2]} initiated", "INITIATED", f"{hostname[4]}", "VM Termination")
                         add_comment_to_jira_task(jira_task_key, f"No commercial software found for {hostname[0]}. Scanning process completed succesfuly.")
-                        delete_vm(hostname[2], process_id, hostname[4])
+                        delete_vm(hostname[2], process_id, hostname[4], hostname[5])
                             
                     else:
                         log_to_database(process_id, f"No commercial software found for {hostname[0]}. Waiting for the next check tomorrow, because the number of applications found is {total_apps_found}, and the number of checks so far is {current_checks}.", "INFO", f"{hostname[4]}", "FLEXERA REPORT")

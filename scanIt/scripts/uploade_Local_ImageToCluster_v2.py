@@ -332,16 +332,18 @@ def upload_image_to_nutanix():
         log_to_database(process_id, f"Jira ticket: {new_jira_task}", "INFO", "Local file uploaded - Self-service", "Jira case")
         log_to_database(process_id, f"The scan was initiated by: {user_email}", "INFO", "Local file uploaded - Self-service", "Jira case")
     
-        body_text = f'Hi {user_email.split('.')[0].capitalize()},'\
-                    f'<p>Scanning of the image {file_name} has been successfully initiated.'\
-                    f'<br>Process id: {process_id}'\
-                    f'<p>The speed of the whole process depends on the system and network load, image size, and it may take some time.'\
-                    f'<br>Progress details can be tracked in a Jira ticket: {new_jira_task}.'\
-                    f'<p>If you have any questions or concerns regarding this process, please feel free to contact the EngSAM Team for assistance.'\
-                    f'<p>Email: eng_sam_admins@nutanix.com'\
+        body_text = f'Hello {user_email.split(".")[0].capitalize()},'\
+                    f'<p>The scanning of the image {file_name} has been successfully initiated.</p>'\
+                    f'<br>Process ID: {process_id}'\
+                    f'<p>Please note that the duration of the process may vary depending on system and network load, as well as the size of the image.</p>'\
+                    f'<br>You can track progress and details in the Jira ticket: {new_jira_task}.'\
+                    f'<p>If you have any questions or concerns regarding this process, please do not hesitate to contact the EngSAM Team for assistance.</p>'\
+                    f'<p>Email: eng_sam_admins@nutanix.com</p>'\
                     f'<br>Slack: #ask-eng-sam'\
-                    f"<p>Kind regards,"\
-                    '<br>EngSAM Team'
+                    f'<p>Kind regards,</p>'\
+                    '<br>'\
+                    'EngSAM Team'
+
         
         msg = MIMEMultipart('mixed')
         msg['Subject'] = f'VM image scan progress'
