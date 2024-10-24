@@ -2116,3 +2116,17 @@ UnboundLocalError: cannot access local variable 'form' where it is not associate
 2024-10-23 15:37:29,200 - INFO - Image uploaded successfully to ivan.perkovic/Win7_Ult_32_auto.iso.
 2024-10-23 15:37:33,603 - INFO - [Mailing] Process ID: 04c2a90c-864e-46ad-be8a-88aa1519d270, Source: /home/noc_admin/image_scanner_project/downloads/Win7_Ult_32_auto.iso - The mail with details about new image Artifactory path was successfully sent to: ivan.perkovic@nutanix.com
 2024-10-23 15:37:33,603 - INFO - /home/noc_admin/image_scanner_project/downloads/Win7_Ult_32_auto.iso has been deleted successfully.
+2024-10-24 14:02:17,595 - INFO - Initiating image upload to the Artifactory
+2024-10-24 14:02:17,751 - INFO - Initiating image upload to the Artifactory
+2024-10-24 14:02:18,598 - INFO - Initiating image upload to the Artifactory
+2024-10-24 14:02:19,306 - INFO - Initiating image upload to the Artifactory
+2024-10-24 14:02:19,463 - INFO - Initiating image upload to the Artifactory
+2024-10-24 14:02:20,313 - INFO - Initiating image upload to the Artifactory
+2024-10-24 14:07:08,900 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/freebsd11_32bit_vdisk.qcow2.
+2024-10-24 14:07:14,075 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/rhel71_uefi_legacy_vdisk.qcow2.
+2024-10-24 14:34:26,420 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/win2008r2_enterprise_vdisk.qcow2.
+2024-10-24 14:46:13,186 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/ubuntu1610_vgpu.qcow2.
+2024-10-24 15:14:12,667 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/windows10_gpu.qcow2.
+2024-10-24 15:16:10,790 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/milos.mladenovic/ahv_guest_os/DSK/sysprep_windows2012_server.qcow2.
+2024-10-24 21:25:13,771 - INFO - Initiating image upload to the Artifactory
+2024-10-24 21:28:15,924 - INFO - Image successfully uploaded to Artifactory https://repos.ntnxdpro.com/artifactory/vmtemplates-qa-vm-images/ivan.perkovic/ahv_guest_os/DSK/freebsd11_32bit_vdisk.qcow2.

@@ -84,27 +84,53 @@ def delete_vm(vm_uuid, process_id, source_url, jira_task_key):
             log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully.", "SUCCEEDED", source_url, "VM Termination")
 
             # removing VM record from the waitForFlexera DB table
-            conn = mysql.connector.connect(**mysql_config)
-            cursor = conn.cursor()
-            cursor.execute(
-                '''
-                DELETE FROM vm_template_scan.waitForFlexera 
-                WHERE vm_uuid = %s
-                ''',
-                (vm_uuid,)  # The provided UUID to match
-            )
-            conn.commit()
+            try:
+                # Establish a database connection
+                conn = mysql.connector.connect(**mysql_config)
+                cursor = conn.cursor()
 
-            print(f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.")
-            log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.", source_url, "VM Termination")
-            log_to_database(process_id, f"SCANNING PROCESS COMPLETED SUCCESSFULY", "SUCCEEDED", source_url, "END")
+                # Execute the DELETE statement
+                cursor.execute(
+                    '''
+                    DELETE FROM vm_template_scan.waitForFlexera 
+                    WHERE vm_uuid = %s
+                    ''',
+                    (vm_uuid,)  # The provided UUID to match
+                )
+
+                # Commit the changes to the database
+                conn.commit()
+
+                # Log success messages
+                print(f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.")
+                log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully from <waitForFlexera> DB table.", source_url, "VM Termination")
+                log_to_database(process_id, "Scanning process completed successfully!", "SUCCEEDED", source_url, "END")
+
+            except mysql.connector.Error as err:
+                # Handle database connection errors or query execution errors
+                print(f"Error: {err}")
+                log_to_database(process_id, f"An error occurred while deleting VM record with ID: {vm_uuid} from <waitForFlexera> DB table: {err}", "FAILED", source_url, "VM Termination")
+                log_to_database(process_id, "Scanning process completed successfully!", "SUCCEEDED", source_url, "END")
+
+            except Exception as e:
+                # Handle any other exceptions
+                print(f"An unexpected error occurred: {e}")
+                log_to_database(process_id, f"An unexpected error occurred: {e}. Please check repo", "FAILED", source_url, "VM Termination")
+                log_to_database(process_id, "Scanning process completed successfully!", "SUCCEEDED", source_url, "END")
+
+            finally:
+                # Close the cursor and connection
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
 
             add_comment_to_jira_task(jira_task_key, "VM deleted successfully from the cluster.")
-            add_comment_to_jira_task(jira_task_key, "SCANNING PROCESS COMPLETED SUCCESSFULY.")
+            add_comment_to_jira_task(jira_task_key, "Scanning process completed successfully!")
             
         else:
             print(f"Failed to delete VM with ID {vm_uuid}: {delete_response.status_code}")
-            log_to_database(process_id, f"Failed to delete VM with ID {vm_uuid}: {delete_response.status_code}", "FAILED", source_url, "VM Termination")
+            log_to_database(process_id, f"Failed to delete VM with ID {vm_uuid}: {delete_response.status_code} on the cluster.", "FAILED", source_url, "VM Termination")
 
     except RequestException as e:
         print(f"An error occurred while trying to delete VM with ID {vm_uuid}: {e}")

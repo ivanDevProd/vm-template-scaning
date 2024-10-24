@@ -417,14 +417,14 @@ def upload_image_to_nutanix():
         log_to_database(process_id, f"Scan triggered by: {user_email}, for image: {source_url}", "INFO", source_url, "Jira case")
 
         body_text = f'Hello {user_email.split(".")[0].capitalize()},'\
-                    f'<p>The scanning of the image at {source_url} has been successfully initiated.</p>'\
+                    f'<p>The scanning of the image at {source_url} has been successfully initiated.'\
                     f'<br>Process ID: {process_id}'\
-                    f'<p>Please note that the speed of the process may vary depending on system and network load, as well as the size of the image.</p>'\
+                    f'<p>Please note that the speed of the process may vary depending on system and network load, as well as the size of the image.'\
                     f'<br>You can track progress and details in the Jira ticket: {new_jira_task}.'\
-                    f'<p>If you have any questions or concerns regarding this process, please do not hesitate to contact the EngSAM Team for assistance.</p>'\
-                    f'<p>Email: eng_sam_admins@nutanix.com</p>'\
+                    f'<p>If you have any questions or concerns regarding this process, please do not hesitate to contact the EngSAM Team for assistance.'\
+                    f'<p>Email: eng_sam_admins@nutanix.com'\
                     f'<br>Slack: #ask-eng-sam'\
-                    f'<p>Kind regards,</p>'\
+                    f'<p>Kind regards,'\
                     '<br>'\
                     'EngSAM Team'
 
