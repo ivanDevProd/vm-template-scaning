@@ -69,6 +69,38 @@ def add_comment_to_jira_task(task_key, comment):
         print(f"An error occurred: {e}")
 
 
+def change_jira_task_status(task_key, transition_id):
+    try:
+        jira_headers = {
+            "Authorization": f"Bearer {JIRA_BEARER_TOKEN}",
+            "Content-Type": "application/json"
+        }
+
+        # payload to change the status using transition ID
+        transition_payload = {
+            "transition": {
+                "id": transition_id
+            }
+        }
+
+        transition_url = f"{jira_base_url}/rest/api/2/issue/{task_key}/transitions"
+        response = requests.post(transition_url, headers=jira_headers, data=json.dumps(transition_payload), timeout=15)
+
+        if response.status_code == 204:
+            print("Status changed successfully!")
+        else:
+            print(f"Failed to change status: {response.status_code}, {response.text}")
+
+    except requests.Timeout:
+        print("The request timed out!")
+
+    except requests.ConnectionError:
+        print("A connection error occurred!")
+
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+
+
 
 def delete_vm(vm_uuid, process_id, source_url, jira_task_key):
     try:
@@ -403,6 +435,12 @@ def run_flexera_checks():
                         log_to_database(process_id, f"No commercial software found for {hostname[0]}. It can be deleted from cluster. (Applications found: {total_apps_found}, Checked: {current_checks} times.)", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
                         log_to_database(process_id, f"Removing VM: {hostname[0]}, UUID: {hostname[2]} initiated", "INITIATED", f"{hostname[4]}", "VM Termination")
                         add_comment_to_jira_task(jira_task_key, f"No commercial software found for {hostname[0]}. Scanning process completed succesfuly.")
+
+                        # change ticket status from "In Progress" to "Approved" 
+                        change_jira_task_status(jira_task_key, '201')
+                        # change ticket status from "Approved" to "Done"
+                        change_jira_task_status(jira_task_key, '211')
+
                         delete_vm(hostname[2], process_id, hostname[4], hostname[5])
                             
                     else:

@@ -197,6 +197,38 @@ def add_comment_to_jira_task(task_key, comment):
         print(f"An error occurred: {e}")
 
 
+def change_jira_task_status(task_key, transition_id):
+    try:
+        jira_headers = {
+            "Authorization": f"Bearer {jira_bearer_token}",
+            "Content-Type": "application/json"
+        }
+
+        # payload to change the status using transition ID
+        transition_payload = {
+            "transition": {
+                "id": transition_id
+            }
+        }
+
+        transition_url = f"{jira_base_url}/rest/api/2/issue/{task_key}/transitions"
+        response = requests.post(transition_url, headers=jira_headers, data=json.dumps(transition_payload), timeout=15)
+
+        if response.status_code == 204:
+            print("Status changed successfully!")
+        else:
+            print(f"Failed to change status: {response.status_code}, {response.text}")
+
+    except requests.Timeout:
+        print("The request timed out!")
+
+    except requests.ConnectionError:
+        print("A connection error occurred!")
+
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+
+
 def extract_image(download_dir_file, extracted_dir, process_id, jira_task_key=None):
     try:
         with tarfile.open(download_dir_file, "r:*") as tar:  # "r:*" handles both gzip and uncompressed tar
@@ -329,6 +361,11 @@ def upload_image_to_nutanix():
     # Create Jira case
     new_jira_task = create_jira_task(f"System Image Scan request - {file_name}", f"A ticket created based on a request received through the self-selfice portal. New image scan request {file_name}")
     if new_jira_task:
+        # change ticket status from "Open" to "Under Review"
+        change_jira_task_status(new_jira_task, '181')
+        # change ticket status from "Under Review" to "In Progress"
+        change_jira_task_status(new_jira_task, '191')
+        
         log_to_database(process_id, f"Jira ticket: {new_jira_task}", "INFO", "Local file uploaded - Self-service", "Jira case")
         log_to_database(process_id, f"The scan was initiated by: {user_email}", "INFO", "Local file uploaded - Self-service", "Jira case")
     
