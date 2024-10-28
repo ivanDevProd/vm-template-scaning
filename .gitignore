@@ -3,5 +3,7 @@ downloads/
 static/scanIt/extracted_images
 logs/
 .env
-download_extract.log
 tech-support-automation-11363608fad2.json
+flexera_inventory_check.log
+download_extract.log
+operatonsOnDeployedVM.log

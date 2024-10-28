@@ -458,14 +458,17 @@
         </div>
         <div class="important-notes">
             <h2>Important:</h2>
-            <p>Please make sure to review the following points before submitting the image URL or file:</p>
+            <p>Before submitting the image URL or file, please review and confirm the following requirements:</p>
             <ul>
-                <li><strong>Ensure the URLs are correct and accessible.</strong></li>
-                <li><strong>Enable SSH for Linux Distributions:</strong> Ensure SSH is enabled on all Linux OS distributions and is listening on port 22 for secure remote access and management of VMs.</li>
-                <li><strong>Configure WinRM for Windows OS:</strong> Configure WinRM for Windows operating systems to allow remote management and administration. Include enabling WinRM service, allowing Basic authentication, unencrypted traffic, setting TrustedHosts to accept all connections, and enabling firewall rules for WinRM.</li>
-                <li><strong>DHCP NIC Configuration:</strong> Ensure VM templates have at least one NIC configured for DHCP. Configure an additional NIC with DHCP enabled if a static NIC is necessary.</li>
-                <li><strong>Nutanix User Configuration:</strong> Configure the Nutanix user with administrator or root privileges to ensure proper access and management capabilities. (This is already covered in the existing manual.)</li>
-                <li><strong>Avoid Using Deprecated OS Distributions:</strong> Ensure that no deprecated OS distributions are used in VM templates or configurations.</li>
+                <li><strong>URL Verification:</strong> Confirm that the URLs provided are accurate and accessible.</li>
+                <li><strong>Remote Management Configuration (SSH or WinRM):</strong></li>
+                <ul>
+                    <li><strong>For Linux distributions</strong>, enable SSH, ensuring it listens on port 22 to support secure remote access and VM management.</li>
+                    <li><strong>For Windows operating systems</strong>, configure WinRM as an alternative to SSH, if preferred. Set up WinRM to support remote administration by enabling the WinRM service, allowing Basic authentication, permitting unencrypted traffic, setting TrustedHosts to accept all connections, and enabling the relevant firewall rules for WinRM.</li>
+                </ul>
+                <li><strong>DHCP NIC Configuration:</strong> Ensure VM templates have at least one NIC configured for DHCP. If a static NIC is necessary, configure an additional NIC with DHCP enabled.</li>
+                <li><strong>User Configuration:</strong> Ensure that one of the user accounts —Nutanix, root, or administrator— is configured with administrative privileges to enable full management access. (Further details can be found in the current manual.)</li>
+                <li><strong>Avoid Using Deprecated OS Distributions:</strong> It is recommended that all VM templates or configurations use supported OS versions, avoiding any deprecated versions.</li>
             </ul>
         </div>
 

@@ -201,7 +201,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 print(f"Using fallback commands due to PowerShell version < 5")
                 remaining_commands = [
                     "hostname",
-                    "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
+                    "powershell -Command \"(New-Object System.Net.WebClient).DownloadFile('http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip', 'C:\\flexera_prodagent.zip')\"",
                     "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
                     'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
                     # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
@@ -221,7 +221,12 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 print(f"Changing hostname to {new_hostname}...")
                 response = session.run_cmd(f'powershell Rename-Computer -NewName "{new_hostname}" -Force')
                 if response.status_code != 0:
-                    raise Exception(f"Failed to change hostname. Status code: {response.status_code}. Error: {response.std_err.decode()}")
+                    print(f"PowerShell command failed. Attempting to change hostname using WMIC...")
+                    insert_workflow_state(process_id, f"PowerShell command Rename-Computer failed. Attempting to change hostname using WMIC..." , "FAILED", "Commands execution", source_url)
+                    wmic_command = f'WMIC computersystem where name="%COMPUTERNAME%" call rename name="{new_hostname}"'
+                    response = session.run_cmd(wmic_command)
+                    if response.status_code != 0:
+                        raise Exception(f"Failed to change hostname using WMIC. Status code: {response.status_code}. Error: {response.std_err.decode()}")
 
                 # Reboot immediately
                 print("Rebooting the machine...")
@@ -238,7 +243,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
             # Wait for the VM to become accessible again
             print(f"Waiting for the machine to become accessible...")
             insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
-            time.sleep(30)  # Wait a bit before retrying
+            # time.sleep(30)  # Wait a bit before retrying
             accessible = False
             for _ in range(5):  # Retry 5 times
                 try:
@@ -256,7 +261,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 except Exception:
                     print("Machine not accessible yet. Retrying...")
                     insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", "Commands execution", source_url)
-                    time.sleep(15)  # Wait before retrying
+                    # time.sleep(15)  # Wait before retrying
 
             if not accessible:
                 print("Machine did not become accessible in the expected time.")
@@ -289,7 +294,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                             print(f"An error occurred while logging to the database: {e}")
                             insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
                 
-                time.sleep(45)
+                # time.sleep(45)
 
             if all_commands_successful:
                 print("All commands executed successfully via WinRM. Returning.")
@@ -353,7 +358,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
 
             if os_type == "Windows":
-                time.sleep(60)
+                # time.sleep(60)
                 ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
@@ -367,7 +372,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 # Commands for changing hostname and rebooting
                 rename_command = f'powershell Rename-Computer -NewName "{new_hostname}" -Force'
-                time.sleep(5)
+                # time.sleep(5)
                 shutdown_command = "powershell Shutdown /r /t 0"
 
                 # Execute the rename command
@@ -391,7 +396,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 # Wait for the machine to become available
                 print("Waiting for the machine to become available...")
-                time.sleep(30)  # Adjust the sleep duration as needed
+                # time.sleep(30)  # Adjust the sleep duration as needed
                 
                 # Check availability
                 for _ in range(5):  # Retry for a 5 attempts
@@ -403,7 +408,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     except Exception as e:
                         print(f"Machine not yet available. Retrying... {e}")
                         insert_workflow_state(process_id, f"Machine not yet available. Retrying... {e}", "INFO", "Commands execution", source_url)
-                        time.sleep(10)  # Wait before retrying
+                        # time.sleep(10)  # Wait before retrying
 
                 else:
                     print("Machine did not come back online in expected time.")
@@ -458,7 +463,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED",  "Commands execution", source_url)
 
                     # print(output)
-                    time.sleep(45)
+                    # time.sleep(45)
 
                 if all_commands_successful:
                     print("All commands executed successfully. Returning.")
@@ -528,12 +533,22 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 elif "CentOS" in distro and isinstance(version, float):
                     if version >= 7.0:
+                        # commands = [
+                        #     f"hostnamectl set-hostname {new_hostname}",
+                        #     "yum install -y curl",
+                        #     "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
+                        #     "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
+                        #     "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
+                        #     "yum -y install managesoft-autoconf",
+                        #     "yum list installed",
+                        #     # "cat /var/opt/managesoft/log/uploader.log"
+                        # ]
+
                         commands = [
                             f"hostnamectl set-hostname {new_hostname}",
-                            "yum install -y curl",
-                            "curl -s -m 10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
-                            "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
-                            "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
+                            "wget -q --spider --timeout=10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
+                            "wget -q --timeout=10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
+                            "wget https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -O /etc/yum.repos.d/flexera.repo",
                             "yum -y install managesoft-autoconf",
                             "yum list installed",
                             # "cat /var/opt/managesoft/log/uploader.log"
@@ -651,14 +666,15 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 # Attempt to run either the full command list or the failed commands
                 commands_to_run = failed_commands if failed_commands else commands
-                    
+                
+                failed_commands_retry = []
                 for command in commands_to_run:
                     output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
 
                     if exit_code != 0:
                         print(f"Failed to execute command '{command}', exit code: {exit_code}")
                         print(f"Error of '{command}': {error}")
-                        failed_commands.append(command)
+                        failed_commands_retry.append(command)
                         insert_workflow_state(process_id, f"Failed to execute command '{command}: {error}'", "FAILED", "Commands execution", source_url)
                     else:
                         print(f"Command '{command}' executed successfully")
@@ -706,25 +722,26 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive.")
                             return
 
-                    time.sleep(30)
+                    # time.sleep(30)
 
-                if failed_commands:
+                if failed_commands_retry:
                     insert_workflow_state(process_id, "Retrying failed commands.", "RUNNING", "Commands execution", source_url)
                     all_linux_commands_successful = True  # Flag to track all commands executed successfully
-                    for command in failed_commands:
-                        time.sleep(90)
+                    for command in failed_commands_retry:
+                        # time.sleep(90)
                         output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
                         if exit_code != 0:
                             print(f"Failed to execute command '{command}', exit code: {exit_code}")
                             print(f"Error of '{command}': {error}")
                             insert_workflow_state(process_id, f"Failed to execute command again. Please check on device.'{command}: {error}'", "FAILED", "Commands execution", source_url)
+                            failed_commands.append(command)
                             all_linux_commands_successful = False  # Set flag to False if any command fails
                         else:
                             print(f"Command '{command}' executed successfully")
                             print(f"Output of '{command}': {output}")
                             insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
                         print(output)
-                        time.sleep(30)
+                        # time.sleep(30)
                         
                     if all_linux_commands_successful:
                         insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
