@@ -433,11 +433,20 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     ]
                 else:
                     # Fallback commands for older PowerShell versions (below 5.0) (Expand-Archive command is missing)
+                    
+                    # windows_commands = [
+                    #     "hostname",
+                    #     'powershell -Command "Start-Process powershell -ArgumentList \'Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile C:\\flexera_prodagent.zip\' -Verb RunAs -Wait"',
+                    #     'powershell -Command "Add-Type -A \'System.IO.Compression.FileSystem\'; [IO.Compression.ZipFile]::ExtractToDirectory(\'C:\\flexera_prodagent.zip\', \'C:\\flexera_prodagent\')"',
+                    #     'powershell -NoProfile -Command "cd C:\\flexera_prodagent\\prodagent; & msiexec /i \'FlexNet Inventory Agent.msi\' /qn"',
+                    #     # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
+                    # ]
+
                     windows_commands = [
-                        "hostname",
-                        'powershell -Command "Start-Process powershell -ArgumentList \'Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile C:\\flexera_prodagent.zip\' -Verb RunAs -Wait"',
-                        'powershell -Command "Add-Type -A \'System.IO.Compression.FileSystem\'; [IO.Compression.ZipFile]::ExtractToDirectory(\'C:\\flexera_prodagent.zip\', \'C:\\flexera_prodagent\')"',
-                        'powershell -NoProfile -Command "cd C:\\flexera_prodagent\\prodagent; & msiexec /i \'FlexNet Inventory Agent.msi\' /qn"',
+                    "hostname",
+                        "powershell -Command \"(New-Object System.Net.WebClient).DownloadFile('http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip', 'C:\\flexera_prodagent.zip')\"",
+                        "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
+                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
                         # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
 
