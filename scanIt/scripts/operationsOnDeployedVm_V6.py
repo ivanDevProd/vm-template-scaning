@@ -191,10 +191,10 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 else:
                     print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check. Commands for older PS version will be executed.")
                     print(f"Error: {response.std_err.decode()}")
-                    ps_version = 0  # If version check fails, default to 0
+                    ps_version = 5  # if version check fails, default to 5
             except Exception as version_check_e:
                     print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with fallback as precaution.")
-                    ps_version = 0  # Assume old PowerShell version if version check fails
+                    ps_version = 5  
 
                 
             if ps_version < 5:
@@ -243,7 +243,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
             # Wait for the VM to become accessible again
             print(f"Waiting for the machine to become accessible...")
             insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
-            # time.sleep(30)  # Wait a bit before retrying
+            time.sleep(30)  # Wait a bit before retrying
             accessible = False
             for _ in range(5):  # Retry 5 times
                 try:
@@ -261,7 +261,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 except Exception:
                     print("Machine not accessible yet. Retrying...")
                     insert_workflow_state(process_id, f"Machine not accessible yet. Retrying...", "INFO", "Commands execution", source_url)
-                    # time.sleep(15)  # Wait before retrying
+                    time.sleep(15)  # Wait before retrying
 
             if not accessible:
                 print("Machine did not become accessible in the expected time.")
@@ -294,7 +294,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                             print(f"An error occurred while logging to the database: {e}")
                             insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
                 
-                # time.sleep(45)
+                time.sleep(45)
 
             if all_commands_successful:
                 print("All commands executed successfully via WinRM. Returning.")
@@ -311,13 +311,13 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
 
     except winrm.exceptions.WinRMTransportError as transport_err:
         logging.error(f"Failed to establish WinRM connection. Transport error occurred with username: {username}. Error: {transport_err}")
-        insert_workflow_state(process_id, f"Transport error occurred with username: {username}. Error: {transport_err}", "FAILED", "Commands execution", source_url)
+        insert_workflow_state(process_id, f"Failed to establish WinRM connection. Transport error occurred with username: {username}. Error: {transport_err}", "FAILED", "Commands execution", source_url)
     except winrm.exceptions.InvalidCredentialsError:
         logging.error(f"Failed to establish WinRM connection. Invalid credentials for {ip} with username: {username}.")
-        insert_workflow_state(process_id, f"Invalid credentials for {ip} with username: {username}.", "FAILED", "Commands execution", source_url)
+        insert_workflow_state(process_id, f"Failed to establish WinRM connection. Invalid credentials for {ip} with username: {username}.", "FAILED", "Commands execution", source_url)
     except Exception as err:
         logging.error(f"Failed to establish WinRM connection. An error occurred with username: {username}. Error: {err}")
-        insert_workflow_state(process_id, f"An error occurred with username: {username}. Error: {err}", "FAILED", "Commands execution", source_url)
+        insert_workflow_state(process_id, f"Failed to establish WinRM connection. An error occurred with username: {username}. Error: {err}", "FAILED", "Commands execution", source_url)
 
 
 
@@ -358,29 +358,34 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
 
             if os_type == "Windows":
-                # time.sleep(60)
+                time.sleep(60)
                 ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
                     print(f"Failed to check PowerShell version: {ps_error}")
                     insert_workflow_state(process_id, f"Failed to check PowerShell version. Older PS commands will be used by default. Error: {ps_error}", "FAILED", "Commands execution", source_url)
-                    ps_version = 0  # If version check fails, default to 0
+                    ps_version = 5  # If version check fails, default to 5
                 else:
                     ps_version = int(ps_output.strip())
                     print(f"PowerShell version detected: {ps_version}")
 
                 # Commands for changing hostname and rebooting
                 rename_command = f'powershell Rename-Computer -NewName "{new_hostname}" -Force'
-                # time.sleep(5)
+                time.sleep(5)
                 shutdown_command = "powershell Shutdown /r /t 0"
 
                 # Execute the rename command
                 output, error, exit_code = execute_command(ssh, rename_command)
                 if exit_code != 0:
-                    print(f"Failed to change hostname: {error}")
-                    insert_workflow_state(process_id, f"Failed to change hostname. Error: {error}", "FAILED", "Commands execution", source_url)
-                    continue  # Skip to the next username if hostname change fails
+                    print(f"PowerShell command failed. Attempting to change hostname using WMIC...")
+                    insert_workflow_state(process_id, f"PowerShell command Rename-Computer failed. Attempting to change hostname using WMIC..." , "FAILED", "Commands execution", source_url)
+                    wmic_command = f'WMIC computersystem where name="%COMPUTERNAME%" call rename name="{new_hostname}"'
+                    output, error, exit_code = execute_command(ssh, wmic_command)
+                    if exit_code != 0:
+                        print(f"Failed to change hostname using WMIC: {error}")
+                        insert_workflow_state(process_id, f"Failed to change hostname. Error: {error}", "FAILED", "Commands execution", source_url)
+                        continue # Skip to the next username if hostname change fails
 
                 print(f"Hostname changed successfully. Output: {output}")
                 insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname}.", "SUCCEEDED", "Commands execution", source_url)
@@ -396,7 +401,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 # Wait for the machine to become available
                 print("Waiting for the machine to become available...")
-                # time.sleep(30)  # Adjust the sleep duration as needed
+                time.sleep(30)  # Adjust the sleep duration as needed
                 
                 # Check availability
                 for _ in range(5):  # Retry for a 5 attempts
@@ -408,7 +413,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     except Exception as e:
                         print(f"Machine not yet available. Retrying... {e}")
                         insert_workflow_state(process_id, f"Machine not yet available. Retrying... {e}", "INFO", "Commands execution", source_url)
-                        # time.sleep(10)  # Wait before retrying
+                        time.sleep(10)  # Wait before retrying
 
                 else:
                     print("Machine did not come back online in expected time.")
@@ -463,7 +468,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED",  "Commands execution", source_url)
 
                     # print(output)
-                    # time.sleep(45)
+                    time.sleep(45)
 
                 if all_commands_successful:
                     print("All commands executed successfully. Returning.")
@@ -722,13 +727,13 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive.")
                             return
 
-                    # time.sleep(30)
+                    time.sleep(30)
 
                 if failed_commands_retry:
                     insert_workflow_state(process_id, "Retrying failed commands.", "RUNNING", "Commands execution", source_url)
                     all_linux_commands_successful = True  # Flag to track all commands executed successfully
                     for command in failed_commands_retry:
-                        # time.sleep(90)
+                        time.sleep(90)
                         output, error, exit_code = execute_command(ssh, command, use_sudo=True, use_pty=True, sudo_password=sudo_password)
                         if exit_code != 0:
                             print(f"Failed to execute command '{command}', exit code: {exit_code}")
@@ -741,7 +746,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             print(f"Output of '{command}': {output}")
                             insert_workflow_state(process_id, f"Command '{command}' executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
                         print(output)
-                        # time.sleep(30)
+                        time.sleep(30)
                         
                     if all_linux_commands_successful:
                         insert_workflow_state(process_id, "All commands executed successfully after retry.", "SUCCEEDED", "Commands execution", source_url)
