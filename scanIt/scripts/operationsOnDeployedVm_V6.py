@@ -187,15 +187,20 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 if response.status_code == 0:
                     ps_version = int(response.std_out.strip())
                     print(f"PowerShell version on target: {ps_version}")
+                    insert_workflow_state(process_id, f"PowerShell version on target: {ps_version}.", "INFO", "Commands execution", source_url)
                     
                 else:
-                    print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check. Commands for older PS version will be executed.")
+                    print(f"Failed to retrieve PowerShell version, status code: {response.status_code}. Proceeding without version check. Commands for PS > 5 version will be executed.")
                     print(f"Error: {response.std_err.decode()}")
                     ps_version = 5  # if version check fails, default to 5
-            except Exception as version_check_e:
-                    print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with fallback as precaution.")
-                    ps_version = 5  
 
+                    insert_workflow_state(process_id, f"Failed to retrieve PowerShell version, status code: {response.status_code}. Error: {response.std_err.decode()}. Commands for PS > 5 version will be executed.", "INFO", "Commands execution", source_url)
+            
+            except Exception as version_check_e:
+                    print(f"Exception during PowerShell version check: {version_check_e}. Proceeding with commands for  PS > 5 version")
+                    ps_version = 5
+                    
+                    insert_workflow_state(process_id, f"Exception during PowerShell version check: {version_check_e}. Proceeding with commands for  PS > 5 version", "INFO", "Commands execution", source_url)
                 
             if ps_version < 5:
                 print(f"Using fallback commands due to PowerShell version < 5")
@@ -206,6 +211,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                     'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
                     # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                 ]
+
             else:
                 print(f"Using standard commands for PowerShell version >= 5")
                 remaining_commands = [
@@ -270,6 +276,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
 
             # Execute remaining commands after reboot
             print("Executing remaining commands...")
+            session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
             all_commands_successful = True
             for command in remaining_commands:
                 response = session.run_cmd(command)
@@ -358,17 +365,18 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
 
             if os_type == "Windows":
-                time.sleep(60)
+                time.sleep(75)
                 ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
                     print(f"Failed to check PowerShell version: {ps_error}")
-                    insert_workflow_state(process_id, f"Failed to check PowerShell version. Older PS commands will be used by default. Error: {ps_error}", "FAILED", "Commands execution", source_url)
-                    ps_version = 5  # If version check fails, default to 5
+                    insert_workflow_state(process_id, f"Failed to check PowerShell version. PS 5 commands will be used by default. Error: {ps_error}", "INFO", "Commands execution", source_url)
+                    ps_version = 5  # If version check fails, default to 2
                 else:
                     ps_version = int(ps_output.strip())
                     print(f"PowerShell version detected: {ps_version}")
+                    insert_workflow_state(process_id, f"PowerShell version detected: {ps_version}" , "INFO", "Commands execution", source_url)
 
                 # Commands for changing hostname and rebooting
                 rename_command = f'powershell Rename-Computer -NewName "{new_hostname}" -Force'
@@ -562,7 +570,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             f"hostnamectl set-hostname {new_hostname}",
                             "wget -q --spider --timeout=10 https://rpm-mirror.corp.nutanix.com/ 1>/dev/null; echo $?",
                             "wget -q --timeout=10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
-                            "wget https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -O /etc/yum.repos.d/flexera.repo",
+                            "wget --no-check-certificate https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -O /etc/yum.repos.d/flexera.repo",
                             "yum -y install managesoft-autoconf",
                             "yum list installed",
                             # "cat /var/opt/managesoft/log/uploader.log"

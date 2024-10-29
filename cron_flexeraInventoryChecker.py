@@ -381,6 +381,7 @@ def run_flexera_checks():
     access_token = create_new_access_token()
 
     hostnames = vmListToCheckOnFlexera()
+    hostnames = [item for item in hostnames if item != "-"]
     # hostnames = ['DPRO_AUTOMATION_1728469955', 'DPRO_AUTOMATION_1728468621', 'GRW0MP6649']
     # print(hostnames)
 
