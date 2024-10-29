@@ -69,6 +69,38 @@ def add_comment_to_jira_task(task_key, comment):
         print(f"An error occurred: {e}")
 
 
+def change_jira_task_status(task_key, transition_id):
+    try:
+        jira_headers = {
+            "Authorization": f"Bearer {JIRA_BEARER_TOKEN}",
+            "Content-Type": "application/json"
+        }
+
+        # payload to change the status using transition ID
+        transition_payload = {
+            "transition": {
+                "id": transition_id
+            }
+        }
+
+        transition_url = f"{jira_base_url}/rest/api/2/issue/{task_key}/transitions"
+        response = requests.post(transition_url, headers=jira_headers, data=json.dumps(transition_payload), timeout=15)
+
+        if response.status_code == 204:
+            print("Status changed successfully!")
+        else:
+            print(f"Failed to change status: {response.status_code}, {response.text}")
+
+    except requests.Timeout:
+        print("The request timed out!")
+
+    except requests.ConnectionError:
+        print("A connection error occurred!")
+
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+
+
 def insert_workflow_state(process_id, description, state, stage, source_url):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor()
@@ -657,7 +689,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                                 if new_jira_task:
                                     add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive. Terminating proces.")
-                                
+                                    # change ticket status from "In Progress" to "Rejected"
+                                    change_jira_task_status(new_jira_task, '131')
+
                                 # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
                                 try:
                                     conn = mysql.connector.connect(**mysql_config)
@@ -742,6 +776,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 
                             if new_jira_task:
                                 add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive.")
+                                # change ticket status from "In Progress" to "Rejected"
+                                change_jira_task_status(new_jira_task, '131')
                             return
 
                     time.sleep(30)

@@ -77,6 +77,38 @@ def add_comment_to_jira_task(task_key, comment):
         print(f"An error occurred: {e}")
 
 
+def change_jira_task_status(task_key, transition_id):
+    try:
+        jira_headers = {
+            "Authorization": f"Bearer {jira_bearer_token}",
+            "Content-Type": "application/json"
+        }
+
+        # payload to change the status using transition ID
+        transition_payload = {
+            "transition": {
+                "id": transition_id
+            }
+        }
+
+        transition_url = f"{jira_base_url}/rest/api/2/issue/{task_key}/transitions"
+        response = requests.post(transition_url, headers=jira_headers, data=json.dumps(transition_payload), timeout=15)
+
+        if response.status_code == 204:
+            print("Status changed successfully!")
+        else:
+            print(f"Failed to change status: {response.status_code}, {response.text}")
+
+    except requests.Timeout:
+        print("The request timed out!")
+
+    except requests.ConnectionError:
+        print("A connection error occurred!")
+
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+
+
 # Function that adds information to the DB that is displayed on the portal page
 def log_to_database(process_id, description, state, image_url, stage):
     try:
@@ -353,6 +385,9 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url, new_jira_ta
                                 log_to_database(process_id, f"Stage completed with errors. Boot the machine manually using the uploaded image and check the status. Possible reasons for the problem are the machine not booting, booting with error, unable to log in with root, nutanix, administrator user, static network settings of the machine itself, winRM config does not allow Basic auth or Unencrypted traffic, etc", "FAILED", source_url, "VM deployment")
                                 if new_jira_task:
                                     add_comment_to_jira_task(new_jira_task, f"Failed to establish connection via SSH or WinRM to UEFI enabled VM. Terminating Process. Possible reasons for the problem are the machine not booting, booting with error, unable to log in with root, nutanix, administrator user, winRM config does not allow Basic auth or Unencrypted traffic, static network settings of the machine itself, etc")
+                                    
+                                    # change ticket status from "In Progress" to "Rejected"
+                                    change_jira_task_status(new_jira_task, '131')
 
                                 return
                         else:
