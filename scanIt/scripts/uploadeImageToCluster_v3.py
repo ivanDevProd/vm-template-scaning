@@ -245,6 +245,7 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
     try:
         # Analyze and extract the tar file
         logging.info(f"Attempting to analyze tar file: {download_path}")
+        log_to_database(process_id, f"The analysis of the archived file has started and may take a few minutes.", "INFO", source_url, "Download and Extraction")
         with tarfile.open(download_path, "r:*") as tar:  # "r:*" handles both gzip and uncompressed tar
             file_info = [member for member in tar.getmembers() if member.isfile()]
             

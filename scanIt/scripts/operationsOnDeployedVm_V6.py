@@ -213,7 +213,8 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
             
             # Check PowerShell version
             try:
-                ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
+                # ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
+                ps_version_command = 'powershell -Command "(Get-Host).Version.Major"'
                 response = session.run_cmd(ps_version_command)
 
                 if response.status_code == 0:
@@ -241,6 +242,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                     "powershell -Command \"(New-Object System.Net.WebClient).DownloadFile('http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip', 'C:\\flexera_prodagent.zip')\"",
                     "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
                     'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                    'cmd /c "wmic product get name, version"',
                     # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                 ]
 
@@ -251,6 +253,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                     "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                     "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent'",
                     'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                    'cmd /c "wmic product get name, version"',
                     # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                 ]
 
@@ -258,37 +261,59 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
             try:
                 print(f"Changing hostname to {new_hostname}...")
                 response = session.run_cmd(f'powershell Rename-Computer -NewName "{new_hostname}" -Force')
+                
+                # Check if the PowerShell command was successful
                 if response.status_code != 0:
-                    print(f"PowerShell command failed. Attempting to change hostname using WMIC...")
-                    insert_workflow_state(process_id, f"PowerShell command Rename-Computer failed. Attempting to change hostname using WMIC..." , "FAILED", "Commands execution", source_url)
-                    wmic_command = f'WMIC computersystem where name="%COMPUTERNAME%" call rename name="{new_hostname}"'
+                    raise Exception(f"PowerShell command failed. Status code: {response.status_code}. Error: {response.std_err.decode()}")
+
+                insert_workflow_state(process_id, f"Hostname changed to {new_hostname} successfully.", "SUCCEEDED", "Commands execution", source_url)
+                print(f"Hostname changed to {new_hostname} successfully.")
+
+            except Exception as hostname_error:
+                print(f"Error during hostname change: {hostname_error}. Attempting to change hostname using WMIC...")
+                insert_workflow_state(process_id, f"Error during hostname change: {hostname_error}. Attempting to change hostname using WMIC...", "FAILED", "Commands execution", source_url)
+
+                # Try to change the hostname using WMIC
+                try:
+                    wmic_command = 'WMIC computersystem where name="%COMPUTERNAME%" call rename name="{}"'.format(new_hostname)
                     response = session.run_cmd(wmic_command)
                     if response.status_code != 0:
                         raise Exception(f"Failed to change hostname using WMIC. Status code: {response.status_code}. Error: {response.std_err.decode()}")
+                    
+                    insert_workflow_state(process_id, f"Hostname changed to {new_hostname} using WMIC successfully.", "SUCCEEDED", "Commands execution", source_url)
+                    print(f"Hostname changed to {new_hostname} using WMIC successfully.")
 
-                # Reboot immediately
+                except Exception as wmic_error:
+                    print(f"Error during WMIC hostname change: {wmic_error}")
+                    insert_workflow_state(process_id, f"Error during WMIC hostname change: {wmic_error}", "FAILED", "Commands execution", source_url)
+
+            # Attempt to reboot with error handling
+            try:
                 print("Rebooting the machine...")
                 response = session.run_cmd("powershell Shutdown /r /t 0")
                 if response.status_code != 0:
                     raise Exception(f"Failed to initiate reboot. Status code: {response.status_code}. Error: {response.std_err.decode()}")
 
-                insert_workflow_state(process_id, f"Hostname changed to {new_hostname} and reboot initiated successfully.", "SUCCEEDED", "Commands execution", source_url)
+                insert_workflow_state(process_id, "Reboot initiated successfully.", "SUCCEEDED", "Commands execution", source_url)
+                print("Reboot initiated successfully.")
 
-            except Exception as hostname_reboot_error:
-                print(f"Error during hostname change or reboot: {hostname_reboot_error}")
-                insert_workflow_state(process_id, f"Error during hostname change or reboot: {hostname_reboot_error}", "FAILED", "Commands execution", source_url)
+            except Exception as reboot_error:
+                print(f"Error during reboot: {reboot_error}")
+                insert_workflow_state(process_id, f"Error during reboot: {reboot_error}", "FAILED", "Commands execution", source_url)
 
             # Wait for the VM to become accessible again
             print(f"Waiting for the machine to become accessible...")
             insert_workflow_state(process_id, f"Waiting for the machine to become accessible...", "INFO", "Commands execution", source_url)
+            
             time.sleep(30)  # Wait a bit before retrying
+            
             accessible = False
             for _ in range(5):  # Retry 5 times
                 try:
                     # Attempt to reconnect using WinRM
                     session = winrm.Session(f'http://{ip}:5985/wsman', auth=(username, password))
                     # Check if the session is alive by running a simple command
-                    test_command = "powershell Get-Process"  # Just an example command
+                    test_command = "powershell Get-Process"  # example command
                     response = session.run_cmd(test_command)
                     
                     if response.status_code == 0:
@@ -318,6 +343,10 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                     print(f"Error of '{command}': {response.std_err.decode()}")
                     insert_workflow_state(process_id, f"Failed to execute command '{command} via WinRM: {response.std_err.decode()}'", "FAILED", "Commands execution", source_url)
                     all_commands_successful = False
+                    
+                    # change ticket status from "In Progress" to "Additional Check"
+                    change_jira_task_status(new_jira_task, '221')
+
                 else:
                     print(f"Command '{command}' executed successfully")
                     print(f"Output of '{command}': {response.std_out.decode().strip()}")
@@ -332,6 +361,12 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                             # Handle the exception and continue
                             print(f"An error occurred while logging to the database: {e}")
                             insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED", "Commands execution", source_url)
+                    
+                    elif command == 'cmd /c "wmic product get name, version"':
+                            try:
+                                log_to_database_rawInstallations(process_id, response.std_out.decode(), source_url)
+                            except Exception as e:
+                                logging.error(f"An error occurred while logging to the <raw_Installations> database: {e}")
                 
                 time.sleep(45)
 
@@ -363,6 +398,7 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
 def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
     usernames = ['nutanix', 'root', 'Administrator']
     failed_commands = []
+    os_type = ""
 
     new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
 
@@ -398,7 +434,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
             if os_type == "Windows":
                 time.sleep(75)
-                ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
+                # ps_version_command = "powershell -Command \"$PSVersionTable.PSVersion.Major\""
+                ps_version_command = 'powershell -Command "(Get-Host).Version.Major"'
                 ps_output, ps_error, ps_exit_code = execute_command(ssh, ps_version_command)
 
                 if ps_exit_code != 0 or not ps_output.strip().isdigit():
@@ -412,25 +449,37 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
                 # Commands for changing hostname and rebooting
                 rename_command = f'powershell Rename-Computer -NewName "{new_hostname}" -Force'
-                time.sleep(5)
-                shutdown_command = "powershell Shutdown /r /t 0"
-
-                # Execute the rename command
-                output, error, exit_code = execute_command(ssh, rename_command)
-                if exit_code != 0:
-                    print(f"PowerShell command failed. Attempting to change hostname using WMIC...")
-                    insert_workflow_state(process_id, f"PowerShell command Rename-Computer failed. Attempting to change hostname using WMIC..." , "FAILED", "Commands execution", source_url)
-                    wmic_command = f'WMIC computersystem where name="%COMPUTERNAME%" call rename name="{new_hostname}"'
-                    output, error, exit_code = execute_command(ssh, wmic_command)
+                try:
+                    # Execute the rename command
+                    output, error, exit_code = execute_command(ssh, rename_command)
                     if exit_code != 0:
-                        print(f"Failed to change hostname using WMIC: {error}")
-                        insert_workflow_state(process_id, f"Failed to change hostname. Error: {error}", "FAILED", "Commands execution", source_url)
-                        continue # Skip to the next username if hostname change fails
+                        raise Exception(f"PowerShell command failed. Error: {error}")
 
-                print(f"Hostname changed successfully. Output: {output}")
-                insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname}.", "SUCCEEDED", "Commands execution", source_url)
+                    print(f"Hostname changed successfully. Output: {output}")
+                    insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname}.", "SUCCEEDED", "Commands execution", source_url)
 
+                except Exception as hostname_error:
+                    print(f"Error during PowerShell hostname change: {hostname_error}. Attempting to change hostname using WMIC...")
+                    insert_workflow_state(process_id, f"PowerShell command Rename-Computer failed. Attempting to change hostname using WMIC...", "FAILED", "Commands execution", source_url)
+
+                    # Attempt to change the hostname using WMIC
+                    try:
+                        wmic_command = 'WMIC computersystem where name="%COMPUTERNAME%" call rename name="{}"'.format(new_hostname)
+                        output, error, exit_code = execute_command(ssh, wmic_command)
+                        if exit_code != 0:
+                            raise Exception(f"Failed to change hostname using WMIC. Error: {error}")
+
+                        print(f"Hostname changed successfully using WMIC. Output: {output}")
+                        insert_workflow_state(process_id, f"Hostname changed successfully to {new_hostname} using WMIC.", "SUCCEEDED", "Commands execution", source_url)
+
+                    except Exception as wmic_error:
+                        print(f"Error during WMIC hostname change: {wmic_error}")
+                        insert_workflow_state(process_id, f"Failed to change hostname. Error: {wmic_error}", "FAILED", "Commands execution", source_url)
+                        continue  # Skip to the next username if hostname change fails
+
+                time.sleep(5)
                 # Reboot the machine
+                shutdown_command = "powershell Shutdown /r /t 0"
                 output, error, exit_code = execute_command(ssh, shutdown_command)
                 if exit_code != 0:
                     print(f"Failed to initiate reboot: {error}")
@@ -466,8 +515,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         # "powershell Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile 'C:\\flexera_prodagent.zip'",
                         'powershell -Command "Start-Process powershell -ArgumentList \'Invoke-WebRequest -Uri http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip -OutFile C:\\flexera_prodagent.zip\' -Verb RunAs -Wait"',
                         "powershell Expand-Archive -Path 'C:\\flexera_prodagent.zip' -DestinationPath 'C:\\flexera_prodagent' -Force",
-                        # 'cd C:/flexera_prodagent/prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
-                        "powershell -NoProfile -Command \"cd C:\\flexera_prodagent\\prodagent; & msiexec /i 'FlexNet Inventory Agent.msi' /qn\"",
+                        'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                        'cmd /c "wmic product get name, version"',
+                        # "powershell -NoProfile -Command \"cd C:\\flexera_prodagent\\prodagent; & msiexec /i 'FlexNet Inventory Agent.msi' /qn\"",
                         # 'net start | findstr Flexera*'
                         # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
@@ -487,6 +537,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "powershell -Command \"(New-Object System.Net.WebClient).DownloadFile('http://drtitfsprod03.corp.nutanix.com/flexera/flexera_prodagent.zip', 'C:\\flexera_prodagent.zip')\"",
                         "powershell -Command \"Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\\flexera_prodagent.zip', 'C:\\flexera_prodagent')\"",
                         'cd C:\\flexera_prodagent\\prodagent && msiexec /i "FlexNet Inventory Agent.msi" /qn',
+                        'cmd /c "wmic product get name, version"',
                         # "powershell -NoProfile -Command \"net start | findstr Flexera*\""
                     ]
 
@@ -515,6 +566,12 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 # Handle the exception and continue
                                 print(f"An error occurred while logging to the database: {e}")
                                 insert_workflow_state(process_id, f"An error occurred while logging to the database: {e}. Process will continue, but check <log_to_database_waitForFlexera> function or <waitForFlexera> table in DB", "FAILED",  "Commands execution", source_url)
+                        
+                        elif command == 'cmd /c "wmic product get name, version"':
+                            try:
+                                log_to_database_rawInstallations(process_id, output, source_url)
+                            except Exception as e:
+                                logging.error(f"An error occurred while logging to the <raw_Installations> database: {e}")
 
                     # print(output)
                     time.sleep(45)
@@ -604,13 +661,13 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             "wget -q --timeout=10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
                             "wget --no-check-certificate https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -O /etc/yum.repos.d/flexera.repo",
                             "yum -y install managesoft-autoconf",
-                            "yum list installed",
+                            "rpm -qa",
                             # "cat /var/opt/managesoft/log/uploader.log"
                         ]
                     else:
                         is_old_version = True
                         commands = [
-                            'yum list installed'  # Get list of installed packages for older versions
+                            'rpm -qa'  # Get list of installed packages for older versions
                         ]
 
                 elif ("RHEL" in distro or "Rocky" in distro or "Red Hat Enterprise Linux" in distro) and isinstance(version, float):
@@ -624,13 +681,13 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             'sudo chmod -R o+rw /etc/yum.repos.d',
                             "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera.repo -o /etc/yum.repos.d/flexera.repo",
                             "yum install -y managesoft-autoconf",
-                            "yum list installed",
-                            # opt/managesoft/log/uploader.log"
+                            "rpm -qa",
+                            # "cat /var/opt/managesoft/log/uploader.log"
                         ]
                     else:
                         is_old_version = True
                         commands = [
-                            'yum list installed'  # Get list of installed packages for older versions
+                            'rpm -qa'  # Get list of installed packages for older versions
                         ]
                 elif "Debian" in distro and isinstance(version, float):
                     # Debian (all versions) just need to get installed packages list
@@ -652,7 +709,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     else:
                         is_old_version = True
                         commands = [
-                            'yum list installed'  
+                            'rpm -qa'  
                         ]
                                         
                 elif "AHV" in distro:
@@ -663,7 +720,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         "curl -s -m 10 https://phxitflexerap1.corp.nutanix.com/ManageSoftRL/ 1>/dev/null; echo $?",
                         "curl https://rpm-mirror.corp.nutanix.com/corp/flexera/flexera-centos-7.repo -o /etc/yum.repos.d/flexera.repo",
                         "yum -y install managesoft-autoconf",
-                        "yum list installed",
+                        "rpm -qa",
                         # "cat /var/opt/managesoft/log/uploader.log"
                     ]
                 else:
@@ -673,7 +730,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     commands_for_unsupported = [
                                                 "dpkg --get-selections",        # Debian-based systems
                                                 "apt list --installed",         # Ubuntu-based systems
-                                                "yum list installed",           # RedHat/CentOS 7 and older
+                                                "rpm -qa",           # RedHat/CentOS 7 and older
                                                 "dnf list installed",           # Fedora/CentOS 8+
                                                 "zypper search --installed-only", # SUSE/openSUSE systems
                                                 "pkg info" # FreeBSD
@@ -732,6 +789,10 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Error of '{command}': {error}")
                         failed_commands_retry.append(command)
                         insert_workflow_state(process_id, f"Failed to execute command '{command}: {error}'", "FAILED", "Commands execution", source_url)
+                        
+                        # change ticket status from "In Progress" to "Additional Check"
+                        change_jira_task_status(new_jira_task, '221')
+                    
                     else:
                         print(f"Command '{command}' executed successfully")
                         print(f"Output of '{command}': {output}")
@@ -751,7 +812,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                             # Ubuntu/Debian systems (newer and older versions)
                             log_to_database_rawInstallations(process_id, output, source_url)
                         
-                        elif command == 'yum list installed' or command == 'dnf list installed':
+                        elif command == 'rpm -qa' or command == 'dnf list installed':
                             # CentOS/RHEL/Fedora/Rocky/AHV systems
                             log_to_database_rawInstallations(process_id, output, source_url)
 
@@ -806,10 +867,14 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
                         if new_jira_task:
                             add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
+                            
+                            # change ticket status from "Additional Check" to "In Progress"
+                            change_jira_task_status(new_jira_task, '221')
+
                         return  # Exit the loop if all commands are successful
                     else:
                         insert_workflow_state(process_id, "The problem with some commands still exists. Retrying with different account.", "FAILED", "Commands execution", source_url)
-                
+                                        
                 else:
                     insert_workflow_state(process_id, "All commands executed successfully.", "SUCCEEDED", "Commands execution", source_url)
                     insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
@@ -828,7 +893,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
 
             
             # Try to connect using WinRM
-            retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
+            if os_type == "" or os_type == "Windows":
+                retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
 
 
 

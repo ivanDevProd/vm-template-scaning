@@ -7,12 +7,18 @@
     <style>
         /* Body styling */
         body {
-            background: url('http://10.67.22.100/static/scanIt/nutanix_background.jpg');
-            background-size: cover;
+            background: url('http://10.67.22.100/static/scanIt/nutanix_background.jpg'), url('https://i.pinimg.com/originals/d9/7a/6d/d97a6d99e7bde5141805653993793a9f.gif'), url('');
+            background-size: cover, auto, auto; /* First image covers, second keeps original size */
+            background-position: center, top right, bottom right; /* Centers overlay, places second image in top right */
+            background-repeat: no-repeat, no-repeat, no-repeat; /* Prevents repetition */
+            background-blend-mode: overlay;
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
             height: 100vh;
+            display: flex; /* Enable flexbox */
+            justify-content: center; /* Horizontally center */
+            align-items: center; /* Vertically center */
             overflow: hidden; /* Prevent body from scrolling */
         }
 
@@ -20,13 +26,44 @@
         .scrollable-content {
             width: 1100px; /* Set width to 1100px */    
             position: relative;
-            max-height: 86vh; /* Adjust to control the visible portion */
+            max-height: 90vh; /* Adjust to control the visible portion */
             overflow-y: auto; /* Enable vertical scrolling */
             padding: 20px;
             z-index: 1; /* Ensure it is above the background */
             background-color: rgba(0, 0, 0, 0.2); /* Optional: Add semi-transparent background for better readability */
             border-radius: 8px; /* Optional: Rounded corners for a cleaner look */
-            margin: auto;margin: 30px auto 0 auto; /* Lower it by 30px from the top and center horizontally */
+            
+        }
+
+        /* Important Notes styling */
+        .important-notes {
+            width: 100%; /* Full width of the container */
+            max-width: 1050px; /* Same width as the text area */
+            background-color: rgba(0, 0, 0, 0.8); /* Black with transparency */
+            color: #fff; /* White text */
+            padding: 15px; /* Padding for spacing */
+            border-radius: 8px; /* Rounded corners */
+            margin: 10px auto 20px auto; /* Center horizontally and position 100px from top */
+            text-align: left; /* Align text to the left */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            font-size: 15px; /* Adjust text size */
+        }
+
+        .important-notes h3 {
+            margin-top: 0; /* Remove top margin for heading */
+        }
+
+        .important-notes ul {
+            list-style: disc; /* Use disc bullets for the list */
+            margin: 0; /* Remove default margin */
+            padding-left: 20px; /* Add padding to the left */
+        }
+
+        .important-notes li {
+            margin-bottom: 10px; /* Add space between list items */
+        }
+        .important-notes strong {
+            color: #7855FA; /* Different color for the strong part */
         }
 
         /* Login link in the top-right corner */
@@ -40,18 +77,93 @@
             font-size: 16px;
         }
 
+        /* Logo placement in bottom-left corner */
+        .logo {
+            position: absolute;
+            bottom: 10px;
+            left: 20px; /* Place logo in bottom-left */
+        }
+
+        hr {
+            border: none; /* Removes default border */
+            height: 2px; /* Thickness of the line */
+            background-color: #6A0DCE; /* Set your desired color */
+        }
     </style>
 </head>
 <body>
     <br>
     <!-- Login link in top-right corner -->
     <div >
-        <p><a href="{{ request.META.HTTP_REFERER }}" class="back-link">Home Page</a>
+        <p><a href="{{ request.META.HTTP_REFERER }}" class="back-link">Home Page &#9679</a>
     </div>
 
     <div class="scrollable-content">
+        <div class="important-notes">
+            <h1>How to Submit System Image for Analysis</h1>
+            <hr>
+            <p>
+                To initiate the analysis process, start by uploading your system image using one of the following methods:
+            </p>
+            <p>
+            <h3>Upload Options:</h3>
+            <ul>
+                <li>
+                    <strong>URL Upload:</strong> Provide the direct URL to the system image you wish to analyze. Ensure the URL is accessible and contains the correct file format.
+                </li>
+                <li>
+                    <strong>Local File Upload:</strong> Select and upload the file directly from your device. Accepted file formats include .img, .iso, qcow, or .tar.gz.
+                </li>
+            </ul>
+            </p>
 
+            <p>
+            <br>
+            <h3>After Upload:</h3>
+            <ul>
+                <li>
+                    <strong>Triggering the Scan Job:</strong> Once the image is uploaded, a scan job will automatically begin in a separate process. This job will analyze the image for compliance, verifying that it meets necessary requirements for further deployment.
+                </li>
+                <li>
+                    <strong>Upload to Artifactory:</strong> The image is uploaded to Artifactory for easy access and future use.
+                </li>   
+                <li>
+                    <strong>End-User Email Notification:</strong> An email containing details about your image processing status and Jira case will be sent to you, along with any relevant links and information.
+                </li>
+                <li>
+                    <strong>Jira Case:</strong> A Jira case is automatically created to track the image's scan process, helping with progress updates and issue management.
+                </li>    
+            </ul>
+            
+            <br>
+            <p>
+            Each of these actions occurs automatically, allowing you to track your image processing progress in real time and receive relevant notifications.
+            <hr>
+            <p>
+        </div>
+        <div class="important-notes">
+            <h1>Useful Links</h1>
+            <hr>
+            <ul>
+                <li>
+                    <strong>Systest Automation - QA UVM Gold Image Guide: </strong><a href="https://confluence.eng.nutanix.com:8443/display/QA/UVM+Gold+Image+Guide" style="color: white;"> UVM Gold Image</a>
+                </li>
+                <li>
+                    <strong>Acropolis Hypervisor (AHV) image creation: </strong><a href="https://confluence.eng.nutanix.com:8443/pages/viewpage.action?spaceKey=AHV&title=Guest+OS+Cert+Process" style="color: white;"> Guest OS Cert</a>
+                </li>
+                <li>
+                    <strong>High-level project overview: </strong><a href="https://confluence.eng.nutanix.com:8443/display/DPRO/Self-Service+VM+image+scanning" style="color: white;"> Self-Service VM image scanning</a>
+                </li>
+            </ul>
+            <hr>
+        </div>
     </div>
+
+    <!-- Logo in bottom-left corner -->
+    <div class="logo">
+        <img src="{% static 'scanIt/logo.png' %}" alt="Logo" style="width: 150px; height: auto;">
+    </div>
+
     </body>
     </html>
     

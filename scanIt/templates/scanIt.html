@@ -6,10 +6,18 @@
 </head>
 {% block content %}
     <style>
-        /* Body styling  https://cdn-assets-us.frontify.com/s3/frontify-enterprise-files-us/eyJwYXRoIjoibnV0YW5peFwvZmlsZVwvWE1YOTMxTVRiUDkydTQ0ZHloZEguanBnIn0:nutanix:UPMYOc-IwxWPjpkDDtl4yhx8MLss5_zIfLAdDXDCumw?width=2400 */
+        /* Body styling  https://cdn-assets-us.frontify.com/s3/frontify-enterprise-files-us/eyJwYXRoIjoibnV0YW5peFwvZmlsZVwvWE1YOTMxTVRiUDkydTQ0ZHloZEguanBnIn0:nutanix:UPMYOc-IwxWPjpkDDtl4yhx8MLss5_zIfLAdDXDCumw?width=2400 
+        
+        background: url('static/scanIt/nutanix_background.jpg');
+        background-size: cover;
+        
+        */
         body {
-            background: url('static/scanIt/nutanix_background.jpg');
-            background-size: cover;
+            background: url('static/scanIt/nutanix_background.jpg'), url('https://i.pinimg.com/originals/d9/7a/6d/d97a6d99e7bde5141805653993793a9f.gif'), url('');
+            background-size: cover, auto, auto; /* First image covers, second keeps original size */
+            background-position: center, top right, bottom right; /* Centers overlay, places second image in top right */
+            background-repeat: no-repeat, no-repeat, no-repeat; /* Prevents repetition */
+            background-blend-mode: overlay;
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
