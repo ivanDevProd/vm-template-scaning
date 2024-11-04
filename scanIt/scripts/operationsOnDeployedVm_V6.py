@@ -400,7 +400,7 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
     failed_commands = []
     os_type = ""
 
-    new_hostname = 'DPRO-AUTOMATION-' + str(int(time.time()))
+    new_hostname = 'DPRO-' + str(int(time.time()))
 
     for username in usernames:
         try:
