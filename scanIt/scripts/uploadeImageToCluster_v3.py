@@ -64,8 +64,8 @@ username = CLUSTER_USERNAME
 password = CLUSTER_PASSWORD
 
 # Jira parameters 
-# jira_base_url = "https://jira.nutanix.com/"
-jira_base_url = "https://jiradev.nutanix.com/"
+jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jiradev.nutanix.com/"
 jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN")
 
 
@@ -75,23 +75,7 @@ def create_jira_task(summary, description):
                     "Content-Type": "application/json"
                 }
     
-    # new_jira_task_payload = {
-    #     "fields": {
-    #         "project": {
-    #             "key": 'DPROREQ'
-    #         },
-    #         "summary": summary,
-    #         "description": description,
-    #         "issuetype": {
-    #             "name": "VM Templates"
-    #         },
-    #         "reporter": {
-    #             "name": "ivan.perkovic"
-    #         },
-    #     }
-    # }
-
-    # payload for Jira DEV. The reporter field is not on the screen that is used when creating the issue like we have in PROD. 
+    # payload for Jira PROD
     new_jira_task_payload = {
         "fields": {
             "project": {
@@ -101,9 +85,26 @@ def create_jira_task(summary, description):
             "description": description,
             "issuetype": {
                 "name": "VM Templates"
-            }
+            },
+            "reporter": {
+                "name": "ivan.perkovic"
+            },
         }
     }
+
+    # # payload for Jira DEV. The reporter field is not on the screen that is used when creating the issue like we have in PROD. 
+    # new_jira_task_payload = {
+    #     "fields": {
+    #         "project": {
+    #             "key": 'DPROREQ'
+    #         },
+    #         "summary": summary,
+    #         "description": description,
+    #         "issuetype": {
+    #             "name": "VM Templates"
+    #         }
+    #     }
+    # }
 
     create_url = f"{jira_base_url}/rest/api/2/issue"
     try:

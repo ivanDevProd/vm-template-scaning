@@ -24,6 +24,11 @@ logging.basicConfig(
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 
+# Cluster variables
+CLUSTER_IP = os.getenv("CLUSTER_IP")
+CLUSTER_USERNAME = os.getenv("CLUSTER_USERNAME")
+CLUSTER_PASSWORD = os.getenv("CLUSTER_PASSWORD")
+
 mysql_config = {
     'user': 'root',
     'password': MYSQL_PASSWORD,
@@ -34,9 +39,9 @@ mysql_config = {
 
 # Jira parameters 
 JIRA_BEARER_TOKEN = os.getenv("JIRA_BEARER_TOKEN")
-# jira_base_url = "https://jira.nutanix.com/"
-jira_base_url = "https://jiradev.nutanix.com/"
-jira_email = "ivan.perkovic@nutanix.com"
+jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jiradev.nutanix.com/"
+# jira_email = "ivan.perkovic@nutanix.com"
 
 
 # Function for adding comment in Jira case
@@ -765,6 +770,30 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 except Error as err:
                                     logging.error(f"Database error: {err}")
                                     insert_workflow_state(process_id, f"Problem with the removing VM record from the <waitForFlexera> DB table. Check record for this process at DB directly.", "FAILED", "Commands execution", source_url)
+                                
+                                # remove VM from cluster
+                                try:
+                                    delete_response = requests.delete(
+                                        f"https://{CLUSTER_IP}:9440/api/nutanix/v3/vms/{vm_uuid}",
+                                        auth=(CLUSTER_USERNAME, CLUSTER_PASSWORD), 
+                                        verify=False
+                                    )
+                                    
+                                    # Check the response status code
+                                    if delete_response.status_code == 202:
+                                        logging.info(f"VM with ID {vm_uuid} deleted successfully.")
+                                        insert_workflow_state(process_id, f"VM with ID {vm_uuid} deleted successfully.", "SUCCEEDED", source_url, "VM Termination")
+                                
+                                except mysql.connector.Error as err:
+                                    # Handle database connection errors or query execution errors
+                                    logging.error(f"An error occurred while deleting VM record with ID. Error: {err}")
+                                    insert_workflow_state(process_id, f"An error occurred while deleting VM record with ID: {vm_uuid} from <waitForFlexera> DB table: {err}", "FAILED", source_url, "VM Termination")
+                                    
+                                except Exception as e:
+                                    # Handle any other exceptions
+                                    logging.error(f"An unexpected error occurred: {e}")
+                                    insert_workflow_state(process_id, f"An unexpected error occurred: {e}. Please check repo", "FAILED", source_url, "VM Termination")
+
                                 return
                             
                             else:
@@ -839,6 +868,30 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                                 add_comment_to_jira_task(new_jira_task, f"Depricated or unsupported distribution for installing Flexera agent. The application list is pulled from the system. The Cron job script <cron_manualAppInfoCollector.py> will collect the records and upload it to Google Drive.")
                                 # change ticket status from "In Progress" to "Rejected"
                                 change_jira_task_status(new_jira_task, '131')
+
+                            # remove VM from cluster
+                                try:
+                                    delete_response = requests.delete(
+                                        f"https://{CLUSTER_IP}:9440/api/nutanix/v3/vms/{vm_uuid}",
+                                        auth=(CLUSTER_USERNAME, CLUSTER_PASSWORD), 
+                                        verify=False
+                                    )
+                                    
+                                    # Check the response status code
+                                    if delete_response.status_code == 202:
+                                        logging.info(f"VM with ID {vm_uuid} deleted successfully.")
+                                        insert_workflow_state(process_id, f"VM with ID {vm_uuid} deleted successfully.", "SUCCEEDED", source_url, "VM Termination")
+                                
+                                except mysql.connector.Error as err:
+                                    # Handle database connection errors or query execution errors
+                                    logging.error(f"An error occurred while deleting VM record with ID. Error: {err}")
+                                    insert_workflow_state(process_id, f"An error occurred while deleting VM record with ID: {vm_uuid} from <waitForFlexera> DB table: {err}", "FAILED", source_url, "VM Termination")
+                                    
+                                except Exception as e:
+                                    # Handle any other exceptions
+                                    logging.error(f"An unexpected error occurred: {e}")
+                                    insert_workflow_state(process_id, f"An unexpected error occurred: {e}. Please check repo", "FAILED", source_url, "VM Termination")
+
                             return
 
                     time.sleep(30)
@@ -868,8 +921,8 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         if new_jira_task:
                             add_comment_to_jira_task(new_jira_task, f"All commands executed successfully. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
                             
-                            # change ticket status from "Additional Check" to "In Progress"
-                            change_jira_task_status(new_jira_task, '221')
+                            # change ticket status from "Additional Check" to "xxxx"
+                            # change_jira_task_status(new_jira_task, 'xxxxxxxxxxx')
 
                         return  # Exit the loop if all commands are successful
                     else:
@@ -903,6 +956,7 @@ if __name__ == "__main__":
     ip = sys.argv[2]
     source_url = sys.argv[3]
     new_jira_task = sys.argv[4]
+    vm_uuid = sys.argv[5]
 
     # username = 'nutanix'
     password = 'nutanix/4u'

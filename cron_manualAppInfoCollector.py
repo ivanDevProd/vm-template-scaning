@@ -90,7 +90,7 @@ def create_spreadsheets_for_each_process_id():
             print(f"Data for process_ID {process_id} successfully written to Google Sheet.")
 
             # Log success in the database
-            log_to_database(process_id, f"Spreadsheet with raw data about installed packages uploaded/created successfully to Gdrive: {spreadsheet.url}", "SUCCEEDED", source_url, "G-drive raw report")
+            log_to_database(process_id, f"Spreadsheet with raw data about installed packages uploaded/created successfully to Gdrive: {spreadsheet.url}", "INFO", source_url, "G-drive raw report")
 
             # Delete the process_ID from the table after successful spreadsheet creation
             cursor.execute('DELETE FROM raw_Installations WHERE process_ID = %s', (process_id,))

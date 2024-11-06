@@ -40,8 +40,8 @@ mysql_config = {
 
 # Jira parameters 
 jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN")
-# jira_base_url = "https://jira.nutanix.com/"
-jira_base_url = "https://jiradev.nutanix.com"
+jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jiradev.nutanix.com"
 
 # Function for adding comment in Jira case
 def add_comment_to_jira_task(task_key, comment):
@@ -159,7 +159,6 @@ def delete_vm(vm_uuid, process_id, source_url, jira_task_key):
                 logging.info(f"VM with ID {vm_uuid} deleted successfully from waitForFlexera DB table.")
                 
                 log_to_database(process_id, f"VM with ID {vm_uuid} deleted successfully from <waitForFlexera> DB table.", "SUCCEEDED", source_url, "VM Termination")
-                log_to_database(process_id, "The entire scanning process has been successfully completed!", "SUCCEEDED", source_url, "END")
 
             except mysql.connector.Error as err:
                 # Handle database connection errors or query execution errors
@@ -167,15 +166,13 @@ def delete_vm(vm_uuid, process_id, source_url, jira_task_key):
                 print(f"An error occurred while deleting VM record with ID. Error: {err}")
 
                 log_to_database(process_id, f"An error occurred while deleting VM record with ID: {vm_uuid} from <waitForFlexera> DB table: {err}", "FAILED", source_url, "VM Termination")
-                log_to_database(process_id, "The entire scanning process has been successfully completed!", "SUCCEEDED", source_url, "END")
-
+                
             except Exception as e:
                 # Handle any other exceptions
                 logging.error(f"An unexpected error occurred: {e}")
                 print(f"An unexpected error occurred: {e}")
 
                 log_to_database(process_id, f"An unexpected error occurred: {e}. Please check repo", "FAILED", source_url, "VM Termination")
-                log_to_database(process_id, "The entire scanning process has been successfully completed!", "SUCCEEDED", source_url, "END")
 
             finally:
                 # Close the cursor and connection
@@ -455,6 +452,7 @@ def run_flexera_checks():
                             add_comment_to_jira_task(jira_task_key, f"Commercial software found for {hostname[0]}: {list_of_commercial_apps}. There are no unauthorized commercial applications to be aware of. Scanning process completed succesfuly.")
                             
                             delete_vm(hostname[2], process_id, hostname[4], hostname[5])
+                            log_to_database(process_id, "The entire scanning process has been successfully completed!", "SUCCEEDED", source_url, "END")
 
                         else:
                             log_to_database(process_id, f"Unauthorized commercial applications: {attention_list}", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
@@ -491,9 +489,9 @@ def run_flexera_checks():
                         print(f"Machine {hostname[0]} can be deleted from the cluster.")
                         logging.info(f"Machine {hostname[0]} can be deleted from the cluster.")
 
-                        log_to_database(process_id, f"No commercial software found for {hostname[0]}. It can be deleted from cluster. (Applications found: {total_apps_found}, Checked: {current_checks} times.)", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
+                        log_to_database(process_id, f"No commercial software found on the {hostname[0]}. It can be deleted from cluster. (Applications found: {total_apps_found}, Checked: {current_checks} times.)", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
                         log_to_database(process_id, f"Removing VM: {hostname[0]}, UUID: {hostname[2]} initiated", "INITIATED", f"{hostname[4]}", "VM Termination")
-                        add_comment_to_jira_task(jira_task_key, f"No commercial software found for {hostname[0]}. Scanning process completed succesfuly.")
+                        add_comment_to_jira_task(jira_task_key, f"No commercial software found on the {hostname[0]}. Scanning process completed succesfuly.")
 
                         # change ticket status from "In Progress" to "Approved" 
                         change_jira_task_status(jira_task_key, '201')
@@ -501,22 +499,33 @@ def run_flexera_checks():
                         change_jira_task_status(jira_task_key, '211')
 
                         delete_vm(hostname[2], process_id, hostname[4], hostname[5])
+                        log_to_database(process_id, "The entire scanning process has been successfully completed!", "SUCCEEDED", source_url, "END")
                             
                     else:
                         log_to_database(process_id, f"No commercial software found for {hostname[0]}. Waiting for the next check tomorrow, because the number of applications found is {total_apps_found}, and the number of checks so far is {current_checks}.", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
                         add_comment_to_jira_task(jira_task_key, f"No commercial software found for {hostname[0]}. Waiting for the next check tomorrow, because the number of applications found is {total_apps_found}, and the number of checks so far is {current_checks}.")
-
+                        
                 increment_number_of_checks(hostname[0])
 
             else:
-                print(f"Machine not found for hostname: {hostname[0]}.")
-                logging.info(f"Machine not found for hostname: {hostname[0]}.")
+                if current_checks <= 5:
+                    print(f"Machine not found for hostname: {hostname[0]}.")
+                    logging.info(f"Machine not found for hostname: {hostname[0]}.")
 
-                # Increment the number_of_checks in the database
-                increment_number_of_checks(hostname[0])
-                log_to_database(process_id, f"No matching inventory ({hostname[0]}) in Flexera. Waiting for the next check tomorrow. Number of checks: {current_checks}", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
-                add_comment_to_jira_task(jira_task_key, f"No matching inventory ({hostname[0]}) in Flexera. Waiting for the next check tomorrow. Number of checks: {current_checks}")
-        
+                    # Increment the number_of_checks in the database
+                    increment_number_of_checks(hostname[0])
+
+                    log_to_database(process_id, f"No matching inventory ({hostname[0]}) in Flexera. Waiting for the next check tomorrow. Number of checks: {current_checks}", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
+                    add_comment_to_jira_task(jira_task_key, f"No matching inventory ({hostname[0]}) in Flexera. Waiting for the next check tomorrow. Number of checks: {current_checks}")
+                
+                else:
+                    log_to_database(process_id, f"No matching inventory ({hostname[0]}) in Flexera. CHECK THE FLEXERA LOGS ON THE VM.", "INFO", f"{hostname[4]}", "FLEXERA REPORT")
+    
+                    increment_number_of_checks(hostname[0])
+
+                    # change ticket status from "In Progress" to "Additional Check"
+                    change_jira_task_status(jira_task_key, '221')
+                    add_comment_to_jira_task(jira_task_key, f"No matching inventory ({hostname[0]}) in Flexera. Number of checks: {current_checks}")
         else:
             print(f"Error fetching report or no data returned for hostname: {hostname[0]}.")
             logging.error(f"Error fetching report or no data returned for hostname: {hostname[0]}.")

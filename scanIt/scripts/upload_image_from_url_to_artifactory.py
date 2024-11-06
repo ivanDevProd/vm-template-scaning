@@ -54,8 +54,8 @@ mysql_config = {
 
 
 # Jira parameters 
-# jira_base_url = "https://jira.nutanix.com/"
-jira_base_url = "https://jiradev.nutanix.com/"
+jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jiradev.nutanix.com/"
 jira_bearer_token = os.getenv("JIRA_BEARER_TOKEN")
 
 

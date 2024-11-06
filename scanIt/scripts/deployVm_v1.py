@@ -41,9 +41,9 @@ username = CLUSTER_USERNAME
 password = CLUSTER_PASSWORD
 
 # Jira parameters 
-# jira_base_url = "https://jira.nutanix.com/"
-jira_base_url = "https://jiradev.nutanix.com/"
-jira_email = "ivan.perkovic@nutanix.com"
+jira_base_url = "https://jira.nutanix.com/"
+# jira_base_url = "https://jiradev.nutanix.com/"
+# jira_email = "ivan.perkovic@nutanix.com"
 jira_bearer_token = JIRA_BEARER_TOKEN
 
 
@@ -351,7 +351,7 @@ def create_vm_with_uefi(vm_name, image_uuid, process_id, source_url, new_jira_ta
 
                                 # Connecting and executing commands on deployed machine (using ssh_to_vm method) passing IP address
                                 script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V6.py'
-                                command = f"python3 {script_path} {process_id} {vm_ip} {source_url} {new_jira_task}"
+                                command = f"python3 {script_path} {process_id} {vm_ip} {source_url} {new_jira_task} {vm_uuid}"
                                 # Run the script asynchronously
                                 subprocess.Popen(command, shell=True)
 
@@ -546,7 +546,7 @@ def deploy_vm():
 
                                 # Connecting and executing commands on deployed machine (using ssh_to_vm method) passing IP address
                                 script_path = '/home/noc_admin/image_scanner_project/scanIt/scripts/operationsOnDeployedVm_V6.py'
-                                command = f"python3 {script_path} {process_id} {vm_ip} {source_url} {new_jira_task}"
+                                command = f"python3 {script_path} {process_id} {vm_ip} {source_url} {new_jira_task} {vm_uuid}"
                                 # Run the script asynchronously
                                 subprocess.Popen(command, shell=True)
 
