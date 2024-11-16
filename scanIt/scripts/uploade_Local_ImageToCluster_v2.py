@@ -360,7 +360,7 @@ def upload_image_to_nutanix():
     file_name = os.path.basename(file_path)
 
     # Create Jira case
-    new_jira_task = create_jira_task(f"System Image Scan request - {file_name}", f"A ticket created based on a request received through the self-selfice portal. New image scan request {file_name}")
+    new_jira_task = create_jira_task(f"System Image Scan request - {file_name}. Process ID: {process_id}.", f"A ticket has been created based on a request submitted through the self-service portal for a new local image scan: {file_name}.")
     if new_jira_task:
         # change ticket status from "Open" to "Under Review"
         change_jira_task_status(new_jira_task, '181')

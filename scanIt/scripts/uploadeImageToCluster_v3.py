@@ -240,6 +240,9 @@ def download_and_extract_image(source_url, download_dir, extracted_dir, process_
 
         if jira_task_key:
             add_comment_to_jira_task(jira_task_key, f"Error during download: {e}")
+            
+            # change ticket status from "In Progress" to "Reject"
+            change_jira_task_status(jira_task_key, '131')
 
         return None
 
@@ -445,7 +448,7 @@ def upload_image_to_nutanix():
     source_url = payload['spec']['resources']['source_uri']
     
     # Create Jira case
-    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}", f"A system image scan ticket is created based on a request received through the self-service portal. Process ID: {process_id}. URL: {source_url}. The scan was initiated by: {user_email}.")
+    new_jira_task = create_jira_task(f"System Image Scan request. URL: {source_url}. Process ID: {process_id}.", f"A system image scan ticket is created based on a request received through the self-service portal. URL: {source_url}. The scan was initiated by: {user_email}.")
     if new_jira_task:
         # change ticket status from "Open" to "Under Review" 
         change_jira_task_status(new_jira_task, '181')

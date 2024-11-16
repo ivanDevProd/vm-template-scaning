@@ -13,7 +13,7 @@
         
         */
         body {
-            background: url('static/scanIt/nutanix_background.jpg'), url('https://i.pinimg.com/originals/d9/7a/6d/d97a6d99e7bde5141805653993793a9f.gif'), url('');
+            background: url('static/scanIt/nutanix_background.jpg'), url(''), url('');
             background-size: cover, auto, auto; /* First image covers, second keeps original size */
             background-position: center, top right, bottom right; /* Centers overlay, places second image in top right */
             background-repeat: no-repeat, no-repeat, no-repeat; /* Prevents repetition */
@@ -508,7 +508,7 @@
             <input type="email" id="emailFieldUrl" name="email" placeholder="Enter your email" required style="width: 40%">
             <hr>
             <input type="checkbox" id="agreeUrl" onclick="toggleSubmitButton('agreeUrl', 'emailFieldUrl', 'submitButtonUrl')">
-            <label for="agreeUrl">I am familiar with the recommended notes</label>
+            <label for="agreeUrl">I am familiar with the guidelines for creating a system image</label>
             <hr>
             <button type="submit" id="submitButtonUrl" disabled>Submit</button>
         </form>

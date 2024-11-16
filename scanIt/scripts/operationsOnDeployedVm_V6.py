@@ -381,7 +381,10 @@ def retry_commands_with_winrm(ip, username, password, new_hostname, process_id, 
                 insert_workflow_state(process_id, f"Waiting for the machine to appear in Flexera and check report.", "INFO", "Commands execution", source_url)
                 if new_jira_task:
                     add_comment_to_jira_task(new_jira_task, f"All commands executed successfully via WinRM. Flexera agent installed. Waiting for the machine to appear in Flexera and check report.")
-                return
+                
+                # return
+                sys.exit()  # Stop the entire script
+
             else:
                 add_comment_to_jira_task(new_jira_task, f"Not all commands were executed completely via WinRM. Check the status and services on VM.")
         else:
@@ -428,6 +431,30 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                     os_type = "Windows"
                 else:
                     print("Unknown OS type.")
+                    insert_workflow_state(process_id, f"Unknown OS type. Terminating Process.", "FAILED", "Commands execution", source_url)
+                    
+                    if new_jira_task:
+                        add_comment_to_jira_task(new_jira_task, f"Unknown OS type. Terminating Process.")
+                        # change ticket status from "In Progress" to "Additional Check"
+                        change_jira_task_status(new_jira_task, '221')
+
+                    # removing VM record from the waitForFlexera DB table since Flexera agent can't be installed
+                        try:
+                            conn = mysql.connector.connect(**mysql_config)
+                            cursor = conn.cursor()
+                            cursor.execute(
+                                '''
+                                DELETE FROM vm_template_scan.waitForFlexera 
+                                WHERE process_ID = %s
+                                ''',
+                                (process_id,)  # The provided UUID to match
+                            )
+                            conn.commit()
+                            insert_workflow_state(process_id, f"VM record from the <waitForFlexera> DB table sucesfully removed since Flexera agent can't be installed on this OS.", "SUCCEEDED", "Commands execution", source_url)
+                        except Error as err:
+                            logging.error(f"Database error: {err}")
+                            insert_workflow_state(process_id, f"Problem with the removing VM record from the <waitForFlexera> DB table. Check record for this process at DB directly.", "FAILED", "Commands execution", source_url)
+                    
                     ssh.close()
                     return
 
@@ -554,7 +581,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Error of '{command}': {error}")
                         insert_workflow_state(process_id, f"Failed to execute command '{command}> Error: {error}'", "FAILED", "Commands execution", source_url)
                         all_commands_successful = False
+                        
                         retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
+                        
                         break  # Stop executing commands for this user if one command fails
 
                     else:
@@ -948,7 +977,6 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
             # Try to connect using WinRM
             if os_type == "" or os_type == "Windows":
                 retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
-
 
 
 if __name__ == "__main__":
