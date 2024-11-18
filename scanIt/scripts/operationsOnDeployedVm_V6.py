@@ -581,6 +581,9 @@ def ssh_to_vm(process_id, ip, source_url, password, sudo_password):
                         print(f"Error of '{command}': {error}")
                         insert_workflow_state(process_id, f"Failed to execute command '{command}> Error: {error}'", "FAILED", "Commands execution", source_url)
                         all_commands_successful = False
+
+                        # change ticket status from "In Progress" to "Additional Check"
+                        change_jira_task_status(new_jira_task, '221')
                         
                         retry_commands_with_winrm(ip, username, password, new_hostname, process_id, source_url, new_jira_task)
                         
